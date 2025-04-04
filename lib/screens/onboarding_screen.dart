@@ -117,7 +117,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
-            'assets/images/calendar.png',
+            'assets/images/calendar.jpg',
             height: 150,
           ),
           const SizedBox(height: 30),
@@ -156,10 +156,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset(
-            'assets/images/features.png',
-            height: 180,
-          ),
           const SizedBox(height: 30),
           Text(
             'Features Designed for You',

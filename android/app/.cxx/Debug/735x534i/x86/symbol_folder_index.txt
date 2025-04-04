@@ -1,0 +1,1 @@
+/home/m/AndroidStudioProjects/MyPD/build/app/intermediates/cxx/Debug/735x534i/obj/x86
