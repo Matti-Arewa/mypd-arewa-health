@@ -1,27 +1,21 @@
-//widgets/language_selector.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/settings_provider.dart';
+import '../providers/language_provider.dart';
+import '../services/localization_service.dart';
 
 class LanguageSelector extends StatelessWidget {
   // List of supported languages with their locale codes and display names
   final List<Map<String, String>> languages = [
     {'code': 'en', 'name': 'English'},
-    {'code': 'de', 'name': 'Deutsch (German)'},
-    {'code': 'fr', 'name': 'Français (French)'},
-    {'code': 'sw', 'name': 'Kiswahili (Swahili)'},
-    {'code': 'ha', 'name': 'Hausa'},
-    {'code': 'yo', 'name': 'Yorùbá (Yoruba)'},
-    {'code': 'am', 'name': 'አማርኛ (Amharic)'},
-    {'code': 'ig', 'name': 'Igbo'},
+    {'code': 'de', 'name': 'Deutsch'},
   ];
 
   LanguageSelector({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final settingsProvider = Provider.of<SettingsProvider>(context);
-    final currentLanguage = settingsProvider.settings.language;
+    final languageProvider = Provider.of<LanguageProvider>(context);
+    final currentLanguage = languageProvider.currentLanguage;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -34,12 +28,12 @@ class LanguageSelector extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Language',
+              context.tr('language'),
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8.0),
             Text(
-              'Select your preferred language for the app content',
+              context.tr('selectLanguage'),
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 16.0),
@@ -60,11 +54,13 @@ class LanguageSelector extends StatelessWidget {
                   )
                       : null,
                   onTap: () {
-                    settingsProvider.setLanguage(language['code']!);
+                    languageProvider.changeLanguage(language['code']!);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          'Language changed to ${language['name']}',
+                          context.tr('language') + ' ' +
+                              context.tr('changed') + ': ' +
+                              language['name']!,
                         ),
                         duration: const Duration(seconds: 2),
                       ),

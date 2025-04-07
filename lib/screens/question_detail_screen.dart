@@ -1,13 +1,13 @@
-//screens/question_detail_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/content_model.dart';
 import '../providers/content_provider.dart';
 import '../utils/app_theme.dart';
 import '../widgets/related_questions.dart';
+import '../services/localization_service.dart';
 
 class QuestionDetailScreen extends StatelessWidget {
-  final ContentQuestion  question;
+  final ContentQuestion question;
   final String categoryId;
 
   const QuestionDetailScreen({
@@ -21,11 +21,39 @@ class QuestionDetailScreen extends StatelessWidget {
     final contentProvider = Provider.of<ContentProvider>(context);
     final category = contentProvider.getCategoryById(categoryId);
 
+    // Responsive Design-Anpassungen
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenWidth < 360 || screenHeight < 600;
+
+    // Responsive Textstile basierend auf Bildschirmgröße
+    final titleStyle = Theme.of(context).textTheme.headlineMedium?.copyWith(
+      color: AppTheme.primaryColor,
+      fontWeight: FontWeight.bold,
+      fontSize: isSmallScreen ? 18.0 : 22.0,
+    );
+
+    final bodyStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
+      fontSize: isSmallScreen ? 14.0 : 16.0,
+    );
+
+    final sectionTitleStyle = Theme.of(context).textTheme.titleLarge?.copyWith(
+      color: AppTheme.primaryColor,
+      fontSize: isSmallScreen ? 16.0 : 18.0,
+    );
+
+    // Responsive Abstände
+    final padding = isSmallScreen ? 12.0 : 16.0;
+    final spacing = isSmallScreen ? 16.0 : 20.0;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
           category!.title,
-          style: const TextStyle(color: AppTheme.textPrimaryColor),
+          style: TextStyle(
+            color: AppTheme.textPrimaryColor,
+            fontSize: isSmallScreen ? 18.0 : 20.0,
+          ),
         ),
         actions: [
           IconButton(
@@ -38,40 +66,39 @@ class QuestionDetailScreen extends StatelessWidget {
             onPressed: () {
               contentProvider.toggleFavorite(question.id);
             },
+            tooltip: context.tr('toggleFavorite'),
           ),
           IconButton(
             icon: const Icon(Icons.share, color: AppTheme.accentColor),
             onPressed: () {
               // Share functionality could be implemented here
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Sharing will be available in the next update')),
+                SnackBar(content: Text(context.tr('sharingComingSoon'))),
               );
             },
+            tooltip: context.tr('share'),
           ),
         ],
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(padding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Question title
               Text(
                 question.question,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppTheme.primaryColor,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: titleStyle,
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: spacing),
 
               // Answer content
               Text(
                 question.answer,
-                style: Theme.of(context).textTheme.bodyLarge,
+                style: bodyStyle,
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: spacing),
 
               // Media section (if available)
               if (question.mediaUrls.isNotEmpty)
@@ -79,28 +106,24 @@ class QuestionDetailScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Visual Guide',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: AppTheme.primaryColor,
-                      ),
+                      context.tr('visualGuide'),
+                      style: sectionTitleStyle,
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: isSmallScreen ? 8 : 12),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: _buildMediaWidget(question.mediaUrls),
+                      child: _buildMediaWidget(question.mediaUrls, isSmallScreen),
                     ),
                   ],
                 ),
-              const SizedBox(height: 32),
+              SizedBox(height: isSmallScreen ? 24 : 32),
 
               // Related questions section
               Text(
-                'Related Questions',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppTheme.primaryColor,
-                ),
+                context.tr('relatedQuestions'),
+                style: sectionTitleStyle,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: isSmallScreen ? 12 : 16),
               RelatedQuestions(
                 currentQuestionId: question.id,
                 categoryId: categoryId,
@@ -112,14 +135,17 @@ class QuestionDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMediaWidget(List<String> mediaUrls) {
+  Widget _buildMediaWidget(List<String> mediaUrls, bool isSmallScreen) {
     final mediaUrl = mediaUrls.first;
     if (mediaUrl.endsWith('.mp4')) {
       return Container(
-        height: 200,
+        height: isSmallScreen ? 160 : 200,
         color: Colors.grey[300],
-        child: const Center(
-          child: Text('Video content will be available here'),
+        child: Center(
+          child: Text(
+            'Video content will be available here',
+            style: TextStyle(fontSize: isSmallScreen ? 13.0 : 14.0),
+          ),
         ),
       );
     } else {

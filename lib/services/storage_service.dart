@@ -1,4 +1,3 @@
-//services/storage_service.dart
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/content_model.dart';
@@ -16,21 +15,22 @@ class StorageService {
   static const String _lastUpdatedKey = 'last_updated';
   static const String _kickCounterHistoryKey = 'kick_counter_history';
   static const String _weightHistoryKey = 'weight_history';
+  static const String _languageKey = 'language';
 
-  // Save categories to local storage
-  Future<void> saveCategories(List<ContentCategory> categories) async {
+  // Save categories to local storage with language specific key
+  Future<void> saveCategories(List<ContentCategory> categories, String language) async {
     final prefs = await SharedPreferences.getInstance();
     final encodedData = json.encode(
       categories.map((category) => category.toJson()).toList(),
     );
-    await prefs.setString(_categoriesKey, encodedData);
+    await prefs.setString('${_categoriesKey}_$language', encodedData);
     await prefs.setString(_lastUpdatedKey, DateTime.now().toIso8601String());
   }
 
-  // Load categories from local storage
-  Future<List<ContentCategory>> loadCategories() async {
+  // Load categories from local storage with language specific data
+  Future<List<ContentCategory>> loadCategories(String language) async {
     final prefs = await SharedPreferences.getInstance();
-    final encodedData = prefs.getString(_categoriesKey);
+    final encodedData = prefs.getString('${_categoriesKey}_$language');
 
     if (encodedData == null) {
       return [];
@@ -40,6 +40,18 @@ class StorageService {
     return decodedData
         .map((categoryData) => ContentCategory.fromJson(categoryData))
         .toList();
+  }
+
+  // Save user's preferred language
+  Future<void> saveLanguage(String language) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_languageKey, language);
+  }
+
+  // Get user's preferred language (default to 'en')
+  Future<String> getLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_languageKey) ?? 'en';
   }
 
   // Save favorites

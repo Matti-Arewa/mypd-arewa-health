@@ -1,10 +1,10 @@
-//screens/favorites_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/content_model.dart';
 import '../providers/content_provider.dart';
 import '../utils/app_theme.dart';
 import '../screens/question_detail_screen.dart';
+import '../services/localization_service.dart';
 
 class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});
@@ -14,12 +14,19 @@ class FavoritesScreen extends StatelessWidget {
     final contentProvider = Provider.of<ContentProvider>(context);
     final favoriteQuestions = contentProvider.getFavoriteQuestions();
 
+    // Responsive Design-Anpassungen
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenWidth < 360 || screenHeight < 600;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Saved Information',
-          style: TextStyle(color: AppTheme.textPrimaryColor),
+        title: Text(
+          context.tr('savedInformation'),
+          style: TextStyle(
+            color: AppTheme.textPrimaryColor,
+            fontSize: isSmallScreen ? 18.0 : 20.0,
+          ),
         ),
       ),
       body: favoriteQuestions.isEmpty
@@ -29,32 +36,35 @@ class FavoritesScreen extends StatelessWidget {
           children: [
             Icon(
               Icons.favorite_border,
-              size: 80,
+              size: isSmallScreen ? 60 : 80,
               color: Colors.grey[300],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: isSmallScreen ? 12 : 16),
             Text(
-              'No favorites yet',
+              context.tr('noFavorites'),
               style: TextStyle(
                 color: Colors.grey[600],
-                fontSize: 18,
+                fontSize: isSmallScreen ? 16 : 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 8),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 32),
+            SizedBox(height: isSmallScreen ? 6 : 8),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 24 : 32),
               child: Text(
-                'Save important information by tapping the heart icon when viewing a question.',
+                context.tr('noFavoritesDescription'),
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: isSmallScreen ? 13 : 14,
+                ),
               ),
             ),
           ],
         ),
       )
           : ListView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
         itemCount: favoriteQuestions.length,
         itemBuilder: (context, index) {
           final ContentQuestion question = favoriteQuestions[index];
@@ -78,9 +88,9 @@ class FavoritesScreen extends StatelessWidget {
               contentProvider.toggleFavorite(question.id);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: const Text('Removed from favorites'),
+                  content: Text(context.tr('removedFromFavorites')),
                   action: SnackBarAction(
-                    label: 'UNDO',
+                    label: context.tr('undo').toUpperCase(),
                     onPressed: () {
                       contentProvider.toggleFavorite(question.id);
                     },
@@ -90,7 +100,7 @@ class FavoritesScreen extends StatelessWidget {
             },
             child: Card(
               elevation: 2,
-              margin: const EdgeInsets.only(bottom: 16),
+              margin: EdgeInsets.only(bottom: isSmallScreen ? 12 : 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -107,43 +117,44 @@ class FavoritesScreen extends StatelessWidget {
                   );
                 },
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(isSmallScreen ? 12.0 : 16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.favorite,
-                            size: 20,
+                            size: isSmallScreen ? 16 : 20,
                             color: AppTheme.accentColor,
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: isSmallScreen ? 6 : 8),
                           Text(
                             categoryName,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppTheme.primaryColor,
                               fontWeight: FontWeight.w500,
+                              fontSize: isSmallScreen ? 12 : 14,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: isSmallScreen ? 6 : 8),
                       Text(
                         question.question,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: isSmallScreen ? 14 : 16,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: isSmallScreen ? 3 : 4),
                       Text(
                         question.answer.length > 100
                             ? '${question.answer.substring(0, 100)}...'
                             : question.answer,
                         style: TextStyle(
                           color: Colors.grey[600],
-                          fontSize: 14,
+                          fontSize: isSmallScreen ? 12 : 14,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,

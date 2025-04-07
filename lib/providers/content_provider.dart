@@ -1,27 +1,35 @@
-//providers/content_provider.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../models/content_model.dart';
 import '../utils/sample_data.dart';
+import '../utils/sample_data_en.dart';
 
 class ContentProvider extends ChangeNotifier {
   ContentData? _contentData;
   bool _isLoading = true;
   List<String> _favorites = [];
   final _searchResults = <ContentQuestion>[];
-  List<ContentCategory> get categories => _contentData?.categories ?? [];
-
+  String _language = 'en';  // Default language is English
 
   ContentData? get contentData => _contentData;
   bool get isLoading => _isLoading;
   List<String> get favorites => _favorites;
   List<ContentQuestion> get searchResults => _searchResults;
+  List<ContentCategory> get categories => _contentData?.categories ?? [];
 
   ContentProvider() {
     _loadContent();
     _loadFavorites();
+  }
+
+  // Update language and reload content
+  void updateLanguage(String language) {
+    if (_language != language) {
+      _language = language;
+      _loadContent();
+    }
   }
 
   Future<void> _loadContent() async {
@@ -31,7 +39,8 @@ class ContentProvider extends ChangeNotifier {
     try {
       // First try to load from Hive (for offline support)
       final contentBox = Hive.box('content');
-      final savedContent = contentBox.get('contentData');
+      final saveKey = 'contentData_$_language';
+      final savedContent = contentBox.get(saveKey);
 
       if (savedContent != null) {
         final Map<String, dynamic> jsonData = json.decode(savedContent);
@@ -39,21 +48,25 @@ class ContentProvider extends ChangeNotifier {
       } else {
         // If no saved content, load from assets or use sample data
         try {
-          final String jsonString = await rootBundle.loadString('assets/data/content.json');
+          final String jsonString = await rootBundle.loadString('assets/data/content_$_language.json');
           final Map<String, dynamic> jsonData = json.decode(jsonString);
           _contentData = ContentData.fromJson(jsonData);
         } catch (e) {
-          // Fallback to sample data
-          _contentData = SampleData.getSampleContent();
+          // Fallback to sample data based on language
+          _contentData = _language == 'en'
+              ? SampleDataEN.getSampleContent()
+              : SampleData.getSampleContent();
         }
 
         // Save to Hive for offline access
-        await contentBox.put('contentData', json.encode(_contentData?.toJson()));
+        await contentBox.put(saveKey, json.encode(_contentData?.toJson()));
       }
     } catch (e) {
       debugPrint('Error loading content: $e');
-      // Fallback to sample data
-      _contentData = SampleData.getSampleContent();
+      // Fallback to sample data based on language
+      _contentData = _language == 'en'
+          ? SampleDataEN.getSampleContent()
+          : SampleData.getSampleContent();
     }
 
     _isLoading = false;

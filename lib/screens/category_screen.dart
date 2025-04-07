@@ -1,10 +1,10 @@
-//screens/category_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/content_model.dart';
 import '../providers/content_provider.dart';
 import '../screens/question_detail_screen.dart';
 import '../widgets/question_card.dart';
+import '../services/localization_service.dart';
 
 class CategoryScreen extends StatelessWidget {
   final String categoryId;
@@ -19,13 +19,17 @@ class CategoryScreen extends StatelessWidget {
     final contentProvider = Provider.of<ContentProvider>(context);
     final category = contentProvider.getCategoryById(categoryId);
 
+    // Bildschirmgröße für responsive Anpassungen
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 360;
+
     if (category == null) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Category'),
+          title: Text(context.tr('category')),
         ),
-        body: const Center(
-          child: Text('Category not found'),
+        body: Center(
+          child: Text(context.tr('categoryNotFound')),
         ),
       );
     }
@@ -37,7 +41,7 @@ class CategoryScreen extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
-            child: _buildHeader(context, category),
+            child: _buildHeader(context, category, isSmallScreen),
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
@@ -52,7 +56,7 @@ class CategoryScreen extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (context) => QuestionDetailScreen(
                           categoryId: category.id,
-                          question: question, //fehleranfällig, question statt question.id
+                          question: question,
                         ),
                       ),
                     );
@@ -73,9 +77,27 @@ class CategoryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, ContentCategory category) {
+  Widget _buildHeader(BuildContext context, ContentCategory category, bool isSmallScreen) {
+    // Responsive Textstile basierend auf Bildschirmgröße
+    final titleStyle = Theme.of(context).textTheme.displayMedium?.copyWith(
+      fontSize: isSmallScreen ? 18.0 : 22.0,
+    );
+
+    final descriptionStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
+      fontSize: isSmallScreen ? 12.0 : 14.0,
+    );
+
+    final sectionTitleStyle = Theme.of(context).textTheme.displaySmall?.copyWith(
+      fontSize: isSmallScreen ? 16.0 : 18.0,
+    );
+
+    // Responsive Bildgröße und Abstände
+    final imageSize = isSmallScreen ? 80.0 : 100.0;
+    final padding = isSmallScreen ? 12.0 : 16.0;
+    final spacing = isSmallScreen ? 8.0 : 16.0;
+
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(padding),
       color: Theme.of(context).primaryColor.withOpacity(0.1),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,38 +109,38 @@ class CategoryScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 child: Image.asset(
                   category.imageUrl,
-                  width: 100,
-                  height: 100,
+                  width: imageSize,
+                  height: imageSize,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
-                      width: 100,
-                      height: 100,
+                      width: imageSize,
+                      height: imageSize,
                       color: Theme.of(context).primaryColor.withOpacity(0.2),
                       child: Icon(
                         Icons.image,
                         color: Theme.of(context).primaryColor,
-                        size: 40,
+                        size: imageSize * 0.4,
                       ),
                     );
                   },
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: spacing),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       category.title,
-                      style: Theme.of(context).textTheme.displayMedium,
+                      style: titleStyle,
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: spacing / 2),
                     Text(
                       category.description,
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: descriptionStyle,
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: spacing / 2),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
@@ -126,10 +148,10 @@ class CategoryScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Text(
-                        '${category.questions.length} Questions',
-                        style: const TextStyle(
+                        '${category.questions.length} ${context.tr('questions')}',
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 12,
+                          fontSize: isSmallScreen ? 10.0 : 12.0,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -139,14 +161,14 @@ class CategoryScreen extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: spacing),
           const Divider(height: 1),
-          const SizedBox(height: 8),
+          SizedBox(height: spacing / 2),
           Text(
-            'Frequently Asked Questions',
-            style: Theme.of(context).textTheme.displaySmall,
+            context.tr('frequentlyAskedQuestions'),
+            style: sectionTitleStyle,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: spacing / 2),
         ],
       ),
     );

@@ -1,4 +1,3 @@
-//screens/home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/content_provider.dart';
@@ -12,6 +11,7 @@ import '../screens/community_screen.dart';
 import '../widgets/pregnancy_progress.dart';
 import '../widgets/category_card.dart';
 import '../utils/app_theme.dart';
+import '../services/localization_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -35,33 +35,34 @@ class _HomeScreenState extends State<HomeScreen> {
       const CommunityScreen(),
       const FavoritesScreen(),
     ];
-
-    _destinations = const [
-      NavigationDestination(
-        icon: Icon(Icons.menu_book_outlined),
-        selectedIcon: Icon(Icons.menu_book_outlined),
-        label: 'Guide',
-      ),
-      NavigationDestination(
-        icon: Icon(Icons.calculate_outlined),
-        selectedIcon: Icon(Icons.calculate),
-        label: 'Tools',
-      ),
-      NavigationDestination(
-        icon: Icon(Icons.forum_outlined),
-        selectedIcon: Icon(Icons.forum),
-        label: 'Community',
-      ),
-      NavigationDestination(
-        icon: Icon(Icons.favorite_border),
-        selectedIcon: Icon(Icons.favorite),
-        label: 'Favoriten',
-      ),
-    ];
   }
 
   @override
   Widget build(BuildContext context) {
+    // Baue NavigationDestinations hier, damit sie die aktuelle Sprache verwenden
+    _destinations = [
+      NavigationDestination(
+        icon: const Icon(Icons.menu_book_outlined),
+        selectedIcon: const Icon(Icons.menu_book_outlined),
+        label: context.tr('guide'),
+      ),
+      NavigationDestination(
+        icon: const Icon(Icons.calculate_outlined),
+        selectedIcon: const Icon(Icons.calculate),
+        label: context.tr('tools'),
+      ),
+      NavigationDestination(
+        icon: const Icon(Icons.forum_outlined),
+        selectedIcon: const Icon(Icons.forum),
+        label: context.tr('community'),
+      ),
+      NavigationDestination(
+        icon: const Icon(Icons.favorite_border),
+        selectedIcon: const Icon(Icons.favorite),
+        label: context.tr('favorites'),
+      ),
+    ];
+
     return Scaffold(
       body: _screens[_selectedIndex],
       bottomNavigationBar: NavigationBar(
@@ -103,11 +104,13 @@ class _InfoContent extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
-          'Schwangerschaftsratgeber',
+        title: Text(
+          context.tr('app_name'),
           style: TextStyle(
             color: AppTheme.textPrimaryColor,
-            fontSize: AppTheme.fontSizeDisplaySmall,
+            fontSize: useCompactView
+                ? AppTheme.fontSizeBodyLarge
+                : AppTheme.fontSizeDisplaySmall,
           ),
         ),
         actions: [
@@ -119,6 +122,7 @@ class _InfoContent extends StatelessWidget {
                 MaterialPageRoute(builder: (context) => const SearchScreen()),
               );
             },
+            tooltip: context.tr('search'),
           ),
           IconButton(
             icon: const Icon(Icons.settings, color: AppTheme.primaryColor),
@@ -128,6 +132,7 @@ class _InfoContent extends StatelessWidget {
                 MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
             },
+            tooltip: context.tr('settings'),
           ),
         ],
       ),
@@ -137,16 +142,18 @@ class _InfoContent extends StatelessWidget {
           _buildHeader(context, userProvider, useCompactView),
 
           // Kategorien-Überschrift
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+          Padding(
+            padding: EdgeInsets.fromLTRB(16, useCompactView ? 12 : 16, 16, useCompactView ? 6 : 8),
             child: Row(
               children: [
-                Icon(Icons.menu_book, color: AppTheme.primaryColor),
-                SizedBox(width: 8),
+                const Icon(Icons.menu_book, color: AppTheme.primaryColor),
+                const SizedBox(width: 8),
                 Text(
-                  'Kategorien',
-                  style: const TextStyle(
-                    fontSize: AppTheme.fontSizeDisplaySmall,
+                  context.tr('categories'),
+                  style: TextStyle(
+                    fontSize: useCompactView
+                        ? AppTheme.fontSizeBodyLarge
+                        : AppTheme.fontSizeDisplaySmall,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.textPrimaryColor,
                   ),
@@ -158,7 +165,10 @@ class _InfoContent extends StatelessWidget {
           // Kategorien-Liste
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: useCompactView ? 6 : 8
+              ),
               itemCount: categories.length,
               itemBuilder: (context, index) {
                 final category = categories[index];
@@ -214,7 +224,7 @@ class _InfoContent extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Ihre Schwangerschaft',
+                  context.tr('yourPregnancy'),
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -256,25 +266,29 @@ class _InfoContent extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(compact ? 10 : 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Entbindungstermin festlegen',
+                    Text(
+                      context.tr('setDueDate'),
                       style: TextStyle(
-                        fontSize: AppTheme.fontSizeBodyLarge,
+                        fontSize: compact
+                            ? AppTheme.fontSizeBodyMedium
+                            : AppTheme.fontSizeBodyLarge,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Verfolgen Sie Ihre Schwangerschaft',
+                    SizedBox(height: compact ? 2 : 4),
+                    Text(
+                      context.tr('trackYourPregnancy'),
                       style: TextStyle(
-                        fontSize: AppTheme.fontSizeBodyMedium,
+                        fontSize: compact
+                            ? AppTheme.fontSizeSmall
+                            : AppTheme.fontSizeBodyMedium,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: compact ? 6 : 8),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -289,10 +303,10 @@ class _InfoContent extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.primaryColor,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          minimumSize: const Size(double.infinity, 36),
+                          padding: EdgeInsets.symmetric(vertical: compact ? 6 : 8),
+                          minimumSize: Size(double.infinity, compact ? 32 : 36),
                         ),
-                        child: const Text('Termin festlegen'),
+                        child: Text(context.tr('setDate')),
                       ),
                     ),
                   ],

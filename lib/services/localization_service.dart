@@ -1,4 +1,3 @@
-//services/localization_screen.dart
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -23,12 +22,6 @@ class AppLocalizations {
   static List<Locale> supportedLocales = [
     const Locale('en', ''), // English
     const Locale('de', ''), // German
-    const Locale('fr', ''), // French
-    const Locale('sw', ''), // Swahili
-    const Locale('ha', ''), // Hausa
-    const Locale('yo', ''), // Yoruba
-    const Locale('am', ''), // Amharic
-    const Locale('ig', ''), // Igbo
   ];
 
   static List<LocalizationsDelegate<dynamic>> localizationsDelegates = [
@@ -80,8 +73,7 @@ class _AppLocalizationsDelegate
   @override
   bool isSupported(Locale locale) {
     // Include all of your supported language codes here
-    return ['en', 'de', 'fr', 'sw', 'ha', 'yo', 'am', 'ig']
-        .contains(locale.languageCode);
+    return ['en', 'de'].contains(locale.languageCode);
   }
 
   @override
