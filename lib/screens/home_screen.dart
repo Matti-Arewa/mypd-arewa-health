@@ -84,6 +84,13 @@ class _InfoContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final contentProvider = Provider.of<ContentProvider>(context);
     final userProvider = Provider.of<UserProvider>(context);
+    final mediaQuery = MediaQuery.of(context);
+    final screenWidth = mediaQuery.size.width;
+    final screenHeight = mediaQuery.size.height;
+
+    // Bestimme, ob wir eine kompakte Anzeige verwenden sollen
+    // basierend auf der Bildschirmgröße
+    final bool useCompactView = screenHeight < 700 || screenWidth < 360;
 
     if (contentProvider.isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -98,7 +105,10 @@ class _InfoContent extends StatelessWidget {
         elevation: 0,
         title: const Text(
           'Schwangerschaftsratgeber',
-          style: TextStyle(color: AppTheme.textPrimaryColor),
+          style: TextStyle(
+            color: AppTheme.textPrimaryColor,
+            fontSize: AppTheme.fontSizeDisplaySmall,
+          ),
         ),
         actions: [
           IconButton(
@@ -124,18 +134,22 @@ class _InfoContent extends StatelessWidget {
       body: Column(
         children: [
           // Header und Schwangerschaftsfortschritt
-          _buildHeader(context, userProvider),
+          _buildHeader(context, userProvider, useCompactView),
 
           // Kategorien-Überschrift
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Row(
               children: [
-                const Icon(Icons.menu_book, color: AppTheme.primaryColor),
-                const SizedBox(width: 8),
+                Icon(Icons.menu_book, color: AppTheme.primaryColor),
+                SizedBox(width: 8),
                 Text(
                   'Kategorien',
-                  style: Theme.of(context).textTheme.displayMedium,
+                  style: const TextStyle(
+                    fontSize: AppTheme.fontSizeDisplaySmall,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimaryColor,
+                  ),
                 ),
               ],
             ),
@@ -172,9 +186,13 @@ class _InfoContent extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, UserProvider userProvider) {
+  Widget _buildHeader(BuildContext context, UserProvider userProvider, bool compact) {
+    // Berechne die optimale Padding-Größe basierend auf der Bildschirmhöhe
+    final screenHeight = MediaQuery.of(context).size.height;
+    final verticalPadding = compact ? 12.0 : 16.0;
+
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: verticalPadding),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -197,72 +215,85 @@ class _InfoContent extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Ihre Schwangerschaft',
-                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                  style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    height: 1.2,
+                    fontSize: compact
+                        ? AppTheme.fontSizeBodyLarge
+                        : AppTheme.fontSizeDisplaySmall,
+                    height: 1.1,
                   ),
                 ),
               ),
-              // Information Icon für medizinischen Touch
+              // Information Icon für medizinischen Touch - kompaktere Größe
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(compact ? 20 : 24),
                 ),
-                padding: const EdgeInsets.all(8),
-                child: const Icon(
+                padding: EdgeInsets.all(compact ? 4 : 6),
+                child: Icon(
                   Icons.medical_information,
                   color: Colors.white,
-                  size: 32,
+                  size: compact ? 20 : 24,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           if (userProvider.dueDate != null) ...[
             PregnancyProgress(
               weeksPregnant: userProvider.weeksPregnant,
               daysLeft: userProvider.daysLeft,
               dueDate: userProvider.dueDate!,
+              compact: compact, // Übergebe die compact-Flag an die PregnancyProgress-Komponente
             ),
           ] else ...[
             Card(
-              elevation: 4,
+              elevation: 2,
+              margin: EdgeInsets.zero,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Entbindungstermin festlegen',
-                      style: Theme.of(context).textTheme.displaySmall,
+                      style: TextStyle(
+                        fontSize: AppTheme.fontSizeBodyLarge,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Verfolgen Sie Ihre Schwangerschaft',
+                      style: TextStyle(
+                        fontSize: AppTheme.fontSizeBodyMedium,
+                      ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      'Verfolgen Sie Ihre Schwangerschaft, indem Sie Ihren Entbindungstermin in den Einstellungen festlegen.',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 12),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SettingsScreen(),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryColor,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SettingsScreen(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primaryColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          minimumSize: const Size(double.infinity, 36),
+                        ),
+                        child: const Text('Termin festlegen'),
                       ),
-                      icon: const Icon(Icons.calendar_today),
-                      label: const Text('Termin festlegen'),
                     ),
                   ],
                 ),

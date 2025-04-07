@@ -7,19 +7,33 @@ class PregnancyProgress extends StatelessWidget {
   final int weeksPregnant;
   final int daysLeft;
   final DateTime dueDate;
+  final bool compact; // Option für kompaktere Darstellung
 
   const PregnancyProgress({
     Key? key,
     required this.weeksPregnant,
     required this.daysLeft,
     required this.dueDate,
+    this.compact = false,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    // Bildschirmbreite für responsive Anpassungen
+    final screenWidth = MediaQuery.of(context).size.width;
+
     // Calculate total pregnancy duration and progress
     const totalWeeks = 40;
     final progress = weeksPregnant / totalWeeks;
+
+    // Schriftgrößen und Abstände abhängig vom compact-Modus anpassen
+    final titleFontSize = compact ? 14.0 : 16.0;
+    final subtitleFontSize = compact ? 12.0 : 14.0;
+    final smallFontSize = compact ? 10.0 : 12.0;
+    final progressBarHeight = compact ? 16.0 : 24.0;
+    final verticalSpacing = compact ? 4.0 : 8.0;
+    final sectionSpacing = compact ? 8.0 : 16.0;
+    final milestoneMarkerSize = compact ? 16.0 : 20.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -29,29 +43,29 @@ class PregnancyProgress extends StatelessWidget {
           children: [
             Text(
               '$weeksPregnant Wochen',
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: titleFontSize,
               ),
             ),
             Text(
               'Termin: ${DateFormat('dd.MM.yyyy').format(dueDate)}',
               style: TextStyle(
                 color: Colors.white.withOpacity(0.9),
-                fontSize: 14,
+                fontSize: subtitleFontSize,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: verticalSpacing),
 
         // Custom progress bar
         Container(
-          height: 24,
+          height: progressBarHeight,
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(progressBarHeight / 2),
           ),
           child: Stack(
             children: [
@@ -68,7 +82,7 @@ class PregnancyProgress extends StatelessWidget {
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
                     ),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(progressBarHeight / 2),
                     boxShadow: const [
                       BoxShadow(
                         color: Colors.black12,
@@ -84,88 +98,115 @@ class PregnancyProgress extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildMilestoneMarker(0.25, progress >= 0.25, '10'),
-                  _buildMilestoneMarker(0.5, progress >= 0.5, '20'),
-                  _buildMilestoneMarker(0.75, progress >= 0.75, '30'),
+                  _buildMilestoneMarker(0.25, progress >= 0.25, '10', milestoneMarkerSize),
+                  _buildMilestoneMarker(0.5, progress >= 0.5, '20', milestoneMarkerSize),
+                  _buildMilestoneMarker(0.75, progress >= 0.75, '30', milestoneMarkerSize),
                 ],
               ),
             ],
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: verticalSpacing),
 
         // Days remaining
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'Fortschritt',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 12,
+                fontSize: smallFontSize,
               ),
             ),
             Text(
               '$daysLeft Tage verbleibend',
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
-                fontSize: 12,
+                fontSize: smallFontSize,
               ),
             ),
           ],
         ),
 
-        // Baby size comparison
+        // Baby size comparison - nur wenn die Woche passt und kompakter im compact-Modus
         if (weeksPregnant > 4 && weeksPregnant < 41) ...[
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
+          if (compact) ...[
+            SizedBox(height: verticalSpacing),
+            Row(
               children: [
                 Icon(
                   _getBabySizeIcon(weeksPregnant),
                   color: Colors.white,
-                  size: 28,
+                  size: 16,
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 6),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Größenvergleich',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                      Text(
-                        _getBabySizeDescription(weeksPregnant),
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    _getBabySizeCompactDescription(weeksPregnant),
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: smallFontSize,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
-          ),
+          ] else ...[
+            SizedBox(height: sectionSpacing),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    _getBabySizeIcon(weeksPregnant),
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Größenvergleich',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: subtitleFontSize,
+                          ),
+                        ),
+                        Text(
+                          _getBabySizeDescription(weeksPregnant, screenWidth),
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.9),
+                            fontSize: smallFontSize,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ],
     );
   }
 
-  Widget _buildMilestoneMarker(double position, bool isReached, String label) {
+  Widget _buildMilestoneMarker(double position, bool isReached, String label, double size) {
     return Container(
-      width: 20,
-      height: 20,
+      width: size,
+      height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: isReached
@@ -177,7 +218,7 @@ class PregnancyProgress extends StatelessWidget {
         label,
         style: TextStyle(
           color: isReached ? AppTheme.primaryColor : Colors.white.withOpacity(0.7),
-          fontSize: 10,
+          fontSize: size * 0.5, // Schriftgröße relativ zur Markergröße
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -196,7 +237,13 @@ class PregnancyProgress extends StatelessWidget {
     }
   }
 
-  String _getBabySizeDescription(int week) {
+  // Normale Beschreibung mit Größenangabe
+  String _getBabySizeDescription(int week, double screenWidth) {
+    // Für sehr kleine Bildschirme, kürzere Beschreibungen
+    if (screenWidth < 360) {
+      return _getBabySizeCompactDescription(week);
+    }
+
     if (week < 8) {
       return 'Dein Baby ist etwa so groß wie ein Reiskorn (< 1 cm)';
     } else if (week < 12) {
@@ -210,11 +257,34 @@ class PregnancyProgress extends StatelessWidget {
     } else if (week < 28) {
       return 'Dein Baby ist etwa so groß wie ein Kohlkopf (35 cm)';
     } else if (week < 32) {
-      return 'Dein Baby ist etwa so groß wie ein Kokosnuss (40 cm)';
+      return 'Dein Baby ist etwa so groß wie eine Kokosnuss (40 cm)';
     } else if (week < 36) {
       return 'Dein Baby ist etwa so groß wie ein Romakopfsalat (45 cm)';
     } else {
       return 'Dein Baby ist fast bereit für die Geburt (45-50 cm)';
+    }
+  }
+
+  // Kompaktere Beschreibung ohne Details
+  String _getBabySizeCompactDescription(int week) {
+    if (week < 8) {
+      return 'Reiskorn (< 1 cm)';
+    } else if (week < 12) {
+      return 'Erdbeere (3 cm)';
+    } else if (week < 16) {
+      return 'Zitrone (9 cm)';
+    } else if (week < 20) {
+      return 'Avocado (16 cm)';
+    } else if (week < 24) {
+      return 'Papaya (25 cm)';
+    } else if (week < 28) {
+      return 'Kohlkopf (35 cm)';
+    } else if (week < 32) {
+      return 'Kokosnuss (40 cm)';
+    } else if (week < 36) {
+      return 'Romakopfsalat (45 cm)';
+    } else {
+      return 'Fast geburtsbereit (45-50 cm)';
     }
   }
 }

@@ -1,5 +1,4 @@
-
-
+//models/feature_models.dart
 // Kick counter model
 class KickSession {
   final DateTime date;
