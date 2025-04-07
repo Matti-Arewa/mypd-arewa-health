@@ -11,8 +11,16 @@ class AppTheme {
   static const Color textSecondaryColor = Color(0xFF7B7F9E);
   static const Color dividerColor = Color(0xFFEBEBEB);
 
-  // Light theme
-  static final ThemeData lightTheme = ThemeData(
+  // Definierte Schriftgrößen, die keine Skalierung verwenden
+  static const double fontSizeDisplayLarge = 22.0;  // War 26.0
+  static const double fontSizeDisplayMedium = 18.0; // War 22.0
+  static const double fontSizeDisplaySmall = 16.0;  // War 18.0
+  static const double fontSizeBodyLarge = 15.0;     // War 16.0
+  static const double fontSizeBodyMedium = 14.0;    // War 14.0
+  static const double fontSizeSmall = 12.0;
+
+  // Light theme - nur dieses Theme wird verwendet
+  static final ThemeData theme = ThemeData(
     primaryColor: primaryColor,
     scaffoldBackgroundColor: backgroundColor,
     appBarTheme: const AppBarTheme(
@@ -53,30 +61,30 @@ class AppTheme {
     textTheme: const TextTheme(
       displayLarge: TextStyle(
         fontFamily: 'Nunito',
-        fontSize: 26,
+        fontSize: fontSizeDisplayLarge,
         fontWeight: FontWeight.bold,
         color: textPrimaryColor,
       ),
       displayMedium: TextStyle(
         fontFamily: 'Nunito',
-        fontSize: 22,
+        fontSize: fontSizeDisplayMedium,
         fontWeight: FontWeight.bold,
         color: textPrimaryColor,
       ),
       displaySmall: TextStyle(
         fontFamily: 'Nunito',
-        fontSize: 18,
+        fontSize: fontSizeDisplaySmall,
         fontWeight: FontWeight.bold,
         color: textPrimaryColor,
       ),
       bodyLarge: TextStyle(
         fontFamily: 'Nunito',
-        fontSize: 16,
+        fontSize: fontSizeBodyLarge,
         color: textPrimaryColor,
       ),
       bodyMedium: TextStyle(
         fontFamily: 'Nunito',
-        fontSize: 14,
+        fontSize: fontSizeBodyMedium,
         color: textPrimaryColor,
       ),
     ),
@@ -86,18 +94,6 @@ class AppTheme {
     ),
     colorScheme: ColorScheme.fromSeed(
       seedColor: primaryColor,
-      primary: primaryColor,
-      secondary: accentColor,
-    ),
-  );
-
-  // Dark theme - we can implement this later if needed
-  static final ThemeData darkTheme = ThemeData(
-    // For now, just use the light theme as base
-    // We can customize this further later
-    brightness: Brightness.dark,
-    primaryColor: primaryColor,
-    colorScheme: const ColorScheme.dark(
       primary: primaryColor,
       secondary: accentColor,
     ),

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../utils/app_theme.dart';
 import '../widgets/custom_app_bar.dart';
+import 'package:intl/intl.dart';
 
 class SettingsScreen extends StatefulWidget {
   static const routeName = '/settings';
@@ -15,22 +16,83 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  late bool _isDarkMode;
   late bool _notificationsEnabled;
   late bool _useCelsius;
   late String _language;
   late String _region;
 
+  // Texte für Mehrsprachigkeit
+  late Map<String, Map<String, String>> _translations;
+
   @override
   void initState() {
     super.initState();
     _loadSettings();
+    _initTranslations();
+  }
+
+  void _initTranslations() {
+    _translations = {
+      'en': {
+        'settings': 'Settings',
+        'generalSettings': 'General Settings',
+        'language': 'Language',
+        'region': 'Region',
+        'notifications': 'Notifications',
+        'pushNotifications': 'Push Notifications',
+        'notificationsSubtitle': 'Receive pregnancy updates and reminders',
+        'units': 'Units',
+        'temperature': 'Temperature',
+        'temperatureSubtitle': 'Use Celsius instead of Fahrenheit',
+        'account': 'Account',
+        'profile': 'Profile',
+        'profileSubtitle': 'Edit your personal information',
+        'dataPrivacy': 'Data Privacy',
+        'dataPrivacySubtitle': 'Manage your data and privacy settings',
+        'about': 'About',
+        'help': 'Help',
+        'helpSubtitle': 'Get assistance and support',
+        'aboutTitle': 'About',
+        'aboutSubtitle': 'App version and information',
+        'signOut': 'Sign Out',
+        'comingSoon': 'Coming in a future update',
+        'selectLanguage': 'Select Language',
+        'selectRegion': 'Select Region',
+        'close': 'Close',
+      },
+      'de': {
+        'settings': 'Einstellungen',
+        'generalSettings': 'Allgemeine Einstellungen',
+        'language': 'Sprache',
+        'region': 'Region',
+        'notifications': 'Benachrichtigungen',
+        'pushNotifications': 'Push-Benachrichtigungen',
+        'notificationsSubtitle': 'Schwangerschaftsupdates und Erinnerungen erhalten',
+        'units': 'Einheiten',
+        'temperature': 'Temperatur',
+        'temperatureSubtitle': 'Celsius statt Fahrenheit verwenden',
+        'account': 'Konto',
+        'profile': 'Profil',
+        'profileSubtitle': 'Persönliche Informationen bearbeiten',
+        'dataPrivacy': 'Datenschutz',
+        'dataPrivacySubtitle': 'Daten- und Datenschutzeinstellungen verwalten',
+        'about': 'Über',
+        'help': 'Hilfe',
+        'helpSubtitle': 'Unterstützung und Hilfe erhalten',
+        'aboutTitle': 'Über die App',
+        'aboutSubtitle': 'App-Version und Informationen',
+        'signOut': 'Abmelden',
+        'comingSoon': 'In einem zukünftigen Update verfügbar',
+        'selectLanguage': 'Sprache auswählen',
+        'selectRegion': 'Region auswählen',
+        'close': 'Schließen',
+      }
+    };
   }
 
   void _loadSettings() {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     setState(() {
-      _isDarkMode = userProvider.isDarkMode;
       _notificationsEnabled = userProvider.notificationsEnabled;
       _useCelsius = userProvider.useCelsius;
       _language = userProvider.language;
@@ -38,44 +100,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
+  // Hilfsfunktion für Übersetzungen
+  String _t(String key) {
+    return _translations[_language]?[key] ?? _translations['en']![key]!;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Settings'),
+      appBar: CustomAppBar(title: _t('settings')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _buildSectionHeader('General Settings'),
+          // Due Date Section
+
+          _buildSectionHeader(_t('generalSettings')),
           _buildSettingItem(
             icon: Icons.language,
-            title: 'Language',
+            title: _t('language'),
             subtitle: _getLanguageName(_language),
             onTap: () => _showLanguageDialog(),
           ),
           _buildSettingItem(
             icon: Icons.location_on_outlined,
-            title: 'Region',
+            title: _t('region'),
             subtitle: _getRegionName(_region),
             onTap: () => _showRegionDialog(),
           ),
-          _buildSwitchItem(
-            icon: Icons.dark_mode_outlined,
-            title: 'Dark Mode',
-            subtitle: 'Change app appearance',
-            value: _isDarkMode,
-            onChanged: (value) {
-              setState(() {
-                _isDarkMode = value;
-              });
-              Provider.of<UserProvider>(context, listen: false).isDarkMode = value;
-            },
-          ),
           const Divider(),
-          _buildSectionHeader('Notifications'),
+
+          _buildSectionHeader(_t('notifications')),
           _buildSwitchItem(
             icon: Icons.notifications_outlined,
-            title: 'Push Notifications',
-            subtitle: 'Receive pregnancy updates and reminders',
+            title: _t('pushNotifications'),
+            subtitle: _t('notificationsSubtitle'),
             value: _notificationsEnabled,
             onChanged: (value) {
               setState(() {
@@ -85,11 +145,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           const Divider(),
-          _buildSectionHeader('Units'),
+
+          _buildSectionHeader(_t('units')),
           _buildSwitchItem(
             icon: Icons.thermostat_outlined,
-            title: 'Temperature',
-            subtitle: 'Use Celsius instead of Fahrenheit',
+            title: _t('temperature'),
+            subtitle: _t('temperatureSubtitle'),
             value: _useCelsius,
             onChanged: (value) {
               setState(() {
@@ -99,49 +160,51 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           const Divider(),
-          _buildSectionHeader('Account'),
+
+          _buildSectionHeader(_t('account')),
           _buildSettingItem(
             icon: Icons.person_outline,
-            title: 'Profile',
-            subtitle: 'Edit your personal information',
+            title: _t('profile'),
+            subtitle: _t('profileSubtitle'),
             onTap: () {
               // Navigate to profile screen
               // This will be implemented in future versions
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Profile feature coming in a future update')),
+                SnackBar(content: Text(_t('comingSoon'))),
               );
             },
           ),
           _buildSettingItem(
             icon: Icons.security_outlined,
-            title: 'Data Privacy',
-            subtitle: 'Manage your data and privacy settings',
+            title: _t('dataPrivacy'),
+            subtitle: _t('dataPrivacySubtitle'),
             onTap: () {
               // Navigate to privacy settings
               // This will be implemented in future versions
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Privacy settings coming in a future update')),
+                SnackBar(content: Text(_t('comingSoon'))),
               );
             },
           ),
           const Divider(),
-          _buildSectionHeader('About'),
+
+          _buildSectionHeader(_t('about')),
           _buildSettingItem(
             icon: Icons.help_outline,
-            title: 'Help',
-            subtitle: 'Get assistance and support',
+            title: _t('help'),
+            subtitle: _t('helpSubtitle'),
             onTap: () {
               // Navigate to help screen
               // This will be implemented in future versions
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Help center coming in a future update')),
+                SnackBar(content: Text(_t('comingSoon'))),
               );
             },
           ),
           _buildSettingItem(
             icon: Icons.info_outline,
-            title: 'About',
-            subtitle: 'App version and information',
+            title: _t('aboutTitle'),
+            subtitle: _t('aboutSubtitle'),
             onTap: () {
               _showAboutDialog();
             },
@@ -153,14 +216,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 // Implement logout functionality
                 // This will be implemented in future versions
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Logout functionality coming in a future update')),
+                  SnackBar(content: Text(_t('comingSoon'))),
                 );
               },
-              child: const Text(
-                'Sign Out',
-                style: TextStyle(
+              child: Text(
+                _t('signOut'),
+                style: const TextStyle(
                   color: Colors.red,
-                  fontSize: 16,
+                  fontSize: AppTheme.fontSizeBodyLarge,
                 ),
               ),
             ),
@@ -170,13 +233,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+
   Widget _buildSectionHeader(String title) {
     return Padding(
       padding: const EdgeInsets.only(top: 16, bottom: 8),
       child: Text(
         title,
         style: const TextStyle(
-          fontSize: 16,
+          fontSize: AppTheme.fontSizeBodyLarge,
           fontWeight: FontWeight.bold,
           color: AppTheme.primaryColor,
         ),
@@ -202,8 +266,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
           color: AppTheme.primaryColor,
         ),
       ),
-      title: Text(title),
-      subtitle: Text(subtitle),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontSize: AppTheme.fontSizeBodyLarge,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: const TextStyle(
+          fontSize: AppTheme.fontSizeBodyMedium,
+        ),
+      ),
       onTap: onTap,
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
     );
@@ -228,8 +302,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
           color: AppTheme.primaryColor,
         ),
       ),
-      title: Text(title),
-      subtitle: Text(subtitle),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontSize: AppTheme.fontSizeBodyLarge,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: const TextStyle(
+          fontSize: AppTheme.fontSizeBodyMedium,
+        ),
+      ),
       trailing: Switch(
         value: value,
         onChanged: onChanged,
@@ -242,29 +326,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
     switch (code) {
       case 'en':
         return 'English';
-      case 'fr':
-        return 'French';
       case 'de':
-        return 'German';
-      case 'sw':
-        return 'Swahili';
+        return 'Deutsch';
       default:
         return 'English';
     }
   }
 
   String _getRegionName(String code) {
-    switch (code) {
-      case 'de':
-        return 'Germany';
-      case 'ke':
-        return 'Kenya';
-      case 'ng':
-        return 'Nigeria';
-      case 'gh':
-        return 'Ghana';
-      default:
-        return 'International';
+    // Übersetzungen für die Regionen basierend auf der aktuellen Sprache
+    if (_language == 'de') {
+      switch (code) {
+        case 'de':
+          return 'Deutschland';
+        case 'at':
+          return 'Österreich';
+        case 'ch':
+          return 'Schweiz';
+        default:
+          return 'International';
+      }
+    } else {
+      switch (code) {
+        case 'de':
+          return 'Germany';
+        case 'at':
+          return 'Austria';
+        case 'ch':
+          return 'Switzerland';
+        default:
+          return 'International';
+      }
     }
   }
 
@@ -272,16 +364,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Select Language'),
+        title: Text(_t('selectLanguage')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildLanguageOption('en', 'English'),
-            _buildLanguageOption('fr', 'French'),
-            _buildLanguageOption('de', 'German'),
-            _buildLanguageOption('sw', 'Swahili'),
+            _buildLanguageOption('de', 'Deutsch'),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(_t('close')),
+          ),
+        ],
       ),
     );
   }
@@ -304,17 +400,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Select Region'),
+        title: Text(_t('selectRegion')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildRegionOption('int', 'International'),
-            _buildRegionOption('de', 'Germany'),
-            _buildRegionOption('ke', 'Kenya'),
-            _buildRegionOption('ng', 'Nigeria'),
-            _buildRegionOption('gh', 'Ghana'),
+            _buildRegionOption('int', _getRegionName('int')),
+            _buildRegionOption('de', _getRegionName('de')),
+            _buildRegionOption('at', _getRegionName('at')),
+            _buildRegionOption('ch', _getRegionName('ch')),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(_t('close')),
+          ),
+        ],
       ),
     );
   }
@@ -337,7 +438,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('About'),
+        title: Text(_t('aboutTitle')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -355,30 +456,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 16),
             const Text(
-              'AREWA Health App',
+              'Pregnancy Guide App',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: AppTheme.fontSizeDisplaySmall,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
             const Text('Version 1.0.0'),
             const SizedBox(height: 16),
-            const Text(
-              'A comprehensive pregnancy resource app designed to provide valuable information and tools for expectant mothers.',
+            Text(
+              _language == 'de'
+                  ? 'Eine umfassende App für Schwangere, die wertvolle Informationen und Tools für werdende Mütter bietet.'
+                  : 'A comprehensive pregnancy resource app designed to provide valuable information and tools for expectant mothers.',
               textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: AppTheme.fontSizeBodyMedium),
             ),
             const SizedBox(height: 16),
             const Text(
-              '© 2025 AREWA Health App',
-              style: TextStyle(fontSize: 12),
+              '© 2025 Pregnancy Guide App',
+              style: TextStyle(fontSize: AppTheme.fontSizeSmall),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
+            child: Text(_t('close')),
           ),
         ],
       ),

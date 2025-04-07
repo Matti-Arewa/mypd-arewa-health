@@ -60,7 +60,7 @@ class UserProvider extends ChangeNotifier {
   DateTime? _dueDate;
   DateTime? _lastPeriodDate;
   bool _isFirstLaunch = true;
-  String _preferredLanguage = 'en';
+  String _preferredLanguage = 'de';
   bool _notificationsEnabled = true;
   final List<KickSession> _kickSessions = [];
 
@@ -73,15 +73,7 @@ class UserProvider extends ChangeNotifier {
   final List<WeightEntry> _weightEntries = [];
   List<WeightEntry> get weightEntries => _weightEntries;
 
-
-
-  bool _isDarkMode = false;
-  bool get isDarkMode => _isDarkMode;
-  set isDarkMode(bool value) {
-    _isDarkMode = value;
-    Hive.box('appSettings').put('isDarkMode', value);
-    notifyListeners();
-  }
+  // Dark Mode wurde entfernt
 
   bool _useCelsius = true;
   bool get useCelsius => _useCelsius;
@@ -91,7 +83,6 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Falls du lieber 'language' anstatt 'preferredLanguage' verwenden möchtest:
   String get language => _preferredLanguage;
   set language(String value) {
     _preferredLanguage = value;
@@ -107,7 +98,6 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Falls du auch einen Setter für notificationsEnabled benötigst:
   bool get notificationsEnabled => _notificationsEnabled;
   set notificationsEnabled(bool value) {
     _notificationsEnabled = value;
@@ -127,7 +117,7 @@ class UserProvider extends ChangeNotifier {
     final savedFirstLaunch = settingsBox.get('isFirstLaunch');
     final savedLanguage = settingsBox.get('preferredLanguage');
     final savedNotifications = settingsBox.get('notificationsEnabled');
-    final savedIsDarkMode = settingsBox.get('isDarkMode');
+    // Dark Mode Einstellung wurde entfernt
     final savedRegion = settingsBox.get('region');
     final savedUseCelsius = settingsBox.get('useCelsius');
 
@@ -151,9 +141,7 @@ class UserProvider extends ChangeNotifier {
       _notificationsEnabled = savedNotifications;
     }
 
-    if (savedIsDarkMode != null) {
-      _isDarkMode = savedIsDarkMode;
-    }
+    // Dark Mode Laden wurde entfernt
 
     if (savedRegion != null) {
       _region = savedRegion;
@@ -163,19 +151,13 @@ class UserProvider extends ChangeNotifier {
       _useCelsius = savedUseCelsius;
     }
 
-    // Optional: Hier könntest du auch gespeicherte Kick Sessions laden
-
     notifyListeners();
   }
 
-  /// Hier wurde die Methode so angepasst, dass sie zwei Parameter erwartet:
-  /// [lastPeriodDate] und [dueDate].
   Future<void> setDueDate(DateTime dueDate) async {
-    //_lastPeriodDate = lastPeriodDate;
     _dueDate = dueDate;
 
     final settingsBox = Hive.box('appSettings');
-    //await settingsBox.put('lastPeriodDate', lastPeriodDate.toIso8601String());
     await settingsBox.put('dueDate', dueDate.toIso8601String());
 
     notifyListeners();
@@ -230,36 +212,25 @@ class UserProvider extends ChangeNotifier {
     return difference.inDays;
   }
 
-  // Neue Methode zum Hinzufügen einer Kick Session
   void addKickSession(KickSession session) {
     _kickSessions.add(session);
-    // Optional: Hier könntest du die Liste der Sessions in Hive persistieren
     notifyListeners();
   }
 
-  // Neue Methode zum Entfernen einer Kick Session anhand des Index
   void removeKickSession(int index) {
     if (index >= 0 && index < _kickSessions.length) {
       _kickSessions.removeAt(index);
-      // Optional: Hier ebenfalls die persistente Speicherung aktualisieren
       notifyListeners();
     }
   }
 
-
   void addWeightEntry({required DateTime date, required double weight}) {
     _weightEntries.add(WeightEntry(date: date, weight: weight));
-    // Optional: Speichern in Hive
     notifyListeners();
   }
 
   void removeWeightEntry(WeightEntry entry) {
     _weightEntries.remove(entry);
-    // Optional: Aktualisieren der persistierten Daten
     notifyListeners();
   }
 }
-
-
-
-

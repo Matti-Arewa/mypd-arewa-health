@@ -8,8 +8,10 @@ import '../screens/favorites_screen.dart';
 import '../screens/search_screen.dart';
 import '../screens/tools_screen.dart';
 import '../screens/settings_screen.dart';
+import '../screens/community_screen.dart';
 import '../widgets/pregnancy_progress.dart';
 import '../widgets/category_card.dart';
+import '../utils/app_theme.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -21,13 +23,42 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _screens = [
-    _HomeContent(),
-    SearchScreen(),
-    ToolsScreen(),
-    FavoritesScreen(),
-    SettingsScreen(),
-  ];
+  late final List<Widget> _screens;
+  late final List<NavigationDestination> _destinations;
+
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      const _InfoContent(),
+      const ToolsScreen(),
+      const CommunityScreen(),
+      const FavoritesScreen(),
+    ];
+
+    _destinations = const [
+      NavigationDestination(
+        icon: Icon(Icons.menu_book_outlined),
+        selectedIcon: Icon(Icons.menu_book_outlined),
+        label: 'Guide',
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.calculate_outlined),
+        selectedIcon: Icon(Icons.calculate),
+        label: 'Tools',
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.forum_outlined),
+        selectedIcon: Icon(Icons.forum),
+        label: 'Community',
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.favorite_border),
+        selectedIcon: Icon(Icons.favorite),
+        label: 'Favoriten',
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,40 +71,14 @@ class _HomeScreenState extends State<HomeScreen> {
             _selectedIndex = index;
           });
         },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.search_outlined),
-            selectedIcon: Icon(Icons.search),
-            label: 'Search',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.calculate_outlined),
-            selectedIcon: Icon(Icons.calculate),
-            label: 'Tools',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.favorite_border),
-            selectedIcon: Icon(Icons.favorite),
-            label: 'Favorites',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
+        destinations: _destinations,
       ),
     );
   }
 }
 
-class _HomeContent extends StatelessWidget {
-  const _HomeContent({Key? key}) : super(key: key);
+class _InfoContent extends StatelessWidget {
+  const _InfoContent({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -84,30 +89,63 @@ class _HomeContent extends StatelessWidget {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final categories = contentProvider.contentData?.categories ?? [];
+    // Alle Kategorien anzeigen
+    final categories = contentProvider.categories;
 
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header and pregnancy progress
-            _buildHeader(context, userProvider),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text(
+          'Schwangerschaftsratgeber',
+          style: TextStyle(color: AppTheme.textPrimaryColor),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search, color: AppTheme.primaryColor),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SearchScreen()),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings, color: AppTheme.primaryColor),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            },
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          // Header und Schwangerschaftsfortschritt
+          _buildHeader(context, userProvider),
 
-            // Categories
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Categories',
-                style: Theme.of(context).textTheme.displayMedium,
-              ),
+          // Kategorien-Überschrift
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Row(
+              children: [
+                const Icon(Icons.menu_book, color: AppTheme.primaryColor),
+                const SizedBox(width: 8),
+                Text(
+                  'Kategorien',
+                  style: Theme.of(context).textTheme.displayMedium,
+                ),
+              ],
             ),
+          ),
 
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
+          // Kategorien-Liste
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               itemCount: categories.length,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
               itemBuilder: (context, index) {
                 final category = categories[index];
                 return CategoryCard(
@@ -128,10 +166,8 @@ class _HomeContent extends StatelessWidget {
                 );
               },
             ),
-
-            const SizedBox(height: 20),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -140,7 +176,14 @@ class _HomeContent extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppTheme.primaryColor,
+            AppTheme.primaryColor.withOpacity(0.8),
+          ],
+        ),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(24),
           bottomRight: Radius.circular(24),
@@ -150,31 +193,34 @@ class _HomeContent extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Pregnancy Guide',
-                style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                  color: Colors.white,
+              Expanded(
+                child: Text(
+                  'Ihre Schwangerschaft',
+                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    height: 1.2,
+                  ),
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-                onPressed: () {
-                  // Handle notifications
-                },
+              // Information Icon für medizinischen Touch
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                padding: const EdgeInsets.all(8),
+                child: const Icon(
+                  Icons.medical_information,
+                  color: Colors.white,
+                  size: 32,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 16),
           if (userProvider.dueDate != null) ...[
-            Text(
-              'Your Pregnancy',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.white.withOpacity(0.9),
-              ),
-            ),
-            const SizedBox(height: 8),
             PregnancyProgress(
               weeksPregnant: userProvider.weeksPregnant,
               daysLeft: userProvider.daysLeft,
@@ -182,6 +228,7 @@ class _HomeContent extends StatelessWidget {
             ),
           ] else ...[
             Card(
+              elevation: 4,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -191,16 +238,16 @@ class _HomeContent extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Set Your Due Date',
+                      'Entbindungstermin festlegen',
                       style: Theme.of(context).textTheme.displaySmall,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Track your pregnancy progress by setting your due date in the settings.',
+                      'Verfolgen Sie Ihre Schwangerschaft, indem Sie Ihren Entbindungstermin in den Einstellungen festlegen.',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 12),
-                    ElevatedButton(
+                    ElevatedButton.icon(
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -210,16 +257,18 @@ class _HomeContent extends StatelessWidget {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor,
+                        backgroundColor: AppTheme.primaryColor,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
                       ),
-                      child: const Text('Set Due Date'),
+                      icon: const Icon(Icons.calendar_today),
+                      label: const Text('Termin festlegen'),
                     ),
                   ],
                 ),
               ),
             ),
           ],
-          const SizedBox(height: 16),
         ],
       ),
     );

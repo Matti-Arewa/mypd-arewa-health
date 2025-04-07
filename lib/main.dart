@@ -39,8 +39,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Pregnancy Guide',
         debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
+        theme: AppTheme.theme,
         // Optional: Systemweite Theme-Einstellungen nutzen
         // themeMode: ThemeMode.system,
         onGenerateRoute: AppRouter.generateRoute,

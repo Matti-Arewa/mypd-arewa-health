@@ -89,7 +89,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
           const SizedBox(height: 40),
           Text(
-            'Welcome to Pregnancy Guide',
+            'Welcome to the AREWA Pregnancy Guide',
             style: Theme
                 .of(context)
                 .textTheme
