@@ -1,10 +1,10 @@
-//screens/search_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/content_model.dart';
 import '../providers/content_provider.dart';
 import '../utils/app_theme.dart';
 import '../screens/question_detail_screen.dart';
+import '../services/localization_service.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -89,21 +89,38 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     final contentProvider = Provider.of<ContentProvider>(context);
 
+    // Responsive design adjustments
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenWidth < 360 || screenHeight < 600;
+
+    // Adjust sizes based on screen size
+    final titleFontSize = isSmallScreen ? 18.0 : 20.0;
+    final cardFontSize = isSmallScreen ? 14.0 : 16.0;
+    final padding = isSmallScreen ? 12.0 : 16.0;
+    final cardPadding = isSmallScreen ? 12.0 : 16.0;
+    final iconSize = isSmallScreen ? 20.0 : 24.0;
+    final placeholderIconSize = isSmallScreen ? 60.0 : 80.0;
+    final emptyMessageSize = isSmallScreen ? 14.0 : 16.0;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Search',
-          style: TextStyle(color: AppTheme.textPrimaryColor),
+        title: Text(
+          context.tr('search'),
+          style: TextStyle(
+            color: AppTheme.textPrimaryColor,
+            fontSize: titleFontSize,
+          ),
         ),
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(padding),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search for topics, questions...',
+                hintText: context.tr('searchHint'),
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
@@ -130,10 +147,13 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           Expanded(
             child: _isSearching
-                ? const Center(child: CircularProgressIndicator())
+                ? Center(child: CircularProgressIndicator())
                 : _searchResults.isEmpty && _searchController.text.isNotEmpty
-                ? const Center(
-              child: Text('No results found. Try different keywords.'),
+                ? Center(
+              child: Text(
+                context.tr('noResultsFound'),
+                style: TextStyle(fontSize: emptyMessageSize),
+              ),
             )
                 : _searchResults.isEmpty
                 ? Center(
@@ -142,15 +162,15 @@ class _SearchScreenState extends State<SearchScreen> {
                 children: [
                   Icon(
                     Icons.search,
-                    size: 80,
+                    size: placeholderIconSize,
                     color: Colors.grey[300],
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: padding),
                   Text(
-                    'Search for pregnancy information',
+                    context.tr('searchForInformation'),
                     style: TextStyle(
                       color: Colors.grey[600],
-                      fontSize: 16,
+                      fontSize: emptyMessageSize,
                     ),
                   ),
                 ],
@@ -160,7 +180,14 @@ class _SearchScreenState extends State<SearchScreen> {
               itemCount: _searchResults.length,
               itemBuilder: (context, index) {
                 final result = _searchResults[index];
-                return _buildSearchResultItem(context, result);
+                return _buildSearchResultItem(
+                  context,
+                  result,
+                  isSmallScreen,
+                  cardFontSize,
+                  cardPadding,
+                  iconSize,
+                );
               },
             ),
           ),
@@ -169,7 +196,14 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildSearchResultItem(BuildContext context, SearchResult result) {
+  Widget _buildSearchResultItem(
+      BuildContext context,
+      SearchResult result,
+      bool isSmallScreen,
+      double fontSize,
+      double padding,
+      double iconSize,
+      ) {
     IconData iconData;
     Color iconColor;
 
@@ -189,8 +223,13 @@ class _SearchScreenState extends State<SearchScreen> {
         break;
     }
 
+    final categoryFontSize = fontSize - 2;
+
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: EdgeInsets.symmetric(
+          horizontal: padding,
+          vertical: isSmallScreen ? 6 : 8
+      ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 2,
       child: InkWell(
@@ -206,33 +245,33 @@ class _SearchScreenState extends State<SearchScreen> {
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(padding),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(
                 iconData,
                 color: iconColor,
-                size: 24,
+                size: iconSize,
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: isSmallScreen ? 12 : 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       result.question.question,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: fontSize,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: isSmallScreen ? 2 : 4),
                     Text(
-                      'In: ${result.categoryTitle}',
+                      context.tr('inCategory', {'category': result.categoryTitle}),
                       style: TextStyle(
                         color: Colors.grey[600],
-                        fontSize: 14,
+                        fontSize: categoryFontSize,
                       ),
                     ),
                   ],

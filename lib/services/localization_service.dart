@@ -59,8 +59,17 @@ class AppLocalizations {
   }
 
   // This method will be called from every widget which needs a localized text
-  String translate(String key) {
-    return _localizedStrings[key] ?? key;
+  String translate(String key, [Map<String, String>? args]) {
+    String text = _localizedStrings[key] ?? key;
+
+    // Replace placeholders with provided arguments if any
+    if (args != null) {
+      args.forEach((key, value) {
+        text = text.replaceAll('{$key}', value);
+      });
+    }
+
+    return text;
   }
 }
 
@@ -91,5 +100,5 @@ class _AppLocalizationsDelegate
 // Extension to make it easier to use
 extension LocalizationExtension on BuildContext {
   AppLocalizations get loc => AppLocalizations.of(this);
-  String tr(String key) => AppLocalizations.of(this).translate(key);
+  String tr(String key, [Map<String, String>? args]) => AppLocalizations.of(this).translate(key, args);
 }

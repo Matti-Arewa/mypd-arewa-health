@@ -1,10 +1,11 @@
-//screens/kick_counter.dart
+//screens/kick_counter_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import '../providers/user_provider.dart';
 import '../utils/app_theme.dart';
+import '../services/localization_service.dart';
 
 class KickCounterScreen extends StatefulWidget {
   const KickCounterScreen({Key? key}) : super(key: key);
@@ -94,19 +95,25 @@ class _KickCounterScreenState extends State<KickCounterScreen> {
   }
 
   void _showCompletionDialog() {
+    // Responsive Einstellungen
+    final isSmallScreen = MediaQuery.of(context).size.width < 360;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Session Complete'),
+        title: Text(context.tr('sessionComplete')),
         content: Text(
-          'You recorded 10 kicks in ${_formatDuration(_elapsedTime)}.\n\nExperts recommend feeling 10 movements within 2 hours.',
+          context.tr('kickCounterResult', {
+            'count': '10',
+            'duration': _formatDuration(_elapsedTime),
+          }) + "\n\n" + context.tr('expertRecommendation'),
         ),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
             },
-            child: const Text('OK'),
+            child: Text(context.tr('ok')),
           ),
         ],
       ),
@@ -123,15 +130,30 @@ class _KickCounterScreenState extends State<KickCounterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Responsive Design-Anpassungen
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenWidth < 360 || screenHeight < 600;
+
+    // Responsive Größen
+    final iconSize = isSmallScreen ? 50.0 : 60.0;
+    final buttonHeight = isSmallScreen ? 42.0 : 48.0;
+    final kickButtonSize = isSmallScreen ? 130.0 : 150.0;
+    final titleFontSize = isSmallScreen ? 16.0 : 18.0;
+    final bodyFontSize = isSmallScreen ? 12.0 : 14.0;
+    final timerFontSize = isSmallScreen ? 28.0 : 32.0;
+    final kickCountFontSize = isSmallScreen ? 42.0 : 48.0;
+    final padding = isSmallScreen ? 12.0 : 16.0;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Kick Counter',
+        title: Text(
+          context.tr('kickCounter'),
           style: TextStyle(color: AppTheme.textPrimaryColor),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(padding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -141,60 +163,61 @@ class _KickCounterScreenState extends State<KickCounterScreen> {
               ),
               elevation: 4,
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(padding),
                 child: Column(
                   children: [
-                    const Text(
-                      'Kick Counter',
-                      style: const TextStyle(
-                        fontSize: 18,
+                    Text(
+                      context.tr('kickCounter'),
+                      style: TextStyle(
+                        fontSize: titleFontSize,
                         fontWeight: FontWeight.bold,
                         color: AppTheme.primaryColor,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Tap the button when you feel a kick. Try to count 10 kicks and time how long it takes.',
+                    SizedBox(height: isSmallScreen ? 6 : 8),
+                    Text(
+                      context.tr('kickCounterInstructions'),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.grey,
+                        fontSize: bodyFontSize,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: isSmallScreen ? 18 : 24),
                     if (_isActive) ...[
                       Text(
                         _formatDuration(_elapsedTime),
-                        style: const TextStyle(
-                          fontSize: 32,
+                        style: TextStyle(
+                          fontSize: timerFontSize,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: isSmallScreen ? 18 : 24),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             '$_kickCount',
-                            style: const TextStyle(
-                              fontSize: 48,
+                            style: TextStyle(
+                              fontSize: kickCountFontSize,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'kicks',
+                          SizedBox(width: isSmallScreen ? 6 : 8),
+                          Text(
+                            context.tr('kicks'),
                             style: TextStyle(
-                              fontSize: 20,
+                              fontSize: isSmallScreen ? 18 : 20,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: isSmallScreen ? 18 : 24),
                       GestureDetector(
                         onTap: _recordKick,
                         child: Container(
-                          width: 150,
-                          height: 150,
+                          width: kickButtonSize,
+                          height: kickButtonSize,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: AppTheme.primaryColor,
@@ -206,58 +229,64 @@ class _KickCounterScreenState extends State<KickCounterScreen> {
                               ),
                             ],
                           ),
-                          child: const Center(
+                          child: Center(
                             child: Icon(
                               Icons.touch_app,
                               color: Colors.white,
-                              size: 60,
+                              size: iconSize,
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: isSmallScreen ? 18 : 24),
                       ElevatedButton(
                         onPressed: _endSession,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                          padding: EdgeInsets.symmetric(
+                              vertical: isSmallScreen ? 10 : 12,
+                              horizontal: isSmallScreen ? 20 : 24
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: const Text('End Session'),
+                        child: Text(context.tr('endSession')),
                       ),
                     ] else ...[
-                      const SizedBox(height: 16),
+                      SizedBox(height: isSmallScreen ? 12 : 16),
                       ElevatedButton(
                         onPressed: _startSession,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.primaryColor,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                          padding: EdgeInsets.symmetric(
+                              vertical: isSmallScreen ? 10 : 12,
+                              horizontal: isSmallScreen ? 20 : 24
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          minimumSize: const Size(double.infinity, 48),
+                          minimumSize: Size(double.infinity, buttonHeight),
                         ),
-                        child: const Text('Start Counting'),
+                        child: Text(context.tr('startCounting')),
                       ),
                     ],
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 24),
-            const Text(
-              'Past Sessions',
+            SizedBox(height: isSmallScreen ? 18 : 24),
+            Text(
+              context.tr('pastSessions'),
               style: TextStyle(
-                fontSize: 18,
+                fontSize: titleFontSize,
                 fontWeight: FontWeight.bold,
                 color: AppTheme.primaryColor,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: isSmallScreen ? 6 : 8),
             _pastSessions.isEmpty
                 ? Card(
               shape: RoundedRectangleBorder(
@@ -265,12 +294,13 @@ class _KickCounterScreenState extends State<KickCounterScreen> {
               ),
               elevation: 2,
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(padding),
                 child: Center(
                   child: Text(
-                    'No sessions recorded yet',
+                    context.tr('noSessionsRecorded'),
                     style: TextStyle(
                       color: Colors.grey[600],
+                      fontSize: bodyFontSize,
                     ),
                   ),
                 ),
@@ -282,12 +312,15 @@ class _KickCounterScreenState extends State<KickCounterScreen> {
               itemCount: _pastSessions.length,
               itemBuilder: (context, index) {
                 final session = _pastSessions[index];
+                final dateFormat = DateFormat.yMd(context.loc.locale.languageCode)
+                    .add_jm(); // Uses localized date format
+
                 return Card(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   elevation: 2,
-                  margin: const EdgeInsets.only(bottom: 8),
+                  margin: EdgeInsets.only(bottom: isSmallScreen ? 6 : 8),
                   child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
@@ -300,15 +333,20 @@ class _KickCounterScreenState extends State<KickCounterScreen> {
                       ),
                     ),
                     title: Text(
-                      '${session.count} kicks in ${_formatDuration(session.duration)}',
-                      style: const TextStyle(
+                      context.tr('kicksInDuration', {
+                        'count': '${session.count}',
+                        'duration': _formatDuration(session.duration)
+                      }),
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
+                        fontSize: isSmallScreen ? 13 : 14,
                       ),
                     ),
                     subtitle: Text(
-                      DateFormat('MMM d, yyyy - h:mm a').format(session.date),
+                      dateFormat.format(session.date),
                       style: TextStyle(
                         color: Colors.grey[600],
+                        fontSize: isSmallScreen ? 11 : 12,
                       ),
                     ),
                     trailing: IconButton(
@@ -321,6 +359,7 @@ class _KickCounterScreenState extends State<KickCounterScreen> {
                         final userProvider = Provider.of<UserProvider>(context, listen: false);
                         userProvider.removeKickSession(index);
                       },
+                      tooltip: context.tr('delete'),
                     ),
                   ),
                 );
@@ -332,4 +371,3 @@ class _KickCounterScreenState extends State<KickCounterScreen> {
     );
   }
 }
-

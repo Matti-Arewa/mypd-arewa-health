@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/localization_service.dart';
 
 class ToolCard extends StatelessWidget {
   final String title;
@@ -20,6 +21,15 @@ class ToolCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Responsive design adjustments
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 360;
+
+    final titleFontSize = isSmallScreen ? 16.0 : 18.0;
+    final descriptionFontSize = isSmallScreen ? 12.0 : 14.0;
+    final iconSize = isSmallScreen ? 28.0 : 32.0;
+    final padding = isSmallScreen ? 12.0 : 16.0;
+
     return Card(
       elevation: 3,
       shape: RoundedRectangleBorder(
@@ -29,11 +39,11 @@ class ToolCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(padding),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(isSmallScreen ? 10 : 12),
                 decoration: BoxDecoration(
                   color: isDisabled ? Colors.grey[200] : color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -41,28 +51,30 @@ class ToolCard extends StatelessWidget {
                 child: Icon(
                   icon,
                   color: isDisabled ? Colors.grey : color,
-                  size: 32,
+                  size: iconSize,
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: isSmallScreen ? 12 : 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
+                      // Support for localized titles
+                      title.startsWith('_') ? context.tr(title.substring(1)) : title,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                        fontSize: titleFontSize,
                         color: isDisabled ? Colors.grey : Colors.black87,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: isSmallScreen ? 2 : 4),
                     Text(
-                      description,
+                      // Support for localized descriptions
+                      description.startsWith('_') ? context.tr(description.substring(1)) : description,
                       style: TextStyle(
                         color: isDisabled ? Colors.grey : Colors.grey[600],
-                        fontSize: 14,
+                        fontSize: descriptionFontSize,
                       ),
                     ),
                   ],
@@ -71,7 +83,7 @@ class ToolCard extends StatelessWidget {
               Icon(
                 Icons.arrow_forward_ios,
                 color: isDisabled ? Colors.grey[300] : Colors.grey,
-                size: 16,
+                size: isSmallScreen ? 14 : 16,
               ),
             ],
           ),

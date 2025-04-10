@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../models/content_model.dart';
-import '../utils/sample_data.dart';
 import '../utils/sample_data_en.dart';
+import '../utils/sample_data_de.dart'; // Neue Import-Anweisung für deutsche Beispieldaten
+import 'package:flutter/foundation.dart';
 
 class ContentProvider extends ChangeNotifier {
   ContentData? _contentData;
@@ -25,10 +26,14 @@ class ContentProvider extends ChangeNotifier {
   }
 
   // Update language and reload content
-  void updateLanguage(String language) {
+  Future<void> updateLanguage(String language) async {
     if (_language != language) {
+      if (kDebugMode) {
+        print("ContentProvider: Updating language to $language");
+      }
+
       _language = language;
-      _loadContent();
+      await _loadContent();
     }
   }
 
@@ -37,25 +42,50 @@ class ContentProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      if (kDebugMode) {
+        print("ContentProvider: Loading content for language: $_language");
+      }
+
       // First try to load from Hive (for offline support)
       final contentBox = Hive.box('content');
       final saveKey = 'contentData_$_language';
       final savedContent = contentBox.get(saveKey);
 
       if (savedContent != null) {
+        if (kDebugMode) {
+          print("ContentProvider: Found saved content in Hive");
+        }
+
         final Map<String, dynamic> jsonData = json.decode(savedContent);
         _contentData = ContentData.fromJson(jsonData);
       } else {
+        if (kDebugMode) {
+          print("ContentProvider: No saved content, trying to load from assets");
+        }
+
         // If no saved content, load from assets or use sample data
         try {
           final String jsonString = await rootBundle.loadString('assets/data/content_$_language.json');
+          if (kDebugMode) {
+            print("ContentProvider: Successfully loaded content from assets");
+          }
+
           final Map<String, dynamic> jsonData = json.decode(jsonString);
           _contentData = ContentData.fromJson(jsonData);
         } catch (e) {
+          if (kDebugMode) {
+            print("ContentProvider: Error loading from assets, using sample data. Error: $e");
+          }
+
           // Fallback to sample data based on language
-          _contentData = _language == 'en'
-              ? SampleDataEN.getSampleContent()
-              : SampleData.getSampleContent();
+          if (_language == 'en') {
+            _contentData = SampleDataEN.getSampleContent();
+          } else if (_language == 'de') {
+            _contentData = SampleData.getSampleContent(); // Hier laden wir die deutschen Beispieldaten
+          } else {
+            // Standardmäßig englische Daten laden, wenn keine Übereinstimmung gefunden wird
+            _contentData = SampleData.getSampleContent();
+          }
         }
 
         // Save to Hive for offline access
@@ -64,9 +94,14 @@ class ContentProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error loading content: $e');
       // Fallback to sample data based on language
-      _contentData = _language == 'en'
-          ? SampleDataEN.getSampleContent()
-          : SampleData.getSampleContent();
+      if (_language == 'en') {
+        _contentData = SampleDataEN.getSampleContent();
+      } else if (_language == 'de') {
+        _contentData = SampleData.getSampleContent(); // Hier laden wir die deutschen Beispieldaten
+      } else {
+        // Standardmäßig englische Daten laden, wenn keine Übereinstimmung gefunden wird
+        _contentData = SampleData.getSampleContent();
+      }
     }
 
     _isLoading = false;
@@ -148,6 +183,9 @@ class ContentProvider extends ChangeNotifier {
     try {
       return _contentData!.categories.firstWhere((cat) => cat.id == categoryId);
     } catch (e) {
+      if (kDebugMode) {
+        print("ContentProvider: Category not found: $categoryId");
+      }
       return null;
     }
   }
@@ -165,6 +203,9 @@ class ContentProvider extends ChangeNotifier {
       }
     }
 
+    if (kDebugMode) {
+      print("ContentProvider: Question not found: $questionId");
+    }
     return null;
   }
 }

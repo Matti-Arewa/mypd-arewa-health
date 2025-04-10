@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../utils/app_theme.dart';
 import '../widgets/custom_app_bar.dart';
+import '../services/localization_service.dart';
 
 class WeightTrackerScreen extends StatefulWidget {
   static const routeName = '/weight-tracker';
@@ -71,7 +72,7 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Weight entry saved')),
+        SnackBar(content: Text(context.tr('weightEntrySaved'))),
       );
 
       _weightController.clear();
@@ -84,20 +85,38 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Responsive design adjustments
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenWidth < 360 || screenHeight < 600;
+
+    // Adjust sizes based on screen size
+    final titleFontSize = isSmallScreen ? 16.0 : 18.0;
+    final bodyFontSize = isSmallScreen ? 12.0 : 14.0;
+    final sectionTitleFontSize = isSmallScreen ? 15.0 : 16.0;
+    final listTileTitleFontSize = isSmallScreen ? 14.0 : 16.0;
+    final listTileSubtitleFontSize = isSmallScreen ? 12.0 : 13.0;
+    final padding = isSmallScreen ? 12.0 : 16.0;
+    final spacing = isSmallScreen ? 12.0 : 16.0;
+    final chartHeight = isSmallScreen ? 200.0 : 240.0;
+    final placeholderIconSize = isSmallScreen ? 48.0 : 64.0;
+
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Weight Tracker'),
+      appBar: CustomAppBar(title: context.tr('weightTracker')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(padding),
         child: Consumer<UserProvider>(
           builder: (context, userProvider, child) {
             final weightEntries = userProvider.weightEntries;
+            // Get weight unit from user settings
+            final weightUnit = context.tr('kg');
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // User guidance text
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(padding),
                   decoration: BoxDecoration(
                     color: AppTheme.accentColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -106,20 +125,21 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Track Your Weight',
+                        context.tr('trackYourWeight'),
                         style: Theme.of(context).textTheme.titleMedium!.copyWith(
                           fontWeight: FontWeight.bold,
+                          fontSize: titleFontSize,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Regular weight monitoring during pregnancy helps ensure healthy growth for both mother and baby. Consult your healthcare provider about ideal weight gain.',
-                        style: TextStyle(fontSize: 14),
+                      SizedBox(height: isSmallScreen ? 6 : 8),
+                      Text(
+                        context.tr('weightTrackerDescription'),
+                        style: TextStyle(fontSize: bodyFontSize),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: spacing * 1.5),
 
                 // Weight input form
                 Form(
@@ -128,10 +148,12 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Add New Entry',
-                        style: Theme.of(context).textTheme.titleMedium,
+                        context.tr('addNewEntry'),
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontSize: sectionTitleFontSize,
+                        ),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: spacing),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -140,7 +162,7 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
                             child: TextFormField(
                               controller: _dateController,
                               decoration: InputDecoration(
-                                labelText: 'Date',
+                                labelText: context.tr('date'),
                                 prefixIcon: const Icon(Icons.calendar_today),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
@@ -150,13 +172,13 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
                               onTap: () => _selectDate(context),
                             ),
                           ),
-                          const SizedBox(width: 16),
+                          SizedBox(width: isSmallScreen ? 12 : 16),
                           // Weight field
                           Expanded(
                             child: TextFormField(
                               controller: _weightController,
                               decoration: InputDecoration(
-                                labelText: 'Weight (kg)',
+                                labelText: context.tr('weightWithUnit', {'unit': weightUnit}),
                                 prefixIcon: const Icon(Icons.monitor_weight_outlined),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
@@ -165,10 +187,10 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
                               keyboardType: TextInputType.number,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Please enter weight';
+                                  return context.tr('pleaseEnterWeight');
                                 }
                                 if (double.tryParse(value) == null) {
-                                  return 'Please enter a valid number';
+                                  return context.tr('pleaseEnterValidNumber');
                                 }
                                 return null;
                               },
@@ -176,7 +198,7 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: spacing),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -184,28 +206,30 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppTheme.primaryColor,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 10 : 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: const Text('Save Entry'),
+                          child: Text(context.tr('saveEntry')),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: spacing * 2),
 
                 // Weight chart section
                 if (weightEntries.isNotEmpty) ...[
                   Text(
-                    'Weight Progress',
-                    style: Theme.of(context).textTheme.titleMedium,
+                    context.tr('weightProgress'),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontSize: sectionTitleFontSize,
+                    ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: spacing),
                   Container(
-                    height: 240,
+                    height: chartHeight,
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -229,11 +253,13 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
                               reservedSize: 30,
                               getTitlesWidget: (double value, TitleMeta meta) {
                                 if (value.toInt() >= 0 && value.toInt() < weightEntries.length) {
+                                  // Use localized date format
+                                  final dateFormat = DateFormat.MMMd(context.loc.locale.languageCode);
                                   return SideTitleWidget(
                                     meta: meta,
                                     child: Text(
-                                      DateFormat('MM/dd').format(weightEntries[value.toInt()].date),
-                                      style: const TextStyle(fontSize: 10),
+                                      dateFormat.format(weightEntries[value.toInt()].date),
+                                      style: TextStyle(fontSize: isSmallScreen ? 8 : 10),
                                     ),
                                   );
                                 }
@@ -252,8 +278,8 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
                                 return SideTitleWidget(
                                   meta: meta,
                                   child: Text(
-                                    '${value.toInt()} kg',
-                                    style: const TextStyle(fontSize: 10),
+                                    '${value.toInt()} $weightUnit',
+                                    style: TextStyle(fontSize: isSmallScreen ? 8 : 10),
                                   ),
                                 );
                               },
@@ -293,7 +319,7 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
                               show: true,
                               getDotPainter: (spot, percent, barData, index) {
                                 return FlDotCirclePainter(
-                                  radius: 4,
+                                  radius: isSmallScreen ? 3 : 4,
                                   color: AppTheme.primaryColor,
                                   strokeWidth: 2,
                                   strokeColor: Colors.white,
@@ -318,43 +344,52 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
                   Center(
                     child: Column(
                       children: [
-                        const SizedBox(height: 32),
+                        SizedBox(height: spacing * 2),
                         Icon(
                           Icons.show_chart,
-                          size: 64,
+                          size: placeholderIconSize,
                           color: Colors.grey[400],
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: spacing),
                         Text(
-                          'No weight entries yet',
+                          context.tr('noWeightEntries'),
                           style: Theme.of(context).textTheme.titleMedium!.copyWith(
                             color: Colors.grey[600],
+                            fontSize: sectionTitleFontSize,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: isSmallScreen ? 6 : 8),
                         Text(
-                          'Add your first entry to start tracking',
-                          style: TextStyle(color: Colors.grey[600]),
+                          context.tr('addFirstEntry'),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: bodyFontSize,
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ],
-                const SizedBox(height: 32),
+                SizedBox(height: spacing * 2),
 
                 // Weight history list
                 if (weightEntries.isNotEmpty) ...[
                   Text(
-                    'Weight History',
-                    style: Theme.of(context).textTheme.titleMedium,
+                    context.tr('weightHistory'),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontSize: sectionTitleFontSize,
+                    ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: spacing),
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: weightEntries.length,
                     itemBuilder: (context, index) {
                       final entry = weightEntries[index];
+                      // Use localized date format
+                      final dateFormat = DateFormat.yMMMMEEEEd(context.loc.locale.languageCode);
+
                       return Dismissible(
                         key: Key(entry.date.toIso8601String()),
                         background: Container(
@@ -370,11 +405,11 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
                         onDismissed: (direction) {
                           userProvider.removeWeightEntry(entry);
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Entry deleted')),
+                            SnackBar(content: Text(context.tr('entryDeleted'))),
                           );
                         },
                         child: Card(
-                          margin: const EdgeInsets.only(bottom: 8),
+                          margin: EdgeInsets.only(bottom: isSmallScreen ? 6 : 8),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -387,20 +422,25 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
                               ),
                             ),
                             title: Text(
-                              '${entry.weight} kg',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              '${entry.weight} $weightUnit',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: listTileTitleFontSize,
+                              ),
                             ),
                             subtitle: Text(
-                              DateFormat('EEEE, MMMM d, yyyy').format(entry.date),
+                              dateFormat.format(entry.date),
+                              style: TextStyle(fontSize: listTileSubtitleFontSize),
                             ),
                             trailing: IconButton(
                               icon: const Icon(Icons.delete_outline),
                               onPressed: () {
                                 userProvider.removeWeightEntry(entry);
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Entry deleted')),
+                                  SnackBar(content: Text(context.tr('entryDeleted'))),
                                 );
                               },
+                              tooltip: context.tr('delete'),
                             ),
                           ),
                         ),

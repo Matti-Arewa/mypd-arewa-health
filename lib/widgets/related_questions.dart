@@ -1,10 +1,10 @@
-//widgets/related_questions.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/content_provider.dart';
 import '../utils/app_theme.dart';
 import '../screens/question_detail_screen.dart';
 import '../models/content_model.dart';
+import '../services/localization_service.dart';
 
 class RelatedQuestions extends StatelessWidget {
   final String currentQuestionId;
@@ -21,8 +21,22 @@ class RelatedQuestions extends StatelessWidget {
     final contentProvider = Provider.of<ContentProvider>(context);
     final category = contentProvider.getCategoryById(categoryId);
 
+    // Responsive design adjustments
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 360;
+
+    // Adjust sizes based on screen size
+    final titleFontSize = isSmallScreen ? 12.0 : 14.0;
+    final textFontSize = isSmallScreen ? 13.0 : 15.0;
+    final iconSize = isSmallScreen ? 16.0 : 20.0;
+    final padding = isSmallScreen ? 12.0 : 16.0;
+    final cardMargin = isSmallScreen ? 8.0 : 12.0;
+
     if (category == null) {
-      return const Text('Keine verwandten Fragen verfügbar.');
+      return Text(
+        context.tr('noRelatedQuestions'),
+        style: TextStyle(fontSize: textFontSize),
+      );
     }
 
     // Get current question to find related keywords
@@ -51,18 +65,27 @@ class RelatedQuestions extends StatelessWidget {
         ...relatedQuestions.map((question) => _buildRelatedQuestionCard(
           context,
           question,
-          contentProvider.getCategoryById(question.categoryId)?.title ?? 'Kategorie',
+          contentProvider.getCategoryById(question.categoryId)?.title ?? context.tr('category'),
+          isSmallScreen,
+          titleFontSize,
+          textFontSize,
+          iconSize,
+          padding,
+          cardMargin,
         )),
 
         if (relatedQuestions.length > 2) ...[
-          const SizedBox(height: 8),
+          SizedBox(height: isSmallScreen ? 6 : 8),
           TextButton.icon(
             onPressed: () {
               // Navigate to category screen for more questions
               Navigator.pop(context);
             },
-            icon: const Icon(Icons.arrow_back, size: 18),
-            label: const Text('Zurück zur Kategorie'),
+            icon: Icon(Icons.arrow_back, size: isSmallScreen ? 16 : 18),
+            label: Text(
+              context.tr('backToCategory'),
+              style: TextStyle(fontSize: isSmallScreen ? 13 : 14),
+            ),
             style: TextButton.styleFrom(
               foregroundColor: AppTheme.primaryColor,
             ),
@@ -90,7 +113,13 @@ class RelatedQuestions extends StatelessWidget {
       'ultraschall', 'vorsorge', 'ernährung', 'sport', 'übung',
       'risiko', 'symptom', 'untersuchung', 'test', 'arzt', 'hebamme',
       'früh', 'spät', 'wehen', 'stillzeit', 'hygiene', 'nährstoff',
-      'vitamin', 'eisen', 'folsäure', 'ctg', 'diagnos', 'schmerz'
+      'vitamin', 'eisen', 'folsäure', 'ctg', 'diagnos', 'schmerz',
+      // Add English terms as well
+      'birth', 'pregnancy', 'embryo', 'fetus',
+      'ultrasound', 'prenatal', 'nutrition', 'exercise',
+      'risk', 'symptom', 'checkup', 'test', 'doctor', 'midwife',
+      'early', 'late', 'contractions', 'breastfeeding', 'hygiene', 'nutrient',
+      'vitamin', 'iron', 'folic acid', 'ctg', 'diagnosis', 'pain'
     ];
 
     for (final term in pregnancyTerms) {
@@ -153,10 +182,16 @@ class RelatedQuestions extends StatelessWidget {
       BuildContext context,
       ContentQuestion question,
       String categoryTitle,
+      bool isSmallScreen,
+      double titleFontSize,
+      double textFontSize,
+      double iconSize,
+      double padding,
+      double cardMargin,
       ) {
     return Card(
       elevation: 1,
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: cardMargin),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -173,50 +208,54 @@ class RelatedQuestions extends StatelessWidget {
           );
         },
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(padding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Show category name if from a different category
               if (question.categoryId != categoryId) ...[
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isSmallScreen ? 6 : 8,
+                    vertical: isSmallScreen ? 1 : 2,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     categoryTitle,
-                    style: const TextStyle(
-                      fontSize: 12,
+                    style: TextStyle(
+                      fontSize: titleFontSize,
                       color: AppTheme.primaryColor,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: isSmallScreen ? 6 : 8),
               ],
 
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.question_answer_outlined,
-                    size: 20,
+                    size: iconSize,
                     color: AppTheme.accentColor,
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: isSmallScreen ? 8 : 12),
                   Expanded(
                     child: Text(
                       question.question,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppTheme.textPrimaryColor,
                         fontWeight: FontWeight.w500,
+                        fontSize: textFontSize,
                       ),
                     ),
                   ),
-                  const Icon(
+                  Icon(
                     Icons.arrow_forward_ios,
-                    size: 16,
+                    size: isSmallScreen ? 12 : 16,
                     color: AppTheme.accentColor,
                   ),
                 ],

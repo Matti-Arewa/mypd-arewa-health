@@ -4,43 +4,61 @@ import '../widgets/tool_card.dart';
 import 'due_date_calculator_screen.dart';
 import 'kick_counter_screen.dart';
 import 'weight_tracker_screen.dart';
+import '../services/localization_service.dart';
 
 class ToolsScreen extends StatelessWidget {
   const ToolsScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    // Responsive design adjustments
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenWidth < 360 || screenHeight < 600;
+
+    // Adjust sizes based on screen size
+    final titleFontSize = isSmallScreen ? 18.0 : 22.0;
+    final subtitleFontSize = isSmallScreen ? 12.0 : 14.0;
+    final sectionTitleFontSize = isSmallScreen ? 16.0 : 20.0;
+    final padding = isSmallScreen ? 12.0 : 16.0;
+    final spacing = isSmallScreen ? 8.0 : 16.0;
+    final sectionSpacing = isSmallScreen ? 24.0 : 32.0;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Pregnancy Tools',
-          style: TextStyle(color: AppTheme.textPrimaryColor),
+          context.tr('pregnancyTools'),
+          style: TextStyle(
+            color: AppTheme.textPrimaryColor,
+            fontSize: isSmallScreen ? 18.0 : 20.0,
+          ),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(padding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Interactive Tools',
+              context.tr('interactiveTools'),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: AppTheme.primaryColor,
                 fontWeight: FontWeight.bold,
+                fontSize: titleFontSize,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: spacing / 2),
             Text(
-              'Track your pregnancy and stay informed with these helpful tools.',
+              context.tr('toolsDescription'),
               style: TextStyle(
                 color: Colors.grey[600],
-                fontSize: 14,
+                fontSize: subtitleFontSize,
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: spacing * 1.5),
             ToolCard(
-              title: 'Due Date Calculator',
-              description: 'Calculate your estimated due date based on your last period.',
+              title: context.tr('dueDateCalculator'),
+              description: context.tr('dueDateCalculatorDesc'),
               icon: Icons.calendar_today,
               color: AppTheme.primaryColor,
               onTap: () {
@@ -51,10 +69,10 @@ class ToolsScreen extends StatelessWidget {
                 );
               },
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: spacing),
             ToolCard(
-              title: 'Kick Counter',
-              description: 'Track your baby\'s movements and kicks.',
+              title: context.tr('kickCounter'),
+              description: context.tr('kickCounterDesc'),
               icon: Icons.touch_app,
               color: AppTheme.accentColor,
               onTap: () {
@@ -65,10 +83,10 @@ class ToolsScreen extends StatelessWidget {
                 );
               },
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: spacing),
             ToolCard(
-              title: 'Weight Tracker',
-              description: 'Monitor your weight throughout your pregnancy.',
+              title: context.tr('weightTracker'),
+              description: context.tr('weightTrackerDesc'),
               icon: Icons.monitor_weight,
               color: Colors.green,
               onTap: () {
@@ -79,40 +97,41 @@ class ToolsScreen extends StatelessWidget {
                 );
               },
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: sectionSpacing),
             Text(
-              'Coming Soon',
+              context.tr('comingSoon'),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: AppTheme.primaryColor,
                 fontWeight: FontWeight.bold,
+                fontSize: sectionTitleFontSize,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: spacing),
             ToolCard(
-              title: 'Contraction Timer',
-              description: 'Time and track your contractions during labor.',
+              title: context.tr('contractionTimer'),
+              description: context.tr('contractionTimerDesc'),
               icon: Icons.timer,
               color: Colors.grey,
               isDisabled: true,
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('This feature will be available in the next update'),
+                  SnackBar(
+                    content: Text(context.tr('featureComingSoon')),
                   ),
                 );
               },
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: spacing),
             ToolCard(
-              title: 'Baby Name Explorer',
-              description: 'Browse and save your favorite baby names with meanings.',
+              title: context.tr('babyNameExplorer'),
+              description: context.tr('babyNameExplorerDesc'),
               icon: Icons.child_care,
               color: Colors.grey,
               isDisabled: true,
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('This feature will be available in the next update'),
+                  SnackBar(
+                    content: Text(context.tr('featureComingSoon')),
                   ),
                 );
               },

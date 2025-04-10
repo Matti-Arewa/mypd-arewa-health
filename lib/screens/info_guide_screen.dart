@@ -6,6 +6,7 @@ import '../providers/user_provider.dart';
 import '../screens/category_screen.dart';
 import '../widgets/category_card.dart';
 import '../utils/app_theme.dart';
+import '../services/localization_service.dart';
 
 class InfoGuideScreen extends StatelessWidget {
   const InfoGuideScreen({Key? key}) : super(key: key);
@@ -15,16 +16,27 @@ class InfoGuideScreen extends StatelessWidget {
     final contentProvider = Provider.of<ContentProvider>(context);
     final userProvider = Provider.of<UserProvider>(context);
 
+    // Bildschirmgröße für responsive Anpassungen
+    final screenWidth = MediaQuery
+        .of(context)
+        .size
+        .width;
+    final screenHeight = MediaQuery
+        .of(context)
+        .size
+        .height;
+    final isSmallScreen = screenWidth < 360 || screenHeight < 600;
+
     if (contentProvider.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(child: CircularProgressIndicator());
     }
 
     final categories = contentProvider.categories;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Schwangerschaftsratgeber',
+        title: Text(
+          context.tr('app_name'),
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: AppTheme.primaryColor,
@@ -34,20 +46,31 @@ class InfoGuideScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header with pregnancy progress
-            _buildHeader(context, userProvider),
+            _buildHeader(context, userProvider, isSmallScreen),
 
             // Categories section
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              padding: EdgeInsets.fromLTRB(
+                  16,
+                  isSmallScreen ? 12 : 16,
+                  16,
+                  isSmallScreen ? 6 : 8
+              ),
               child: Text(
-                'Informationskategorien',
-                style: Theme.of(context).textTheme.displayMedium,
+                context.tr('informationCategories'),
+                style: Theme
+                    .of(context)
+                    .textTheme
+                    .displayMedium
+                    ?.copyWith(
+                  fontSize: isSmallScreen ? 18.0 : 22.0,
+                ),
               ),
             ),
 
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
                 itemCount: categories.length,
                 itemBuilder: (context, index) {
                   final category = categories[index];
@@ -60,9 +83,10 @@ class InfoGuideScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => CategoryScreen(
-                            categoryId: category.id,
-                          ),
+                          builder: (context) =>
+                              CategoryScreen(
+                                categoryId: category.id,
+                              ),
                         ),
                       );
                     },
@@ -76,25 +100,31 @@ class InfoGuideScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, UserProvider userProvider) {
+  Widget _buildHeader(BuildContext context, UserProvider userProvider,
+      bool isSmallScreen) {
     // If no due date is set, show a smaller header
     if (userProvider.dueDate == null) {
       return Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
         color: AppTheme.primaryColor.withOpacity(0.1),
         child: Row(
           children: [
-            const Icon(
+            Icon(
               Icons.info_outline,
               color: AppTheme.primaryColor,
-              size: 32,
+              size: isSmallScreen ? 24 : 32,
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: isSmallScreen ? 12 : 16),
             Expanded(
               child: Text(
-                'Willkommen zum umfassenden Schwangerschaftsratgeber. Hier finden Sie Informationen zu allen wichtigen Themen rund um die Schwangerschaft.',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                context.tr('pregnancyGuideWelcome'),
+                style: Theme
+                    .of(context)
+                    .textTheme
+                    .bodyLarge
+                    ?.copyWith(
                   height: 1.5,
+                  fontSize: isSmallScreen ? 13.0 : 15.0,
                 ),
               ),
             ),
@@ -105,7 +135,7 @@ class InfoGuideScreen extends StatelessWidget {
 
     // If due date is set, show pregnancy progress
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -124,24 +154,36 @@ class InfoGuideScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Schwangerschaftswoche ${userProvider.weeksPregnant}',
-            style: Theme.of(context).textTheme.displayMedium?.copyWith(
+            context.tr(
+                'pregnancyWeek', {'week': '${userProvider.weeksPregnant}'}),
+            style: Theme
+                .of(context)
+                .textTheme
+                .displayMedium
+                ?.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.bold,
+              fontSize: isSmallScreen ? 18.0 : 22.0,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: isSmallScreen ? 6 : 8),
           Text(
-            'Noch ${userProvider.daysLeft} Tage bis zum errechneten Termin',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            context.tr(
+                'daysUntilDueDate', {'days': '${userProvider.daysLeft}'}),
+            style: Theme
+                .of(context)
+                .textTheme
+                .bodyLarge
+                ?.copyWith(
               color: Colors.white.withOpacity(0.9),
+              fontSize: isSmallScreen ? 14.0 : 16.0,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: isSmallScreen ? 12 : 16),
 
           // Recommendations based on current week
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
@@ -157,23 +199,39 @@ class InfoGuideScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Empfehlungen für diese Woche',
-                  style: Theme.of(context).textTheme.displaySmall,
+                  context.tr('recommendationsForWeek'),
+                  style: Theme
+                      .of(context)
+                      .textTheme
+                      .displaySmall
+                      ?.copyWith(
+                    fontSize: isSmallScreen ? 16.0 : 18.0,
+                  ),
                 ),
-                const SizedBox(height: 8),
-                _buildWeeklyRecommendation(context, userProvider.weeksPregnant),
-                const SizedBox(height: 12),
+                SizedBox(height: isSmallScreen ? 6 : 8),
+                _buildWeeklyRecommendation(
+                    context, userProvider.weeksPregnant, isSmallScreen),
+                SizedBox(height: isSmallScreen ? 10 : 12),
                 ElevatedButton.icon(
                   onPressed: () {
                     // Find which category is relevant for current week and navigate there
-                    _navigateToRelevantCategory(context, userProvider.weeksPregnant);
+                    _navigateToRelevantCategory(
+                        context, userProvider.weeksPregnant);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.accentColor,
                     foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isSmallScreen ? 12 : 16,
+                      vertical: isSmallScreen ? 8 : 10,
+                    ),
                   ),
-                  icon: const Icon(Icons.arrow_forward),
-                  label: const Text('Mehr erfahren'),
+                  icon: Icon(
+                      Icons.arrow_forward, size: isSmallScreen ? 16 : 18),
+                  label: Text(
+                    context.tr('learnMore'),
+                    style: TextStyle(fontSize: isSmallScreen ? 12.0 : 14.0),
+                  ),
                 ),
               ],
             ),
@@ -183,21 +241,28 @@ class InfoGuideScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildWeeklyRecommendation(BuildContext context, int week) {
-    String recommendation;
+  Widget _buildWeeklyRecommendation(BuildContext context, int week,
+      bool isSmallScreen) {
+    String recommendationKey;
 
     // Provide different recommendations based on pregnancy week
     if (week < 13) {
-      recommendation = 'Im ersten Trimester ist Folsäure besonders wichtig. Richte deinen Fokus auf nährstoffreiche Lebensmittel und ausreichend Ruhe.';
+      recommendationKey = 'trimester1Tip';
     } else if (week < 28) {
-      recommendation = 'Im zweiten Trimester kannst du moderate Bewegung genießen. Es ist auch Zeit für die wichtigen Vorsorgeuntersuchungen.';
+      recommendationKey = 'trimester2Tip';
     } else {
-      recommendation = 'Im dritten Trimester bereite dich auf die Geburt vor und schone dich. Achte besonders auf deine Körpersignale.';
+      recommendationKey = 'trimester3Tip';
     }
 
     return Text(
-      recommendation,
-      style: Theme.of(context).textTheme.bodyMedium,
+      context.tr(recommendationKey),
+      style: Theme
+          .of(context)
+          .textTheme
+          .bodyMedium
+          ?.copyWith(
+        fontSize: isSmallScreen ? 13.0 : 14.0,
+      ),
     );
   }
 
@@ -217,9 +282,10 @@ class InfoGuideScreen extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CategoryScreen(
-          categoryId: categoryId,
-        ),
+        builder: (context) =>
+            CategoryScreen(
+              categoryId: categoryId,
+            ),
       ),
     );
   }

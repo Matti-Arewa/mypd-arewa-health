@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../services/localization_service.dart';
+import 'package:intl/intl.dart';
 
 class DueDatePicker extends StatefulWidget {
   final Function(DateTime) onDateSelected;
@@ -54,6 +56,21 @@ class _DueDatePickerState extends State<DueDatePicker> {
 
   @override
   Widget build(BuildContext context) {
+    // Responsive design adjustments
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 360;
+
+    // Adjust sizes based on screen size
+    final buttonFontSize = isSmallScreen ? 14.0 : 16.0;
+    final dateFontSize = isSmallScreen ? 15.0 : 17.0;
+    final verticalPadding = isSmallScreen ? 10.0 : 12.0;
+    final horizontalPadding = isSmallScreen ? 12.0 : 16.0;
+    final spacing = isSmallScreen ? 12.0 : 16.0;
+
+    // Format date according to locale
+    final dateFormat = DateFormat.yMd(context.loc.locale.languageCode);
+    final formattedDate = dateFormat.format(_selectedDate);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -62,28 +79,44 @@ class _DueDatePickerState extends State<DueDatePicker> {
             border: Border.all(color: Theme.of(context).dividerColor),
             borderRadius: BorderRadius.circular(12),
           ),
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          padding: EdgeInsets.symmetric(
+              vertical: verticalPadding,
+              horizontal: horizontalPadding
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                style: Theme.of(context).textTheme.bodyLarge,
+                formattedDate,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  fontSize: dateFontSize,
+                ),
               ),
               IconButton(
                 icon: Icon(
                   Icons.calendar_today,
                   color: Theme.of(context).primaryColor,
+                  size: isSmallScreen ? 20 : 24,
                 ),
                 onPressed: () => _selectDate(context),
+                tooltip: context.tr('selectDate'),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: spacing),
         ElevatedButton(
           onPressed: () => _selectDate(context),
-          child: const Text('Change Date'),
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(
+              vertical: verticalPadding,
+              horizontal: horizontalPadding * 1.5,
+            ),
+          ),
+          child: Text(
+            context.tr('changeDate'),
+            style: TextStyle(fontSize: buttonFontSize),
+          ),
         ),
       ],
     );

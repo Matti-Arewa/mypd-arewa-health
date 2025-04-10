@@ -9,6 +9,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;
   final double elevation;
   final Color? backgroundColor;
+  final VoidCallback? onBackPressed; // Neuer Callback für explizite Navigation
 
   const CustomAppBar({
     Key? key,
@@ -18,6 +19,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.leading,
     this.elevation = 0,
     this.backgroundColor,
+    this.onBackPressed,
   }) : super(key: key);
 
   @override
@@ -48,7 +50,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ? leading ??
           IconButton(
             icon: Icon(Icons.arrow_back_ios_new, color: AppTheme.textPrimaryColor),
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: onBackPressed ?? () {
+              // Verwende WillPopScope's Verhalten für Navigation zurück
+              Navigator.of(context).maybePop();
+            },
             tooltip: context.tr('back'),
           )
           : leading,

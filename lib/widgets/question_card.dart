@@ -1,5 +1,5 @@
-//widgets/question_card.dart
 import 'package:flutter/material.dart';
+import '../services/localization_service.dart';
 
 class QuestionCard extends StatelessWidget {
   final String question;
@@ -17,8 +17,26 @@ class QuestionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Responsive design adjustments
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 360;
+
+    // Adjust sizes based on screen size
+    final iconSize = isSmallScreen ? 18.0 : 22.0;
+    final padding = isSmallScreen ? 12.0 : 16.0;
+    final spacingWidth = isSmallScreen ? 8.0 : 12.0;
+
+    // Text style with responsive font size
+    final textStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
+      fontWeight: FontWeight.w500,
+      fontSize: isSmallScreen ? 14.0 : 16.0,
+    );
+
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: EdgeInsets.symmetric(
+          horizontal: padding,
+          vertical: isSmallScreen ? 6 : 8
+      ),
       elevation: 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -27,32 +45,33 @@ class QuestionCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(padding),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
+              Icon(
                 Icons.question_mark_rounded,
-                color: Color(0xFFF0A58E),
-                size: 22,
+                color: const Color(0xFFF0A58E),
+                size: iconSize,
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: spacingWidth),
               Expanded(
                 child: Text(
-                  question,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                  // Support for localization - if question starts with underscore, assume it's a key to translate
+                  question.startsWith('_') ? context.tr(question.substring(1)) : question,
+                  style: textStyle,
                 ),
               ),
               IconButton(
                 icon: Icon(
                   isFavorite ? Icons.favorite : Icons.favorite_border,
                   color: isFavorite ? const Color(0xFFF0A58E) : Colors.grey,
+                  size: iconSize,
                 ),
                 onPressed: onFavoriteToggle,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
+                tooltip: context.tr('toggleFavorite'),
               ),
             ],
           ),

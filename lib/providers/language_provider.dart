@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../providers/content_provider.dart';
+import 'package:flutter/foundation.dart';
 
 class LanguageProvider with ChangeNotifier {
   final ContentProvider _contentProvider;
@@ -22,6 +23,10 @@ class LanguageProvider with ChangeNotifier {
 
   Future<void> changeLanguage(String languageCode) async {
     if (_currentLanguage != languageCode) {
+      if (kDebugMode) {
+        print("Changing language from $_currentLanguage to $languageCode");
+      }
+
       _currentLanguage = languageCode;
 
       // Save to persistent storage
@@ -29,8 +34,9 @@ class LanguageProvider with ChangeNotifier {
       await settingsBox.put('preferredLanguage', languageCode);
 
       // Update content with new language
-      _contentProvider.updateLanguage(languageCode);
+      await _contentProvider.updateLanguage(languageCode);
 
+      // Notify all listeners to rebuild
       notifyListeners();
     }
   }

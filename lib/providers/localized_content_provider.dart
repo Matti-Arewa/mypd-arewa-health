@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../models/content_model.dart';
-import '../utils/sample_data.dart';
+import '../utils/sample_data_de.dart';
 import '../utils/sample_data_en.dart';
 import 'user_provider.dart';
 

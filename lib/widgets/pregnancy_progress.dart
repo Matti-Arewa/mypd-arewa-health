@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../utils/app_theme.dart';
+import '../services/localization_service.dart';
 
 class PregnancyProgress extends StatelessWidget {
   final int weeksPregnant;
@@ -42,7 +43,7 @@ class PregnancyProgress extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '$weeksPregnant Wochen',
+              context.tr('weeksCount', {'count': '$weeksPregnant'}),
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -50,7 +51,7 @@ class PregnancyProgress extends StatelessWidget {
               ),
             ),
             Text(
-              'Termin: ${DateFormat('dd.MM.yyyy').format(dueDate)}',
+              context.tr('dueDate', {'date': DateFormat.yMd(context.loc.locale.languageCode).format(dueDate)}),
               style: TextStyle(
                 color: Colors.white.withOpacity(0.9),
                 fontSize: subtitleFontSize,
@@ -113,14 +114,14 @@ class PregnancyProgress extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Fortschritt',
+              context.tr('progress'),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: smallFontSize,
               ),
             ),
             Text(
-              '$daysLeft Tage verbleibend',
+              context.tr('daysRemaining', {'count': '$daysLeft'}),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: smallFontSize,
@@ -143,7 +144,7 @@ class PregnancyProgress extends StatelessWidget {
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    _getBabySizeCompactDescription(weeksPregnant),
+                    _getBabySizeDescription(context, weeksPregnant, true),
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.9),
                       fontSize: smallFontSize,
@@ -175,7 +176,7 @@ class PregnancyProgress extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Größenvergleich',
+                          context.tr('sizeComparison'),
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -183,7 +184,7 @@ class PregnancyProgress extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          _getBabySizeDescription(weeksPregnant, screenWidth),
+                          _getBabySizeDescription(context, weeksPregnant, screenWidth < 360),
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.9),
                             fontSize: smallFontSize,
@@ -237,54 +238,31 @@ class PregnancyProgress extends StatelessWidget {
     }
   }
 
-  // Normale Beschreibung mit Größenangabe
-  String _getBabySizeDescription(int week, double screenWidth) {
-    // Für sehr kleine Bildschirme, kürzere Beschreibungen
-    if (screenWidth < 360) {
-      return _getBabySizeCompactDescription(week);
-    }
+  // Beschreibung mit lokalisiertem Text
+  String _getBabySizeDescription(BuildContext context, int week, bool compact) {
+    // Bestimme den Übersetzungsschlüssel basierend auf der Schwangerschaftswoche
+    String sizeKey;
 
     if (week < 8) {
-      return 'Dein Baby ist etwa so groß wie ein Reiskorn (< 1 cm)';
+      sizeKey = compact ? 'babySizeRiceCompact' : 'babySizeRice';
     } else if (week < 12) {
-      return 'Dein Baby ist etwa so groß wie eine Erdbeere (3 cm)';
+      sizeKey = compact ? 'babySizeStrawberryCompact' : 'babySizeStrawberry';
     } else if (week < 16) {
-      return 'Dein Baby ist etwa so groß wie eine Zitrone (9 cm)';
+      sizeKey = compact ? 'babySizeLemonCompact' : 'babySizeLemon';
     } else if (week < 20) {
-      return 'Dein Baby ist etwa so groß wie eine Avocado (16 cm)';
+      sizeKey = compact ? 'babySizeAvocadoCompact' : 'babySizeAvocado';
     } else if (week < 24) {
-      return 'Dein Baby ist etwa so groß wie eine Papaya (25 cm)';
+      sizeKey = compact ? 'babySizePapayaCompact' : 'babySizePapaya';
     } else if (week < 28) {
-      return 'Dein Baby ist etwa so groß wie ein Kohlkopf (35 cm)';
+      sizeKey = compact ? 'babySizeCabbageCompact' : 'babySizeCabbage';
     } else if (week < 32) {
-      return 'Dein Baby ist etwa so groß wie eine Kokosnuss (40 cm)';
+      sizeKey = compact ? 'babySizeCoconutCompact' : 'babySizeCoconut';
     } else if (week < 36) {
-      return 'Dein Baby ist etwa so groß wie ein Romakopfsalat (45 cm)';
+      sizeKey = compact ? 'babySizeLettuceCompact' : 'babySizeLettuce';
     } else {
-      return 'Dein Baby ist fast bereit für die Geburt (45-50 cm)';
+      sizeKey = compact ? 'babySizeFullTermCompact' : 'babySizeFullTerm';
     }
-  }
 
-  // Kompaktere Beschreibung ohne Details
-  String _getBabySizeCompactDescription(int week) {
-    if (week < 8) {
-      return 'Reiskorn (< 1 cm)';
-    } else if (week < 12) {
-      return 'Erdbeere (3 cm)';
-    } else if (week < 16) {
-      return 'Zitrone (9 cm)';
-    } else if (week < 20) {
-      return 'Avocado (16 cm)';
-    } else if (week < 24) {
-      return 'Papaya (25 cm)';
-    } else if (week < 28) {
-      return 'Kohlkopf (35 cm)';
-    } else if (week < 32) {
-      return 'Kokosnuss (40 cm)';
-    } else if (week < 36) {
-      return 'Romakopfsalat (45 cm)';
-    } else {
-      return 'Fast geburtsbereit (45-50 cm)';
-    }
+    return context.tr(sizeKey);
   }
 }

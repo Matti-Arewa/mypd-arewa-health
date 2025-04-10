@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_app_bar.dart';
 import '../utils/app_theme.dart';
+import '../services/localization_service.dart';
 
 class NutritionScreen extends StatelessWidget {
   static const routeName = '/nutrition';
@@ -9,10 +10,27 @@ class NutritionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Responsive design adjustments
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenWidth < 360 || screenHeight < 600;
+
+    // Adjust sizes based on screen size
+    final titleFontSize = isSmallScreen ? 18.0 : 22.0;
+    final sectionTitleFontSize = isSmallScreen ? 16.0 : 18.0;
+    final bodyTextFontSize = isSmallScreen ? 13.0 : 16.0;
+    final categoryTitleFontSize = isSmallScreen ? 14.0 : 16.0;
+    final categoryDescriptionFontSize = isSmallScreen ? 12.0 : 14.0;
+    final challengeTitleFontSize = isSmallScreen ? 14.0 : 16.0;
+    final noteFontSize = isSmallScreen ? 12.0 : 14.0;
+    final padding = isSmallScreen ? 12.0 : 16.0;
+    final sectionPadding = isSmallScreen ? 16.0 : 24.0;
+    final imageHeight = isSmallScreen ? 160.0 : 200.0;
+
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Nutrition During Pregnancy'),
+      appBar: CustomAppBar(title: context.tr('nutritionDuringPregnancy')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(padding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -21,239 +39,325 @@ class NutritionScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               child: Image.asset(
                 'assets/images/nutrition.jpg',
-                height: 200,
+                height: imageHeight,
                 width: double.infinity,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
-                    height: 200,
+                    height: imageHeight,
                     width: double.infinity,
                     color: AppTheme.accentColor.withOpacity(0.2),
-                    child: const Icon(
+                    child: Icon(
                       Icons.restaurant,
-                      size: 64,
+                      size: isSmallScreen ? 48 : 64,
                       color: AppTheme.primaryColor,
                     ),
                   );
                 },
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: sectionPadding),
 
             // Introduction
             Text(
-              'Eating for Two: Nutrition Basics',
+              context.tr('nutritionBasicsTitle'),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppTheme.primaryColor,
+                fontSize: titleFontSize,
               ),
             ),
-            const SizedBox(height: 16),
-            const Text(
-              'Proper nutrition during pregnancy is crucial for both your health and your baby\'s development. Understanding what to eat, how much, and which nutrients are particularly important can help ensure a healthy pregnancy.',
-              style: TextStyle(fontSize: 16),
+            SizedBox(height: padding),
+            Text(
+              context.tr('nutritionBasicsDescription'),
+              style: TextStyle(fontSize: bodyTextFontSize),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: sectionPadding),
 
             // Daily nutritional needs
             _buildSection(
               context,
-              title: 'Daily Nutritional Needs',
+              title: context.tr('dailyNutritionalNeeds'),
               icon: Icons.check_circle_outline,
               content: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildNutrientItem(
-                    'Folate/Folic Acid',
-                    '600-800 mcg daily',
-                    'Helps prevent neural tube defects. Found in leafy greens, fortified cereals, and supplements.',
+                    context.tr('nutrientFolicAcid'),
+                    context.tr('nutrientFolicAcidAmount'),
+                    context.tr('nutrientFolicAcidDesc'),
+                    isSmallScreen,
+                    categoryTitleFontSize,
+                    categoryDescriptionFontSize,
                   ),
                   _buildNutrientItem(
-                    'Iron',
-                    '27 mg daily',
-                    'Prevents anemia and supports baby\'s blood supply. Found in lean red meat, beans, and fortified cereals.',
+                    context.tr('nutrientIron'),
+                    context.tr('nutrientIronAmount'),
+                    context.tr('nutrientIronDesc'),
+                    isSmallScreen,
+                    categoryTitleFontSize,
+                    categoryDescriptionFontSize,
                   ),
                   _buildNutrientItem(
-                    'Calcium',
-                    '1,000 mg daily',
-                    'Builds baby\'s bones and teeth. Found in dairy products, fortified plant milks, and leafy greens.',
+                    context.tr('nutrientCalcium'),
+                    context.tr('nutrientCalciumAmount'),
+                    context.tr('nutrientCalciumDesc'),
+                    isSmallScreen,
+                    categoryTitleFontSize,
+                    categoryDescriptionFontSize,
                   ),
                   _buildNutrientItem(
-                    'Protein',
-                    '75-100 g daily',
-                    'Supports baby\'s growth. Found in meat, poultry, fish, eggs, beans, and dairy.',
+                    context.tr('nutrientProtein'),
+                    context.tr('nutrientProteinAmount'),
+                    context.tr('nutrientProteinDesc'),
+                    isSmallScreen,
+                    categoryTitleFontSize,
+                    categoryDescriptionFontSize,
                   ),
                   _buildNutrientItem(
-                    'Omega-3 Fatty Acids',
-                    '200-300 mg DHA daily',
-                    'Supports brain and eye development. Found in fatty fish, walnuts, and flaxseeds.',
+                    context.tr('nutrientOmega3'),
+                    context.tr('nutrientOmega3Amount'),
+                    context.tr('nutrientOmega3Desc'),
+                    isSmallScreen,
+                    categoryTitleFontSize,
+                    categoryDescriptionFontSize,
                   ),
                 ],
               ),
+              isSmallScreen: isSmallScreen,
+              sectionTitleFontSize: sectionTitleFontSize,
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: sectionPadding),
 
             // Foods to enjoy
             _buildSection(
               context,
-              title: 'Foods to Enjoy',
+              title: context.tr('foodsToEnjoy'),
               icon: Icons.thumb_up_outlined,
-              content: const Column(
+              content: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _FoodCategory(
-                    title: 'Fruits & Vegetables',
-                    description: 'Aim for 5+ servings daily, with a variety of colors.',
-                    examples: 'Spinach, kale, carrots, sweet potatoes, bananas, berries',
+                    title: context.tr('foodCategoryFruits'),
+                    description: context.tr('foodCategoryFruitsDesc'),
+                    examples: context.tr('foodCategoryFruitsExamples'),
+                    isSmallScreen: isSmallScreen,
+                    titleFontSize: categoryTitleFontSize,
+                    descriptionFontSize: categoryDescriptionFontSize,
                   ),
                   _FoodCategory(
-                    title: 'Whole Grains',
-                    description: 'Provide fiber and essential nutrients.',
-                    examples: 'Brown rice, whole wheat bread, oats, quinoa',
+                    title: context.tr('foodCategoryGrains'),
+                    description: context.tr('foodCategoryGrainsDesc'),
+                    examples: context.tr('foodCategoryGrainsExamples'),
+                    isSmallScreen: isSmallScreen,
+                    titleFontSize: categoryTitleFontSize,
+                    descriptionFontSize: categoryDescriptionFontSize,
                   ),
                   _FoodCategory(
-                    title: 'Lean Proteins',
-                    description: 'Important for baby\'s growth.',
-                    examples: 'Chicken, fish, beans, lentils, tofu, eggs',
+                    title: context.tr('foodCategoryProteins'),
+                    description: context.tr('foodCategoryProteinsDesc'),
+                    examples: context.tr('foodCategoryProteinsExamples'),
+                    isSmallScreen: isSmallScreen,
+                    titleFontSize: categoryTitleFontSize,
+                    descriptionFontSize: categoryDescriptionFontSize,
                   ),
                   _FoodCategory(
-                    title: 'Dairy & Calcium-Rich Foods',
-                    description: 'Essential for bone development.',
-                    examples: 'Milk, yogurt, cheese, fortified plant milks',
+                    title: context.tr('foodCategoryDairy'),
+                    description: context.tr('foodCategoryDairyDesc'),
+                    examples: context.tr('foodCategoryDairyExamples'),
+                    isSmallScreen: isSmallScreen,
+                    titleFontSize: categoryTitleFontSize,
+                    descriptionFontSize: categoryDescriptionFontSize,
                   ),
                   _FoodCategory(
-                    title: 'Healthy Fats',
-                    description: 'Support brain development.',
-                    examples: 'Avocados, nuts, seeds, olive oil',
+                    title: context.tr('foodCategoryFats'),
+                    description: context.tr('foodCategoryFatsDesc'),
+                    examples: context.tr('foodCategoryFatsExamples'),
+                    isSmallScreen: isSmallScreen,
+                    titleFontSize: categoryTitleFontSize,
+                    descriptionFontSize: categoryDescriptionFontSize,
                   ),
                 ],
               ),
+              isSmallScreen: isSmallScreen,
+              sectionTitleFontSize: sectionTitleFontSize,
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: sectionPadding),
 
             // Foods to avoid
             _buildSection(
               context,
-              title: 'Foods to Avoid',
+              title: context.tr('foodsToAvoid'),
               icon: Icons.not_interested,
-              content: const Column(
+              content: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _AvoidFoodItem(
-                    food: 'Raw or undercooked meat, poultry, fish, and eggs',
-                    reason: 'Risk of harmful bacteria and parasites (salmonella, E. coli, listeria)',
+                    food: context.tr('avoidFoodRaw'),
+                    reason: context.tr('avoidFoodRawReason'),
+                    isSmallScreen: isSmallScreen,
+                    titleFontSize: categoryTitleFontSize,
+                    descriptionFontSize: categoryDescriptionFontSize,
                   ),
                   _AvoidFoodItem(
-                    food: 'High-mercury fish',
-                    reason: 'Mercury can harm baby\'s developing nervous system',
-                    examples: 'Shark, swordfish, king mackerel, tilefish',
+                    food: context.tr('avoidFoodMercury'),
+                    reason: context.tr('avoidFoodMercuryReason'),
+                    examples: context.tr('avoidFoodMercuryExamples'),
+                    isSmallScreen: isSmallScreen,
+                    titleFontSize: categoryTitleFontSize,
+                    descriptionFontSize: categoryDescriptionFontSize,
                   ),
                   _AvoidFoodItem(
-                    food: 'Unpasteurized dairy and juices',
-                    reason: 'Risk of bacterial contamination',
+                    food: context.tr('avoidFoodUnpasteurized'),
+                    reason: context.tr('avoidFoodUnpasteurizedReason'),
+                    isSmallScreen: isSmallScreen,
+                    titleFontSize: categoryTitleFontSize,
+                    descriptionFontSize: categoryDescriptionFontSize,
                   ),
                   _AvoidFoodItem(
-                    food: 'Deli meats and hot dogs',
-                    reason: 'Risk of listeria unless thoroughly heated',
+                    food: context.tr('avoidFoodDeli'),
+                    reason: context.tr('avoidFoodDeliReason'),
+                    isSmallScreen: isSmallScreen,
+                    titleFontSize: categoryTitleFontSize,
+                    descriptionFontSize: categoryDescriptionFontSize,
                   ),
                   _AvoidFoodItem(
-                    food: 'Excessive caffeine',
-                    reason: 'Limit to 200mg daily (about one 12oz cup of coffee)',
+                    food: context.tr('avoidFoodCaffeine'),
+                    reason: context.tr('avoidFoodCaffeineReason'),
+                    isSmallScreen: isSmallScreen,
+                    titleFontSize: categoryTitleFontSize,
+                    descriptionFontSize: categoryDescriptionFontSize,
                   ),
                   _AvoidFoodItem(
-                    food: 'Alcohol',
-                    reason: 'No safe level during pregnancy, can cause birth defects',
+                    food: context.tr('avoidFoodAlcohol'),
+                    reason: context.tr('avoidFoodAlcoholReason'),
+                    isSmallScreen: isSmallScreen,
+                    titleFontSize: categoryTitleFontSize,
+                    descriptionFontSize: categoryDescriptionFontSize,
                   ),
                 ],
               ),
+              isSmallScreen: isSmallScreen,
+              sectionTitleFontSize: sectionTitleFontSize,
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: sectionPadding),
 
             // Meal planning tips
             _buildSection(
               context,
-              title: 'Meal Planning Tips',
+              title: context.tr('mealPlanningTips'),
               icon: Icons.restaurant_menu,
               content: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildTipItem(
-                    'Eat smaller, frequent meals',
-                    'This can help manage nausea and maintain energy levels.',
+                    context.tr('tipSmallMeals'),
+                    context.tr('tipSmallMealsDesc'),
+                    isSmallScreen,
+                    categoryTitleFontSize,
+                    categoryDescriptionFontSize,
                   ),
                   _buildTipItem(
-                    'Stay hydrated',
-                    'Aim for 8-10 glasses of water daily to support blood volume expansion and amniotic fluid.',
+                    context.tr('tipStayHydrated'),
+                    context.tr('tipStayHydratedDesc'),
+                    isSmallScreen,
+                    categoryTitleFontSize,
+                    categoryDescriptionFontSize,
                   ),
                   _buildTipItem(
-                    'Plan balanced meals',
-                    'Include protein, complex carbohydrates, healthy fats, and fruits/vegetables at each meal.',
+                    context.tr('tipBalancedMeals'),
+                    context.tr('tipBalancedMealsDesc'),
+                    isSmallScreen,
+                    categoryTitleFontSize,
+                    categoryDescriptionFontSize,
                   ),
                   _buildTipItem(
-                    'Prepare snacks in advance',
-                    'Keep nuts, cut vegetables, yogurt, or fruit on hand for healthy snacking.',
+                    context.tr('tipPrepareSnacks'),
+                    context.tr('tipPrepareSnacksDesc'),
+                    isSmallScreen,
+                    categoryTitleFontSize,
+                    categoryDescriptionFontSize,
                   ),
                   _buildTipItem(
-                    'Listen to your body',
-                    'Honor your hunger and fullness cues rather than restricting food.',
+                    context.tr('tipListenToBody'),
+                    context.tr('tipListenToBodyDesc'),
+                    isSmallScreen,
+                    categoryTitleFontSize,
+                    categoryDescriptionFontSize,
                   ),
                 ],
               ),
+              isSmallScreen: isSmallScreen,
+              sectionTitleFontSize: sectionTitleFontSize,
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: sectionPadding),
 
             // Managing nutrition challenges
             _buildSection(
               context,
-              title: 'Managing Nutrition Challenges',
+              title: context.tr('managingChallenges'),
               icon: Icons.healing,
               content: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildChallengeItem(
-                    'Morning Sickness',
+                    context.tr('challengeMorningSickness'),
                     [
-                      'Eat small, frequent meals',
-                      'Keep crackers by your bed',
-                      'Try ginger tea or candies',
-                      'Avoid triggering smells or foods'
+                      context.tr('challengeMorningSicknessTip1'),
+                      context.tr('challengeMorningSicknessTip2'),
+                      context.tr('challengeMorningSicknessTip3'),
+                      context.tr('challengeMorningSicknessTip4')
                     ],
+                    isSmallScreen,
+                    challengeTitleFontSize,
+                    categoryDescriptionFontSize,
                   ),
                   _buildChallengeItem(
-                    'Heartburn',
+                    context.tr('challengeHeartburn'),
                     [
-                      'Eat smaller meals',
-                      'Avoid spicy, fatty, or acidic foods',
-                      'Don\'t lie down right after eating',
-                      'Ask your doctor about safe antacids'
+                      context.tr('challengeHeartburnTip1'),
+                      context.tr('challengeHeartburnTip2'),
+                      context.tr('challengeHeartburnTip3'),
+                      context.tr('challengeHeartburnTip4')
                     ],
+                    isSmallScreen,
+                    challengeTitleFontSize,
+                    categoryDescriptionFontSize,
                   ),
                   _buildChallengeItem(
-                    'Constipation',
+                    context.tr('challengeConstipation'),
                     [
-                      'Increase fiber intake gradually',
-                      'Stay well hydrated',
-                      'Regular physical activity',
-                      'Consider prune juice or fiber supplements'
+                      context.tr('challengeConstipationTip1'),
+                      context.tr('challengeConstipationTip2'),
+                      context.tr('challengeConstipationTip3'),
+                      context.tr('challengeConstipationTip4')
                     ],
+                    isSmallScreen,
+                    challengeTitleFontSize,
+                    categoryDescriptionFontSize,
                   ),
                   _buildChallengeItem(
-                    'Food Aversions',
+                    context.tr('challengeAversions'),
                     [
-                      'Find alternative sources of key nutrients',
-                      'Try different preparations of nutritious foods',
-                      'Cold foods may be more tolerable when nauseous',
-                      'Focus on what you can eat, not what you can\'t'
+                      context.tr('challengeAversionsTip1'),
+                      context.tr('challengeAversionsTip2'),
+                      context.tr('challengeAversionsTip3'),
+                      context.tr('challengeAversionsTip4')
                     ],
+                    isSmallScreen,
+                    challengeTitleFontSize,
+                    categoryDescriptionFontSize,
                   ),
                 ],
               ),
+              isSmallScreen: isSmallScreen,
+              sectionTitleFontSize: sectionTitleFontSize,
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: isSmallScreen ? 24 : 32),
 
             // Consultation note
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(padding),
               decoration: BoxDecoration(
                 color: AppTheme.accentColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
@@ -261,29 +365,29 @@ class NutritionScreen extends StatelessWidget {
                   color: AppTheme.accentColor.withOpacity(0.3),
                 ),
               ),
-              child: const Row(
+              child: Row(
                 children: [
                   Icon(
                     Icons.info_outline,
                     color: AppTheme.accentColor,
-                    size: 24,
+                    size: isSmallScreen ? 20 : 24,
                   ),
-                  SizedBox(width: 16),
+                  SizedBox(width: isSmallScreen ? 12 : 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Note',
+                          context.tr('note'),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: isSmallScreen ? 14 : 16,
                           ),
                         ),
-                        SizedBox(height: 4),
+                        SizedBox(height: isSmallScreen ? 2 : 4),
                         Text(
-                          'This information is general guidance. Always consult with your healthcare provider about your specific nutritional needs during pregnancy.',
-                          style: TextStyle(fontSize: 14),
+                          context.tr('consultationNote'),
+                          style: TextStyle(fontSize: noteFontSize),
                         ),
                       ],
                     ),
@@ -291,7 +395,7 @@ class NutritionScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: padding * 2),
           ],
         ),
       ),
@@ -303,7 +407,11 @@ class NutritionScreen extends StatelessWidget {
         required String title,
         required IconData icon,
         required Widget content,
+        required bool isSmallScreen,
+        required double sectionTitleFontSize,
       }) {
+    final padding = isSmallScreen ? 12.0 : 16.0;
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -321,7 +429,7 @@ class NutritionScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(padding),
             decoration: BoxDecoration(
               color: AppTheme.primaryColor.withOpacity(0.1),
               borderRadius: const BorderRadius.only(
@@ -334,21 +442,22 @@ class NutritionScreen extends StatelessWidget {
                 Icon(
                   icon,
                   color: AppTheme.primaryColor,
-                  size: 24,
+                  size: isSmallScreen ? 20 : 24,
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: isSmallScreen ? 8 : 12),
                 Text(
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.primaryColor,
+                    fontSize: sectionTitleFontSize,
                   ),
                 ),
               ],
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(padding),
             child: content,
           ),
         ],
@@ -356,43 +465,51 @@ class NutritionScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildNutrientItem(String nutrient, String recommendation, String description) {
+  Widget _buildNutrientItem(
+      String nutrient,
+      String recommendation,
+      String description,
+      bool isSmallScreen,
+      double titleFontSize,
+      double descriptionFontSize,
+      ) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: isSmallScreen ? 12 : 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
+              Icon(
                 Icons.fiber_manual_record,
-                size: 10,
+                size: isSmallScreen ? 8 : 10,
                 color: AppTheme.primaryColor,
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: isSmallScreen ? 6 : 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       nutrient,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: titleFontSize,
                       ),
                     ),
                     Text(
                       recommendation,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppTheme.primaryColor,
                         fontWeight: FontWeight.w500,
+                        fontSize: descriptionFontSize,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: isSmallScreen ? 2 : 4),
                     Text(
                       description,
-                      style: const TextStyle(fontSize: 14),
+                      style: TextStyle(fontSize: descriptionFontSize),
                     ),
                   ],
                 ),
@@ -404,33 +521,39 @@ class NutritionScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTipItem(String title, String description) {
+  Widget _buildTipItem(
+      String title,
+      String description,
+      bool isSmallScreen,
+      double titleFontSize,
+      double descriptionFontSize,
+      ) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: isSmallScreen ? 12 : 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
+          Icon(
             Icons.check,
-            size: 18,
+            size: isSmallScreen ? 16 : 18,
             color: AppTheme.primaryColor,
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: isSmallScreen ? 8 : 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: titleFontSize,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: isSmallScreen ? 2 : 4),
                 Text(
                   description,
-                  style: const TextStyle(fontSize: 14),
+                  style: TextStyle(fontSize: descriptionFontSize),
                 ),
               ],
             ),
@@ -440,34 +563,46 @@ class NutritionScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildChallengeItem(String challenge, List<String> tips) {
+  Widget _buildChallengeItem(
+      String challenge,
+      List<String> tips,
+      bool isSmallScreen,
+      double titleFontSize,
+      double descriptionFontSize,
+      ) {
+    final bulletPointSpacing = isSmallScreen ? 2.0 : 4.0;
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: isSmallScreen ? 12 : 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             challenge,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 16,
+              fontSize: titleFontSize,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: isSmallScreen ? 6 : 8),
           ...tips.map((tip) => Padding(
-            padding: const EdgeInsets.only(bottom: 4),
+            padding: EdgeInsets.only(bottom: bulletPointSpacing),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   '• ',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.primaryColor,
+                    fontSize: descriptionFontSize,
                   ),
                 ),
                 Expanded(
-                  child: Text(tip),
+                  child: Text(
+                    tip,
+                    style: TextStyle(fontSize: descriptionFontSize),
+                  ),
                 ),
               ],
             ),
@@ -482,37 +617,43 @@ class _FoodCategory extends StatelessWidget {
   final String title;
   final String description;
   final String examples;
+  final bool isSmallScreen;
+  final double titleFontSize;
+  final double descriptionFontSize;
 
   const _FoodCategory({
     required this.title,
     required this.description,
     required this.examples,
+    required this.isSmallScreen,
+    required this.titleFontSize,
+    required this.descriptionFontSize,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: isSmallScreen ? 12 : 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 16,
+              fontSize: titleFontSize,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: isSmallScreen ? 2 : 4),
           Text(
             description,
-            style: const TextStyle(fontSize: 14),
+            style: TextStyle(fontSize: descriptionFontSize),
           ),
-          const SizedBox(height: 2),
+          SizedBox(height: isSmallScreen ? 1 : 2),
           Text(
-            'Examples: $examples',
+            context.tr('examples') + ': ' + examples,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: descriptionFontSize,
               fontStyle: FontStyle.italic,
               color: Colors.grey[700],
             ),
@@ -527,38 +668,44 @@ class _AvoidFoodItem extends StatelessWidget {
   final String food;
   final String reason;
   final String? examples;
+  final bool isSmallScreen;
+  final double titleFontSize;
+  final double descriptionFontSize;
 
   const _AvoidFoodItem({
     required this.food,
     required this.reason,
     this.examples,
+    required this.isSmallScreen,
+    required this.titleFontSize,
+    required this.descriptionFontSize,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: isSmallScreen ? 12 : 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             food,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 16,
+              fontSize: titleFontSize,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: isSmallScreen ? 2 : 4),
           Text(
             reason,
-            style: const TextStyle(fontSize: 14),
+            style: TextStyle(fontSize: descriptionFontSize),
           ),
           if (examples != null) ...[
-            const SizedBox(height: 2),
+            SizedBox(height: isSmallScreen ? 1 : 2),
             Text(
-              'Examples: $examples',
+              context.tr('examples') + ': ' + examples!,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: descriptionFontSize,
                 fontStyle: FontStyle.italic,
                 color: Colors.grey[700],
               ),

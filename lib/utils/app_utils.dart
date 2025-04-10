@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/content_model.dart';
+import '../services/localization_service.dart';
 
 class AppUtils {
   // Format date
-  static String formatDate(DateTime date) {
-    return DateFormat('MMM dd, yyyy').format(date);
+  static String formatDate(DateTime date, BuildContext context) {
+    return DateFormat.yMMMd(context.loc.locale.languageCode).format(date);
   }
 
   // Format date with time
-  static String formatDateTime(DateTime date) {
-    return DateFormat('MMM dd, yyyy - HH:mm').format(date);
+  static String formatDateTime(DateTime date, BuildContext context) {
+    return DateFormat.yMMMd(context.loc.locale.languageCode).add_Hm().format(date);
   }
 
   // Calculate weeks between two dates
@@ -28,96 +29,137 @@ class AppUtils {
   }
 
   // Calculate trimester based on pregnancy week
-  static String getCurrentTrimester(int pregnancyWeek) {
-    if (pregnancyWeek < 1) return "Pre-pregnancy";
-    if (pregnancyWeek <= 13) return "First Trimester";
-    if (pregnancyWeek <= 26) return "Second Trimester";
-    if (pregnancyWeek <= 40) return "Third Trimester";
-    return "Post-term";
+  static String getCurrentTrimester(int pregnancyWeek, BuildContext context) {
+    if (pregnancyWeek < 1) return context.tr('prePregnancy');
+    if (pregnancyWeek <= 13) return context.tr('firstTrimester');
+    if (pregnancyWeek <= 26) return context.tr('secondTrimester');
+    if (pregnancyWeek <= 40) return context.tr('thirdTrimester');
+    return context.tr('postTerm');
   }
 
   // Get baby size comparison for current week
-  static String getBabySizeComparison(int pregnancyWeek) {
+  static String getBabySizeComparison(int pregnancyWeek, BuildContext context) {
+    String size;
+
     switch (pregnancyWeek) {
       case 4:
-        return "Poppy seed";
+        size = context.tr('sizePoppy');
+        break;
       case 5:
-        return "Sesame seed";
+        size = context.tr('sizeSesame');
+        break;
       case 6:
-        return "Lentil";
+        size = context.tr('sizeLentil');
+        break;
       case 7:
-        return "Blueberry";
+        size = context.tr('sizeBlueberry');
+        break;
       case 8:
-        return "Raspberry";
+        size = context.tr('sizeRaspberry');
+        break;
       case 9:
-        return "Grape";
+        size = context.tr('sizeGrape');
+        break;
       case 10:
-        return "Strawberry";
+        size = context.tr('sizeStrawberry');
+        break;
       case 11:
-        return "Lime";
+        size = context.tr('sizeLime');
+        break;
       case 12:
-        return "Plum";
+        size = context.tr('sizePlum');
+        break;
       case 13:
-        return "Peach";
+        size = context.tr('sizePeach');
+        break;
       case 14:
-        return "Lemon";
+        size = context.tr('sizeLemon');
+        break;
       case 15:
-        return "Apple";
+        size = context.tr('sizeApple');
+        break;
       case 16:
-        return "Avocado";
+        size = context.tr('sizeAvocado');
+        break;
       case 17:
-        return "Pear";
+        size = context.tr('sizePear');
+        break;
       case 18:
-        return "Bell pepper";
+        size = context.tr('sizeBellPepper');
+        break;
       case 19:
-        return "Mango";
+        size = context.tr('sizeMango');
+        break;
       case 20:
-        return "Banana";
+        size = context.tr('sizeBanana');
+        break;
       case 21:
-        return "Carrot";
+        size = context.tr('sizeCarrot');
+        break;
       case 22:
-        return "Papaya";
+        size = context.tr('sizePapaya');
+        break;
       case 23:
-        return "Grapefruit";
+        size = context.tr('sizeGrapefruit');
+        break;
       case 24:
-        return "Ear of corn";
+        size = context.tr('sizeEarOfCorn');
+        break;
       case 25:
-        return "Cauliflower";
+        size = context.tr('sizeCauliflower');
+        break;
       case 26:
-        return "Lettuce";
+        size = context.tr('sizeLettuce');
+        break;
       case 27:
-        return "Rutabaga";
+        size = context.tr('sizeRutabaga');
+        break;
       case 28:
-        return "Eggplant";
+        size = context.tr('sizeEggplant');
+        break;
       case 29:
-        return "Butternut squash";
+        size = context.tr('sizeButternutSquash');
+        break;
       case 30:
-        return "Cabbage";
+        size = context.tr('sizeCabbage');
+        break;
       case 31:
-        return "Coconut";
+        size = context.tr('sizeCoconut');
+        break;
       case 32:
-        return "Squash";
+        size = context.tr('sizeSquash');
+        break;
       case 33:
-        return "Pineapple";
+        size = context.tr('sizePineapple');
+        break;
       case 34:
-        return "Cantaloupe";
+        size = context.tr('sizeCantaloupe');
+        break;
       case 35:
-        return "Honeydew melon";
+        size = context.tr('sizeHoneydew');
+        break;
       case 36:
-        return "Romaine lettuce";
+        size = context.tr('sizeRomaineLettuce');
+        break;
       case 37:
-        return "Swiss chard";
+        size = context.tr('sizeSwissChard');
+        break;
       case 38:
-        return "Leek";
+        size = context.tr('sizeLeek');
+        break;
       case 39:
-        return "Watermelon";
+        size = context.tr('sizeWatermelon');
+        break;
       case 40:
-        return "Small pumpkin";
+        size = context.tr('sizePumpkin');
+        break;
       default:
-        if (pregnancyWeek < 4) return "Smaller than a poppy seed";
-        if (pregnancyWeek > 40) return "Small pumpkin";
-        return "Growing baby";
+        if (pregnancyWeek < 4) return context.tr('sizeSmallerThanPoppy');
+        if (pregnancyWeek > 40) return context.tr('sizePumpkin');
+        return context.tr('sizeGrowingBaby');
     }
+
+    return size;
   }
 
   // Format duration in a human-readable way
@@ -165,17 +207,37 @@ class AppUtils {
       BuildContext context, {
         required String title,
         required String content,
-        String buttonText = 'OK',
+        String? buttonText,
       }) async {
+    final localizedButtonText = buttonText ?? context.tr('ok');
+
+    // Responsive design adjustments
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 360;
+
+    // Adjust sizes based on screen size
+    final titleFontSize = isSmallScreen ? 16.0 : 18.0;
+    final contentFontSize = isSmallScreen ? 14.0 : 16.0;
+    final buttonFontSize = isSmallScreen ? 13.0 : 14.0;
+
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(title),
-          content: Text(content),
+          title: Text(
+            title,
+            style: TextStyle(fontSize: titleFontSize),
+          ),
+          content: Text(
+            content,
+            style: TextStyle(fontSize: contentFontSize),
+          ),
           actions: <Widget>[
             TextButton(
-              child: Text(buttonText),
+              child: Text(
+                localizedButtonText,
+                style: TextStyle(fontSize: buttonFontSize),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -191,24 +253,48 @@ class AppUtils {
       BuildContext context, {
         required String title,
         required String content,
-        String confirmText = 'Yes',
-        String cancelText = 'No',
+        String? confirmText,
+        String? cancelText,
       }) async {
+    final localizedConfirmText = confirmText ?? context.tr('yes');
+    final localizedCancelText = cancelText ?? context.tr('no');
+
+    // Responsive design adjustments
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 360;
+
+    // Adjust sizes based on screen size
+    final titleFontSize = isSmallScreen ? 16.0 : 18.0;
+    final contentFontSize = isSmallScreen ? 14.0 : 16.0;
+    final buttonFontSize = isSmallScreen ? 13.0 : 14.0;
+
     final result = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(title),
-          content: Text(content),
+          title: Text(
+            title,
+            style: TextStyle(fontSize: titleFontSize),
+          ),
+          content: Text(
+            content,
+            style: TextStyle(fontSize: contentFontSize),
+          ),
           actions: <Widget>[
             TextButton(
-              child: Text(cancelText),
+              child: Text(
+                localizedCancelText,
+                style: TextStyle(fontSize: buttonFontSize),
+              ),
               onPressed: () {
                 Navigator.of(context).pop(false);
               },
             ),
             TextButton(
-              child: Text(confirmText),
+              child: Text(
+                localizedConfirmText,
+                style: TextStyle(fontSize: buttonFontSize),
+              ),
               onPressed: () {
                 Navigator.of(context).pop(true);
               },

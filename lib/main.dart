@@ -37,27 +37,37 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(create: (_) => UserProvider()),
       ],
-      child: Consumer<LanguageProvider>(
-          builder: (context, languageProvider, _) {
-            return MaterialApp(
-              title: 'Pregnancy Guide',
-              theme: ThemeData(
-                colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink[300]!),
-                useMaterial3: true,
-              ),
-              home: const HomeScreen(),
-              routes: {
-                SettingsScreen.routeName: (ctx) => const SettingsScreen(),
-                // Add other routes here
-              },
-              // Localization setup
-              locale: Locale(languageProvider.currentLanguage),
-              supportedLocales: AppLocalizations.supportedLocales,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              localeResolutionCallback: AppLocalizations.localeResolutionCallback,
-            );
-          }
+      child: const AppWithLanguage(),
+    );
+  }
+}
+
+class AppWithLanguage extends StatelessWidget {
+  const AppWithLanguage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Die Key-Eigenschaft ist entscheidend hier - sie zwingt Flutter, die ganze MaterialApp
+    // neu aufzubauen, wenn sich der Sprachcode ändert
+    final languageProvider = Provider.of<LanguageProvider>(context);
+
+    return MaterialApp(
+      key: ValueKey(languageProvider.currentLanguage), // Wichtig: Erzwingt Neuaufbau bei Sprachänderung
+      title: 'Pregnancy Guide',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink[300]!),
+        useMaterial3: true,
       ),
+      home: const HomeScreen(),
+      routes: {
+        SettingsScreen.routeName: (ctx) => const SettingsScreen(),
+        // Add other routes here
+      },
+      // Localization setup
+      locale: Locale(languageProvider.currentLanguage),
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localeResolutionCallback: AppLocalizations.localeResolutionCallback,
     );
   }
 }

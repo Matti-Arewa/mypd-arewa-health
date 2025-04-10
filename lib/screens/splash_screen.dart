@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../screens/onboarding_screen.dart';
 import '../screens/home_screen.dart';
+import '../services/localization_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -26,11 +27,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     );
 
     _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(parent: _controller, curve: Interval(0.0, 0.5, curve: Curves.easeIn))
+        CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.5, curve: Curves.easeIn))
     );
 
     _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-        CurvedAnimation(parent: _controller, curve: Interval(0.0, 0.7, curve: Curves.easeOutBack))
+        CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.7, curve: Curves.easeOutBack))
     );
 
     _controller.forward();
@@ -59,6 +60,16 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    // Responsive design adjustments
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenWidth < 360 || screenHeight < 600;
+
+    // Adjust logo and text sizes based on screen size
+    final logoSize = isSmallScreen ? 100.0 : 120.0;
+    final titleFontSize = isSmallScreen ? 22.0 : 28.0;
+    final subtitleFontSize = isSmallScreen ? 14.0 : 16.0;
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -84,22 +95,24 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     children: [
                       Image.asset(
                         'assets/images/logo.png',
-                        width: 120,
-                        height: 120,
+                        width: logoSize,
+                        height: logoSize,
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: isSmallScreen ? 20 : 24),
                       Text(
-                        'AREWA - Pregnancy Guide',
+                        context.tr('appTitle'),
                         style: Theme.of(context).textTheme.displayMedium?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
+                          fontSize: titleFontSize,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: isSmallScreen ? 6 : 8),
                       Text(
-                        'Your companion through pregnancy',
+                        context.tr('appTagline'),
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: Colors.white70,
+                          fontSize: subtitleFontSize,
                         ),
                       ),
                     ],

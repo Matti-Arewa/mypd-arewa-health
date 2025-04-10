@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/content_provider.dart';
 import '../providers/user_provider.dart';
+import '../providers/language_provider.dart';
 import '../screens/category_screen.dart';
 import '../screens/favorites_screen.dart';
 import '../screens/search_screen.dart';
@@ -12,6 +13,7 @@ import '../widgets/pregnancy_progress.dart';
 import '../widgets/category_card.dart';
 import '../utils/app_theme.dart';
 import '../services/localization_service.dart';
+import 'package:flutter/foundation.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -20,15 +22,20 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   int _selectedIndex = 0;
 
   late final List<Widget> _screens;
-  late final List<NavigationDestination> _destinations;
+  late List<NavigationDestination> _destinations;
 
   @override
   void initState() {
     super.initState();
+    _initializeScreens();
+  }
+
+  void _initializeScreens() {
+    // Erstelle die Screens nur einmal und speichere sie
     _screens = [
       const _InfoContent(),
       const ToolsScreen(),
@@ -37,10 +44,9 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // Baue NavigationDestinations hier, damit sie die aktuelle Sprache verwenden
-    _destinations = [
+  List<NavigationDestination> _buildDestinations(BuildContext context) {
+    // Dies stellt sicher, dass die Labels übersetzt werden, wenn sich die Sprache ändert
+    return [
       NavigationDestination(
         icon: const Icon(Icons.menu_book_outlined),
         selectedIcon: const Icon(Icons.menu_book_outlined),
@@ -62,12 +68,34 @@ class _HomeScreenState extends State<HomeScreen> {
         label: context.tr('favorites'),
       ),
     ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Navigation-Destinations hier erstellen, um die aktuelle Sprache zu verwenden
+    _destinations = _buildDestinations(context);
+
+    // Überprüfe, ob der Content-Provider fertig geladen hat
+    final contentProvider = Provider.of<ContentProvider>(context);
+    if (contentProvider.isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
 
     return Scaffold(
-      body: _screens[_selectedIndex],
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _screens,
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) {
+          if (kDebugMode) {
+            print("Navigation: Changing tab to $index");
+          }
           setState(() {
             _selectedIndex = index;
           });
@@ -139,7 +167,7 @@ class _InfoContent extends StatelessWidget {
       body: Column(
         children: [
           // Header und Schwangerschaftsfortschritt
-          _buildHeader(context, userProvider, useCompactView),
+          //_buildHeader(context, userProvider, useCompactView),
 
           // Kategorien-Überschrift
           Padding(
@@ -165,6 +193,7 @@ class _InfoContent extends StatelessWidget {
           // Kategorien-Liste
           Expanded(
             child: ListView.builder(
+              key: PageStorageKey('category-list'),
               padding: EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: useCompactView ? 6 : 8
