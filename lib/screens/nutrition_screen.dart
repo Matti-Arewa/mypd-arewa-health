@@ -28,7 +28,7 @@ class NutritionScreen extends StatelessWidget {
     final imageHeight = isSmallScreen ? 160.0 : 200.0;
 
     return Scaffold(
-      appBar: CustomAppBar(title: context.tr('nutritionDuringPregnancy')),
+      appBar: CustomAppBar(title: context.tr('nutritionDuringPregnancy'), backgroundColor: AppTheme.primaryColor,),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(padding),
         child: Column(

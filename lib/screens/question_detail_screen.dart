@@ -56,6 +56,7 @@ class QuestionDetailScreen extends StatelessWidget {
             fontSize: isSmallScreen ? 18.0 : 20.0,
           ),
         ),
+        backgroundColor: AppTheme.primaryColor,
         actions: [
           IconButton(
             icon: Icon(

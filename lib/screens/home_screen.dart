@@ -13,6 +13,8 @@ import '../widgets/pregnancy_progress.dart';
 import '../widgets/category_card.dart';
 import '../utils/app_theme.dart';
 import '../services/localization_service.dart';
+import '../widgets/under_development_overlay.dart';
+import '../screens/medical_records_screen.dart';
 import 'package:flutter/foundation.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -24,38 +26,27 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   int _selectedIndex = 0;
-
-  late final List<Widget> _screens;
-  late List<NavigationDestination> _destinations;
+  bool _communityDevMode = false;
+  bool _medicalRecordsDevMode = false;
 
   @override
-  void initState() {
-    super.initState();
-    _initializeScreens();
-  }
-
-  void _initializeScreens() {
-    // Erstelle die Screens nur einmal und speichere sie
-    _screens = [
-      const _InfoContent(),
-      const ToolsScreen(),
-      const CommunityScreen(),
-      const FavoritesScreen(),
-    ];
-  }
-
-  List<NavigationDestination> _buildDestinations(BuildContext context) {
-    // Dies stellt sicher, dass die Labels übersetzt werden, wenn sich die Sprache ändert
-    return [
+  Widget build(BuildContext context) {
+    // Baue NavigationDestinations hier, damit sie die aktuelle Sprache verwenden
+    final destinations = [
       NavigationDestination(
         icon: const Icon(Icons.menu_book_outlined),
-        selectedIcon: const Icon(Icons.menu_book_outlined),
+        selectedIcon: const Icon(Icons.menu_book),
         label: context.tr('guide'),
       ),
       NavigationDestination(
         icon: const Icon(Icons.calculate_outlined),
         selectedIcon: const Icon(Icons.calculate),
         label: context.tr('tools'),
+      ),
+      NavigationDestination(
+        icon: const Icon(Icons.medical_services_outlined),
+        selectedIcon: const Icon(Icons.medical_services),
+        label: context.tr('medicalRecords'),
       ),
       NavigationDestination(
         icon: const Icon(Icons.forum_outlined),
@@ -68,12 +59,37 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         label: context.tr('favorites'),
       ),
     ];
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    // Navigation-Destinations hier erstellen, um die aktuelle Sprache zu verwenden
-    _destinations = _buildDestinations(context);
+    // WICHTIG: Erstelle die Screens bei JEDEM Build neu, damit sie den aktuellen State verwenden
+    final screens = [
+      const _InfoContent(),            // Guide
+      const ToolsScreen(),             // Tools
+      UnderDevelopmentOverlay(         // Medical Records (Mitte)
+        child: const MedicalRecordsScreen(),
+        developmentMode: _medicalRecordsDevMode,
+        onTestButtonPressed: () {
+          if (kDebugMode) {
+            print("Medical Records: Enabling dev mode");
+          }
+          setState(() {
+            _medicalRecordsDevMode = true;
+          });
+        },
+      ),
+      UnderDevelopmentOverlay(         // Community
+        child: const CommunityScreen(),
+        developmentMode: _communityDevMode,
+        onTestButtonPressed: () {
+          if (kDebugMode) {
+            print("Community: Enabling dev mode");
+          }
+          setState(() {
+            _communityDevMode = true;
+          });
+        },
+      ),
+      const FavoritesScreen(),         // Favorites
+    ];
 
     // Überprüfe, ob der Content-Provider fertig geladen hat
     final contentProvider = Provider.of<ContentProvider>(context);
@@ -88,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
-        children: _screens,
+        children: screens,
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
@@ -100,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             _selectedIndex = index;
           });
         },
-        destinations: _destinations,
+        destinations: destinations,
       ),
     );
   }
@@ -130,7 +146,7 @@ class _InfoContent extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppTheme.primaryColor,
         elevation: 0,
         title: Text(
           context.tr('app_name'),
@@ -143,7 +159,7 @@ class _InfoContent extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search, color: AppTheme.primaryColor),
+            icon: const Icon(Icons.search, color: Colors.white),
             onPressed: () {
               Navigator.push(
                 context,
@@ -153,7 +169,7 @@ class _InfoContent extends StatelessWidget {
             tooltip: context.tr('search'),
           ),
           IconButton(
-            icon: const Icon(Icons.settings, color: AppTheme.primaryColor),
+            icon: const Icon(Icons.settings, color: Colors.white),
             onPressed: () {
               Navigator.push(
                 context,

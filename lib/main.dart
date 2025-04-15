@@ -21,6 +21,7 @@ void main() async {
   await Hive.openBox('content');
   await Hive.openBox('favorites');
 
+
   runApp(const MyApp());
 }
 
@@ -103,6 +104,7 @@ class AppWithLanguage extends StatelessWidget {
     // Android/andere Plattformen verwenden MaterialApp
     else {
       return MaterialApp(
+        debugShowCheckedModeBanner: false,
         key: ValueKey('android_${languageProvider.currentLanguage}'),
         title: title,
         theme: ThemeData(

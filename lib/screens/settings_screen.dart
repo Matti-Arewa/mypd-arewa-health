@@ -51,6 +51,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Scaffold(
         appBar: CustomAppBar(
           title: context.tr('settings'),
+          backgroundColor: AppTheme.primaryColor,
           showBackButton: true,
           onBackPressed: () {
             // Explizite Navigation zurück

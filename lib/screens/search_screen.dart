@@ -112,6 +112,7 @@ class _SearchScreenState extends State<SearchScreen> {
             fontSize: titleFontSize,
           ),
         ),
+        backgroundColor: AppTheme.primaryColor,
       ),
       body: Column(
         children: [

@@ -13,6 +13,7 @@ import '../screens/weight_tracker_screen.dart';
 import '../screens/nutrition_screen.dart';
 import '../screens/settings_screen.dart';
 import '../models/content_model.dart';
+import '../screens/medical_records_screen.dart';
 
 class AppRouter {
   static const String splash = '/';
@@ -28,6 +29,7 @@ class AppRouter {
   static const String weightTracker = '/weight_tracker';
   static const String nutrition = '/nutrition';
   static const String settings = '/settings';
+  static const String records = '/records';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -75,6 +77,9 @@ class AppRouter {
 
       case nutrition:
         return MaterialPageRoute(builder: (_) => const NutritionScreen());
+
+      case records:
+        return MaterialPageRoute(builder: (_) => const MedicalRecordsScreen());
 
       case AppRouter.settings:
         return MaterialPageRoute(builder: (_) => const SettingsScreen());

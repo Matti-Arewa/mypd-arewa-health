@@ -6,6 +6,7 @@ import '../providers/content_provider.dart';
 import '../screens/question_detail_screen.dart';
 import '../widgets/question_card.dart';
 import '../services/localization_service.dart';
+import '../utils/app_theme.dart';
 
 class CategoryScreen extends StatelessWidget {
   final String categoryId;
@@ -27,6 +28,7 @@ class CategoryScreen extends StatelessWidget {
     if (category == null) {
       return Scaffold(
         appBar: AppBar(
+          backgroundColor: AppTheme.primaryColor,
           title: Text(context.tr('category')),
         ),
         body: Center(

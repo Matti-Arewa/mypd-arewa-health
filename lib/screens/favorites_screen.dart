@@ -29,6 +29,7 @@ class FavoritesScreen extends StatelessWidget {
             fontSize: isSmallScreen ? 18.0 : 20.0,
           ),
         ),
+        backgroundColor: AppTheme.primaryColor,
       ),
       body: favoriteQuestions.isEmpty
           ? Center(

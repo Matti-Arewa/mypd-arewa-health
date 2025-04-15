@@ -102,7 +102,7 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
     final placeholderIconSize = isSmallScreen ? 48.0 : 64.0;
 
     return Scaffold(
-      appBar: CustomAppBar(title: context.tr('weightTracker')),
+      appBar: CustomAppBar(title: context.tr('weightTracker'), backgroundColor: AppTheme.primaryColor,),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(padding),
         child: Consumer<UserProvider>(

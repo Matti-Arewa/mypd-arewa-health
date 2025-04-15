@@ -151,6 +151,7 @@ class _KickCounterScreenState extends State<KickCounterScreen> {
           context.tr('kickCounter'),
           style: TextStyle(color: AppTheme.textPrimaryColor),
         ),
+        backgroundColor: AppTheme.primaryColor,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(padding),
