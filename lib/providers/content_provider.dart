@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../models/content_model.dart';
 import '../utils/sample_data_en.dart';
-import '../utils/sample_data_de.dart'; // Neue Import-Anweisung für deutsche Beispieldaten
+import '../utils/sample_data_de.dart';
 import 'package:flutter/foundation.dart';
 
 class ContentProvider extends ChangeNotifier {
@@ -18,7 +18,16 @@ class ContentProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   List<String> get favorites => _favorites;
   List<ContentQuestion> get searchResults => _searchResults;
-  List<ContentCategory> get categories => _contentData?.categories ?? [];
+  List<ContentSection> get sections => _contentData?.sections ?? [];
+
+  // Getter for backward compatibility
+  List<ContentCategory> get categories {
+    List<ContentCategory> allCategories = [];
+    for (final section in sections) {
+      allCategories.addAll(section.categories);
+    }
+    return allCategories;
+  }
 
   ContentProvider() {
     _loadContent();
@@ -81,10 +90,10 @@ class ContentProvider extends ChangeNotifier {
           if (_language == 'en') {
             _contentData = SampleDataEN.getSampleContent();
           } else if (_language == 'de') {
-            _contentData = SampleData.getSampleContent(); // Hier laden wir die deutschen Beispieldaten
-          } else {
-            // Standardmäßig englische Daten laden, wenn keine Übereinstimmung gefunden wird
             _contentData = SampleData.getSampleContent();
+          } else {
+            // Default to English data if no match is found
+            _contentData = SampleDataEN.getSampleContent();
           }
         }
 
@@ -97,10 +106,10 @@ class ContentProvider extends ChangeNotifier {
       if (_language == 'en') {
         _contentData = SampleDataEN.getSampleContent();
       } else if (_language == 'de') {
-        _contentData = SampleData.getSampleContent(); // Hier laden wir die deutschen Beispieldaten
-      } else {
-        // Standardmäßig englische Daten laden, wenn keine Übereinstimmung gefunden wird
         _contentData = SampleData.getSampleContent();
+      } else {
+        // Default to English data if no match is found
+        _contentData = SampleDataEN.getSampleContent();
       }
     }
 
@@ -140,10 +149,12 @@ class ContentProvider extends ChangeNotifier {
 
     if (_contentData == null) return [];
 
-    for (final category in _contentData!.categories) {
-      for (final question in category.questions) {
-        if (_favorites.contains(question.id)) {
-          favoriteQuestions.add(question);
+    for (final section in _contentData!.sections) {
+      for (final category in section.categories) {
+        for (final question in category.questions) {
+          if (_favorites.contains(question.id)) {
+            favoriteQuestions.add(question);
+          }
         }
       }
     }
@@ -163,11 +174,13 @@ class ContentProvider extends ChangeNotifier {
 
     if (_contentData == null) return;
 
-    for (final category in _contentData!.categories) {
-      for (final question in category.questions) {
-        if (question.question.toLowerCase().contains(queryLower) ||
-            question.answer.toLowerCase().contains(queryLower)) {
-          results.add(question);
+    for (final section in _contentData!.sections) {
+      for (final category in section.categories) {
+        for (final question in category.questions) {
+          if (question.question.toLowerCase().contains(queryLower) ||
+              question.answer.toLowerCase().contains(queryLower)) {
+            results.add(question);
+          }
         }
       }
     }
@@ -177,29 +190,49 @@ class ContentProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  ContentCategory? getCategoryById(String categoryId) {
+  ContentSection? getSectionById(String sectionId) {
     if (_contentData == null) return null;
 
     try {
-      return _contentData!.categories.firstWhere((cat) => cat.id == categoryId);
+      return _contentData!.sections.firstWhere((section) => section.id == sectionId);
     } catch (e) {
       if (kDebugMode) {
-        print("ContentProvider: Category not found: $categoryId");
+        print("ContentProvider: Section not found: $sectionId");
       }
       return null;
     }
   }
 
+  ContentCategory? getCategoryById(String categoryId) {
+    if (_contentData == null) return null;
+
+    for (final section in _contentData!.sections) {
+      try {
+        return section.categories.firstWhere((cat) => cat.id == categoryId);
+      } catch (e) {
+        // Category not found in this section, continue to next
+        continue;
+      }
+    }
+
+    if (kDebugMode) {
+      print("ContentProvider: Category not found: $categoryId");
+    }
+    return null;
+  }
+
   ContentQuestion? getQuestionById(String questionId) {
     if (_contentData == null) return null;
 
-    for (final category in _contentData!.categories) {
-      try {
-        final question = category.questions.firstWhere((q) => q.id == questionId);
-        return question;
-      } catch (e) {
-        // Question not found in this category, continue to next
-        continue;
+    for (final section in _contentData!.sections) {
+      for (final category in section.categories) {
+        try {
+          final question = category.questions.firstWhere((q) => q.id == questionId);
+          return question;
+        } catch (e) {
+          // Question not found in this category, continue to next
+          continue;
+        }
       }
     }
 

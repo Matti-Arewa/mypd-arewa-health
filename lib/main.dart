@@ -68,7 +68,7 @@ class AppWithLanguage extends StatelessWidget {
           primaryColor: primaryColor,
           brightness: Brightness.light,
           textTheme: const CupertinoTextThemeData(
-            navLargeTitleTextStyle: const TextStyle(
+            navLargeTitleTextStyle: TextStyle(
               fontFamily: 'Poppins',
               fontWeight: FontWeight.bold,
               fontSize: 30,
@@ -86,7 +86,7 @@ class AppWithLanguage extends StatelessWidget {
             ),
           ),
         ),
-        home: const HomeScreen(),
+        home: const HomeScreen(), // Weiterhin HomeScreen als Startpunkt verwenden
         routes: {
           SettingsScreen.routeName: (ctx) => const SettingsScreen(),
           // Add other routes here
@@ -112,7 +112,7 @@ class AppWithLanguage extends StatelessWidget {
           useMaterial3: true,
           fontFamily: 'Poppins',
         ),
-        home: const HomeScreen(),
+        home: const HomeScreen(), // Weiterhin HomeScreen als Startpunkt verwenden
         routes: {
           SettingsScreen.routeName: (ctx) => const SettingsScreen(),
           // Add other routes here

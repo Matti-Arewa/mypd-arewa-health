@@ -1,20 +1,22 @@
-//widgets/category_card.dart
+//widgets/section_card.dart
 import 'package:flutter/material.dart';
 import '../utils/app_theme.dart';
 
-class CategoryCard extends StatelessWidget {
+class SectionCard extends StatelessWidget {
   final String title;
   final String imageUrl;
+  final bool isExpanded;
   final VoidCallback onTap;
 
-  const CategoryCard({
+  const SectionCard({
     Key? key,
     required this.title,
     required this.imageUrl,
+    required this.isExpanded,
     required this.onTap,
     // Folgende Parameter werden nicht mehr benötigt, aber für Kompatibilität gelassen
     String? description,
-    int? questionCount,
+    int? categoryCount,
   }) : super(key: key);
 
   @override
@@ -25,30 +27,30 @@ class CategoryCard extends StatelessWidget {
 
     // Responsive Textstile basierend auf Bildschirmgröße
     final titleStyle = Theme.of(context).textTheme.displaySmall?.copyWith(
-      fontSize: isSmallScreen ? 16.0 : 18.0,
-      fontWeight: FontWeight.w600,
-      color: Theme.of(context).primaryColor,
+      fontSize: isSmallScreen ? 18.0 : 20.0,
+      fontWeight: FontWeight.bold,
+      color: AppTheme.primaryColor,
     );
 
     // Responsive Bildgröße
-    final imageSize = isSmallScreen ? 50.0 : 60.0;
+    final imageSize = isSmallScreen ? 60.0 : 70.0;
 
     return Card(
-      elevation: 2,
-      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 3, // Stärkere Elevation für Hauptkategorien
+      margin: const EdgeInsets.only(bottom: 8), // Weniger Abstand, da die Unterkategorien folgen können
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: EdgeInsets.all(isSmallScreen ? 10.0 : 12.0),
+          padding: EdgeInsets.all(isSmallScreen ? 12.0 : 16.0),
           child: Row(
             children: [
               // Bild mit abgerundeten Ecken
               ClipRRect(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
                 child: Image.asset(
                   imageUrl,
                   width: imageSize,
@@ -58,16 +60,17 @@ class CategoryCard extends StatelessWidget {
                     return Container(
                       width: imageSize,
                       height: imageSize,
-                      color: Theme.of(context).primaryColor.withOpacity(0.1),
+                      color: AppTheme.primaryColor.withOpacity(0.1),
                       child: Icon(
-                        Icons.image,
-                        color: Theme.of(context).primaryColor,
+                        Icons.menu_book,
+                        color: AppTheme.primaryColor,
+                        size: imageSize / 2,
                       ),
                     );
                   },
                 ),
               ),
-              SizedBox(width: isSmallScreen ? 10.0 : 12.0),
+              SizedBox(width: isSmallScreen ? 12.0 : 16.0),
               // Nur noch den Titel anzeigen
               Expanded(
                 child: Text(
@@ -77,10 +80,11 @@ class CategoryCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
+              // Expand/Collapse Icon
               Icon(
-                Icons.arrow_forward_ios,
-                size: isSmallScreen ? 14.0 : 16.0,
-                color: Theme.of(context).primaryColor,
+                isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                size: isSmallScreen ? 24.0 : 28.0,
+                color: AppTheme.primaryColor,
               ),
             ],
           ),

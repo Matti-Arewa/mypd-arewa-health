@@ -4,13 +4,14 @@ import '../providers/content_provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/language_provider.dart';
 import '../screens/category_screen.dart';
-import '../screens/favorites_screen.dart';
+import '../screens/welcome_screen.dart'; // Import welcome screen
 import '../screens/search_screen.dart';
 import '../screens/tools_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/community_screen.dart';
 import '../widgets/pregnancy_progress.dart';
 import '../widgets/category_card.dart';
+import '../widgets/section_card.dart';
 import '../utils/app_theme.dart';
 import '../services/localization_service.dart';
 import '../widgets/under_development_overlay.dart';
@@ -25,7 +26,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
-  int _selectedIndex = 0;
+  int _selectedIndex = 4;
   bool _communityDevMode = false;
   bool _medicalRecordsDevMode = false;
 
@@ -54,17 +55,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         label: context.tr('community'),
       ),
       NavigationDestination(
-        icon: const Icon(Icons.favorite_border),
-        selectedIcon: const Icon(Icons.favorite),
-        label: context.tr('favorites'),
+        // Hier wird das ursprüngliche Favorites-Icon für den Welcome Screen verwendet
+        icon: const Icon(Icons.info_outline),
+        selectedIcon: const Icon(Icons.info),
+        label: context.tr('welcomeTab'),
       ),
     ];
 
     // WICHTIG: Erstelle die Screens bei JEDEM Build neu, damit sie den aktuellen State verwenden
     final screens = [
-      const _InfoContent(),            // Guide
-      const ToolsScreen(),             // Tools
-      UnderDevelopmentOverlay(         // Medical Records (Mitte)
+      const _InfoContent(),            // Guide (0)
+      const ToolsScreen(),             // Tools (1)
+      UnderDevelopmentOverlay(         // Medical Records (2)
         child: const MedicalRecordsScreen(),
         developmentMode: _medicalRecordsDevMode,
         onTestButtonPressed: () {
@@ -76,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           });
         },
       ),
-      UnderDevelopmentOverlay(         // Community
+      UnderDevelopmentOverlay(         // Community (3)
         child: const CommunityScreen(),
         developmentMode: _communityDevMode,
         onTestButtonPressed: () {
@@ -88,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           });
         },
       ),
-      const FavoritesScreen(),         // Favorites
+      const WelcomeScreen(),           // Welcome Screen (ehemals Favorites) (4)
     ];
 
     // Überprüfe, ob der Content-Provider fertig geladen hat
@@ -108,6 +110,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
+        //labelTextStyle: ,
+        labelTextStyle: MaterialStateProperty.all(
+          TextStyle(fontSize: 11.0), // Kleinere Schriftgröße
+        ),
         onDestinationSelected: (index) {
           if (kDebugMode) {
             print("Navigation: Changing tab to $index");
@@ -122,8 +128,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 }
 
-class _InfoContent extends StatelessWidget {
+class _InfoContent extends StatefulWidget {
   const _InfoContent({Key? key}) : super(key: key);
+
+  @override
+  State<_InfoContent> createState() => _InfoContentState();
+}
+
+class _InfoContentState extends State<_InfoContent> {
+  // Verfolge, welche Abschnitte erweitert sind
+  Map<String, bool> expandedSections = {};
 
   @override
   Widget build(BuildContext context) {
@@ -141,8 +155,8 @@ class _InfoContent extends StatelessWidget {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Alle Kategorien anzeigen
-    final categories = contentProvider.categories;
+    // Alle Abschnitte anzeigen
+    final sections = contentProvider.sections;
 
     return Scaffold(
       appBar: AppBar(
@@ -185,7 +199,7 @@ class _InfoContent extends StatelessWidget {
           // Header und Schwangerschaftsfortschritt
           //_buildHeader(context, userProvider, useCompactView),
 
-          // Kategorien-Überschrift
+          // Abschnitts-Überschrift
           Padding(
             padding: EdgeInsets.fromLTRB(16, useCompactView ? 12 : 16, 16, useCompactView ? 6 : 8),
             child: Row(
@@ -193,7 +207,7 @@ class _InfoContent extends StatelessWidget {
                 const Icon(Icons.menu_book, color: AppTheme.primaryColor),
                 const SizedBox(width: 8),
                 Text(
-                  context.tr('categories'),
+                  context.tr('pregnancyGuide'),
                   style: TextStyle(
                     fontSize: useCompactView
                         ? AppTheme.fontSizeBodyLarge
@@ -206,32 +220,66 @@ class _InfoContent extends StatelessWidget {
             ),
           ),
 
-          // Kategorien-Liste
+          // Abschnitts-Liste
           Expanded(
             child: ListView.builder(
-              key: PageStorageKey('category-list'),
+              key: const PageStorageKey('section-list'),
               padding: EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: useCompactView ? 6 : 8
               ),
-              itemCount: categories.length,
+              itemCount: sections.length,
               itemBuilder: (context, index) {
-                final category = categories[index];
-                return CategoryCard(
-                  title: category.title,
-                  description: category.description,
-                  imageUrl: category.imageUrl,
-                  questionCount: category.questions.length,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CategoryScreen(
-                          categoryId: category.id,
-                        ),
+                final section = sections[index];
+
+                // Initialisiere den expandierten Status, falls noch nicht gesetzt
+                expandedSections.putIfAbsent(section.id, () => index == 0); // Der erste Abschnitt ist standardmäßig geöffnet
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Abschnitts-Header mit Toggle
+                      SectionCard(
+                        title: section.title,
+                        imageUrl: section.imageUrl,
+                        isExpanded: expandedSections[section.id] ?? false,
+                        onTap: () {
+                          setState(() {
+                            expandedSections[section.id] = !(expandedSections[section.id] ?? false);
+                          });
+                        },
                       ),
-                    );
-                  },
+
+                      // Kategorien für diesen Abschnitt (nur anzeigen, wenn erweitert)
+                      if (expandedSections[section.id] ?? false)
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          child: Column(
+                            children: section.categories.map((category) {
+                              return Padding(
+                                padding: const EdgeInsets.only(left: 16.0, top: 8.0),
+                                child: CategoryCard(
+                                  title: category.title,
+                                  imageUrl: category.imageUrl,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => CategoryScreen(
+                                          categoryId: category.id,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                    ],
+                  ),
                 );
               },
             ),

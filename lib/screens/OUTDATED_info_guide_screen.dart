@@ -1,4 +1,4 @@
-// screens/info_guide_screen.dart
+// screens/OUTDATED_info_guide_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/content_provider.dart';

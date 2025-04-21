@@ -1,9 +1,53 @@
-//models/content_model.dart
+// models/content_model.dart
+class ContentSection {
+  final String id;
+  final String title;
+  final String description;
+  final String imageUrl;
+  final List<ContentCategory> categories;
+
+  ContentSection({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.imageUrl,
+    required this.categories,
+  });
+
+  factory ContentSection.fromJson(Map<String, dynamic> json) {
+    List<ContentCategory> categoriesList = [];
+    if (json['categories'] != null) {
+      categoriesList = List<ContentCategory>.from(
+        json['categories'].map((c) => ContentCategory.fromJson(c)),
+      );
+    }
+
+    return ContentSection(
+      id: json['id'] ?? '',
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      imageUrl: json['imageUrl'] ?? 'assets/images/placeholder.png',
+      categories: categoriesList,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'imageUrl': imageUrl,
+      'categories': categories.map((c) => c.toJson()).toList(),
+    };
+  }
+}
+
 class ContentCategory {
   final String id;
   final String title;
   final String description;
   final String imageUrl;
+  final String sectionId;
   final List<ContentQuestion> questions;
 
   ContentCategory({
@@ -11,6 +55,7 @@ class ContentCategory {
     required this.title,
     required this.description,
     required this.imageUrl,
+    required this.sectionId,
     required this.questions,
   });
 
@@ -27,6 +72,7 @@ class ContentCategory {
       title: json['title'] ?? '',
       description: json['description'] ?? '',
       imageUrl: json['imageUrl'] ?? 'assets/images/placeholder.png',
+      sectionId: json['sectionId'] ?? '',
       questions: questionsList,
     );
   }
@@ -37,6 +83,7 @@ class ContentCategory {
       'title': title,
       'description': description,
       'imageUrl': imageUrl,
+      'sectionId': sectionId,
       'questions': questions.map((q) => q.toJson()).toList(),
     };
   }
@@ -84,24 +131,24 @@ class ContentQuestion {
 }
 
 class ContentData {
-  final List<ContentCategory> categories;
+  final List<ContentSection> sections;
 
-  ContentData({required this.categories});
+  ContentData({required this.sections});
 
   factory ContentData.fromJson(Map<String, dynamic> json) {
-    List<ContentCategory> categoriesList = [];
-    if (json['categories'] != null) {
-      categoriesList = List<ContentCategory>.from(
-        json['categories'].map((c) => ContentCategory.fromJson(c)),
+    List<ContentSection> sectionsList = [];
+    if (json['sections'] != null) {
+      sectionsList = List<ContentSection>.from(
+        json['sections'].map((s) => ContentSection.fromJson(s)),
       );
     }
 
-    return ContentData(categories: categoriesList);
+    return ContentData(sections: sectionsList);
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'categories': categories.map((c) => c.toJson()).toList(),
+      'sections': sections.map((s) => s.toJson()).toList(),
     };
   }
 }

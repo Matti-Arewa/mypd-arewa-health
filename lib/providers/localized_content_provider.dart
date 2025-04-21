@@ -19,7 +19,20 @@ class ContentProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   List<String> get favorites => _favorites;
   List<ContentQuestion> get searchResults => _searchResults;
-  List<ContentCategory> get categories => _contentData?.categories ?? [];
+
+  // Getter für die Abschnitte
+  List<ContentSection> get sections => _contentData?.sections ?? [];
+
+  // Getter for backward compatibility - flacht die hierarchische Struktur ab
+  List<ContentCategory> get categories {
+    List<ContentCategory> allCategories = [];
+    if (_contentData != null) {
+      for (final section in _contentData!.sections) {
+        allCategories.addAll(section.categories);
+      }
+    }
+    return allCategories;
+  }
 
   ContentProvider() {
     _loadContent();
@@ -107,10 +120,12 @@ class ContentProvider extends ChangeNotifier {
 
     if (_contentData == null) return [];
 
-    for (final category in _contentData!.categories) {
-      for (final question in category.questions) {
-        if (_favorites.contains(question.id)) {
-          favoriteQuestions.add(question);
+    for (final section in _contentData!.sections) {
+      for (final category in section.categories) {
+        for (final question in category.questions) {
+          if (_favorites.contains(question.id)) {
+            favoriteQuestions.add(question);
+          }
         }
       }
     }
@@ -130,11 +145,13 @@ class ContentProvider extends ChangeNotifier {
 
     if (_contentData == null) return;
 
-    for (final category in _contentData!.categories) {
-      for (final question in category.questions) {
-        if (question.question.toLowerCase().contains(queryLower) ||
-            question.answer.toLowerCase().contains(queryLower)) {
-          results.add(question);
+    for (final section in _contentData!.sections) {
+      for (final category in section.categories) {
+        for (final question in category.questions) {
+          if (question.question.toLowerCase().contains(queryLower) ||
+              question.answer.toLowerCase().contains(queryLower)) {
+            results.add(question);
+          }
         }
       }
     }
@@ -144,26 +161,44 @@ class ContentProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  ContentCategory? getCategoryById(String categoryId) {
+  // Neue Methode, um einen Abschnitt anhand seiner ID zu finden
+  ContentSection? getSectionById(String sectionId) {
     if (_contentData == null) return null;
 
     try {
-      return _contentData!.categories.firstWhere((cat) => cat.id == categoryId);
+      return _contentData!.sections.firstWhere((section) => section.id == sectionId);
     } catch (e) {
       return null;
     }
   }
 
+  ContentCategory? getCategoryById(String categoryId) {
+    if (_contentData == null) return null;
+
+    for (final section in _contentData!.sections) {
+      try {
+        return section.categories.firstWhere((cat) => cat.id == categoryId);
+      } catch (e) {
+        // Category not found in this section, continue to next
+        continue;
+      }
+    }
+
+    return null;
+  }
+
   ContentQuestion? getQuestionById(String questionId) {
     if (_contentData == null) return null;
 
-    for (final category in _contentData!.categories) {
-      try {
-        final question = category.questions.firstWhere((q) => q.id == questionId);
-        return question;
-      } catch (e) {
-        // Question not found in this category, continue to next
-        continue;
+    for (final section in _contentData!.sections) {
+      for (final category in section.categories) {
+        try {
+          final question = category.questions.firstWhere((q) => q.id == questionId);
+          return question;
+        } catch (e) {
+          // Question not found in this category, continue to next
+          continue;
+        }
       }
     }
 
