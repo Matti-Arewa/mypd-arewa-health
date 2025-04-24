@@ -19,7 +19,7 @@ class MedicalRecordsScreen extends StatelessWidget {
     final padding = isSmallScreen ? 12.0 : 16.0;
 
     // Beispiel-Patientendaten laden
-    final patientData = PatientData.getSampleData();
+    final patientData = PatientData.getSampleData(context: context);
 
     return Scaffold(
       appBar: AppBar(
@@ -405,7 +405,7 @@ class MedicalRecordsScreen extends StatelessWidget {
     required IconData icon,
     required bool isSmallScreen,
   }) {
-    return Container(
+    return SizedBox(
       width: isSmallScreen ? 150 : 170,
       child: Row(
         children: [

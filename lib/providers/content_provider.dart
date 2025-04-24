@@ -34,7 +34,6 @@ class ContentProvider extends ChangeNotifier {
     _loadFavorites();
   }
 
-  // Update language and reload content
   Future<void> updateLanguage(String language) async {
     if (_language != language) {
       if (kDebugMode) {
@@ -42,7 +41,12 @@ class ContentProvider extends ChangeNotifier {
       }
 
       _language = language;
-      await _loadContent();
+
+      // Verwende Future.microtask, um den Aufruf zu verzögern,
+      // bis der aktuelle Build-Prozess abgeschlossen ist
+      Future.microtask(() async {
+        await _loadContent();
+      });
     }
   }
 
@@ -68,33 +72,19 @@ class ContentProvider extends ChangeNotifier {
         final Map<String, dynamic> jsonData = json.decode(savedContent);
         _contentData = ContentData.fromJson(jsonData);
       } else {
+        // Use sample data directly instead of trying to load from assets
         if (kDebugMode) {
-          print("ContentProvider: No saved content, trying to load from assets");
+          print("ContentProvider: Using sample data");
         }
 
-        // If no saved content, load from assets or use sample data
-        try {
-          final String jsonString = await rootBundle.loadString('assets/data/content_$_language.json');
-          if (kDebugMode) {
-            print("ContentProvider: Successfully loaded content from assets");
-          }
-
-          final Map<String, dynamic> jsonData = json.decode(jsonString);
-          _contentData = ContentData.fromJson(jsonData);
-        } catch (e) {
-          if (kDebugMode) {
-            print("ContentProvider: Error loading from assets, using sample data. Error: $e");
-          }
-
-          // Fallback to sample data based on language
-          if (_language == 'en') {
-            _contentData = SampleDataEN.getSampleContent();
-          } else if (_language == 'de') {
-            _contentData = SampleData.getSampleContent();
-          } else {
-            // Default to English data if no match is found
-            _contentData = SampleDataEN.getSampleContent();
-          }
+        // Load appropriate sample data based on language
+        if (_language == 'en') {
+          _contentData = SampleDataEN.getSampleContent();
+        } else if (_language == 'de') {
+          _contentData = SampleData.getSampleContent();
+        } else {
+          // Default to English data if no match is found
+          _contentData = SampleDataEN.getSampleContent();
         }
 
         // Save to Hive for offline access

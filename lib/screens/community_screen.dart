@@ -2,6 +2,9 @@
 import 'package:flutter/material.dart';
 import '../utils/app_theme.dart';
 import 'dart:math' as math;
+import '../services/localization_service.dart';
+import '../providers/language_provider.dart';
+import 'package:provider/provider.dart';
 
 class CommunityPost {
   final String id;
@@ -25,6 +28,66 @@ class CommunityPost {
     this.tags = const [],
     this.isExpert = false,
   });
+
+  // Lokalisierte Methode für Zeitangaben
+  String getFormattedPostTime(BuildContext context) {
+    final now = DateTime.now();
+    final difference = now.difference(postedAt);
+
+    if (difference.inMinutes < 1) {
+      return context.tr('justNow');
+    } else if (difference.inHours < 1) {
+      final minutes = difference.inMinutes;
+      return context.tr('minutesAgo', {'count': minutes.toString()});
+    } else if (difference.inDays < 1) {
+      final hours = difference.inHours;
+      return context.tr('hoursAgo', {'count': hours.toString()});
+    } else if (difference.inDays < 7) {
+      final days = difference.inDays;
+      return context.tr('daysAgo', {'count': days.toString()});
+    } else {
+      return '${postedAt.day}.${postedAt.month}.${postedAt.year}';
+    }
+  }
+}
+
+class Comment {
+  final String id;
+  final String authorName;
+  final String authorAvatar;
+  final String content;
+  final DateTime postedAt;
+  final int likesCount;
+
+  Comment({
+    required this.id,
+    required this.authorName,
+    required this.authorAvatar,
+    required this.content,
+    required this.postedAt,
+    this.likesCount = 0,
+  });
+
+  // Lokalisierte Methode für Zeitangaben
+  String getFormattedPostTime(BuildContext context) {
+    final now = DateTime.now();
+    final difference = now.difference(postedAt);
+
+    if (difference.inMinutes < 1) {
+      return context.tr('justNow');
+    } else if (difference.inHours < 1) {
+      final minutes = difference.inMinutes;
+      return context.tr('minutesAgo', {'count': minutes.toString()});
+    } else if (difference.inDays < 1) {
+      final hours = difference.inHours;
+      return context.tr('hoursAgo', {'count': hours.toString()});
+    } else if (difference.inDays < 7) {
+      final days = difference.inDays;
+      return context.tr('daysAgo', {'count': days.toString()});
+    } else {
+      return '${postedAt.day}.${postedAt.month}.${postedAt.year}';
+    }
+  }
 }
 
 class CommunityScreen extends StatefulWidget {
@@ -39,103 +102,246 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
   late TabController _tabController;
   bool _isComposing = false;
   final TextEditingController _postController = TextEditingController();
-
-  // Mock-Daten für den Prototyp
-  final List<CommunityPost> _posts = [
-    CommunityPost(
-      id: '1',
-      authorName: 'Laura M.',
-      authorAvatar: 'assets/images/avatar1.png',
-      content: 'Hat jemand Tipps gegen Sodbrennen in der 32. Woche? Ich habe schon alles versucht!',
-      postedAt: DateTime.now().subtract(const Duration(hours: 3)),
-      likesCount: 8,
-      commentsCount: 5,
-      tags: ['Sodbrennen', 'Drittes Trimester'],
-    ),
-    CommunityPost(
-      id: '2',
-      authorName: 'Julia K.',
-      authorAvatar: 'assets/images/avatar2.png',
-      content: 'Heute den ersten Tritt gespürt! So ein wunderschönes Gefühl. ❤️',
-      postedAt: DateTime.now().subtract(const Duration(hours: 5)),
-      likesCount: 24,
-      commentsCount: 7,
-      tags: ['Babybewegungen', 'Zweites Trimester'],
-    ),
-    CommunityPost(
-      id: '3',
-      authorName: 'Sarah P.',
-      authorAvatar: 'assets/images/avatar3.png',
-      content: 'Welche Kliniktasche habt ihr für die Geburt gepackt? Ich bin im 8. Monat und möchte langsam anfangen, alles vorzubereiten.',
-      postedAt: DateTime.now().subtract(const Duration(hours: 8)),
-      likesCount: 15,
-      commentsCount: 12,
-      tags: ['Kliniktasche', 'Geburtsvorbereitung'],
-    ),
-    CommunityPost(
-      id: '4',
-      authorName: 'Melanie H.',
-      authorAvatar: 'assets/images/avatar4.png',
-      content: 'Hat jemand Erfahrung mit Pränataldiagnostik? Ich stehe vor der Entscheidung, ob ich Tests machen lassen soll.',
-      postedAt: DateTime.now().subtract(const Duration(hours: 10)),
-      likesCount: 6,
-      commentsCount: 8,
-      tags: ['Pränataldiagnostik', 'Vorsorge'],
-    ),
-    CommunityPost(
-      id: '5',
-      authorName: 'Martina B.',
-      authorAvatar: 'assets/images/avatar5.png',
-      content: 'Ist es normal, dass ich im ersten Trimester so erschöpft bin? Ich schlafe fast 10 Stunden täglich und bin trotzdem müde.',
-      postedAt: DateTime.now().subtract(const Duration(hours: 24)),
-      likesCount: 18,
-      commentsCount: 9,
-      tags: ['Müdigkeit', 'Erstes Trimester'],
-    ),
-  ];
-
-  final List<CommunityPost> _expertPosts = [
-    CommunityPost(
-      id: 'e1',
-      authorName: 'Dr. Martina Schmidt',
-      authorAvatar: 'assets/images/doctor1.png',
-      content: 'Liebe werdende Mütter, denkt daran, ausreichend Folsäure zu euch zu nehmen. Dies ist besonders wichtig für die Entwicklung des Neuralrohrs beim Baby in den ersten Wochen der Schwangerschaft.',
-      postedAt: DateTime.now().subtract(const Duration(days: 1)),
-      likesCount: 45,
-      commentsCount: 12,
-      tags: ['Expertenrat', 'Ernährung'],
-      isExpert: true,
-    ),
-    CommunityPost(
-      id: 'e2',
-      authorName: 'Hebamme Sabine Weber',
-      authorAvatar: 'assets/images/midwife1.png',
-      content: 'Entspannungstechniken für die Geburt: Praktiziert regelmäßig tiefe Atemübungen. Sie können helfen, während der Wehen ruhig zu bleiben und euren Körper mit Sauerstoff zu versorgen. Übt verschiedene Positionen, die euch während der Wehen helfen können, bequemer zu sein.',
-      postedAt: DateTime.now().subtract(const Duration(days: 2)),
-      likesCount: 38,
-      commentsCount: 8,
-      tags: ['Geburtsvorbereitung', 'Entspannung'],
-      isExpert: true,
-    ),
-  ];
-
-  // Liste von Kategorien für Filter
-  final List<String> _categories = [
-    'Alle Beiträge',
-    'Erstes Trimester',
-    'Zweites Trimester',
-    'Drittes Trimester',
-    'Ernährung',
-    'Bewegung',
-    'Geburtsvorbereitung',
-    'Medizinische Fragen'
-  ];
+  late List<CommunityPost> _posts;
+  late List<CommunityPost> _expertPosts;
+  late List<Comment> _comments;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
   }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Initialisiere die Daten entsprechend der aktuellen Sprache
+    _initializeLocalizedData();
+  }
+
+  void _initializeLocalizedData() {
+    // Die aktuelle Sprache abrufen
+    final language = Provider.of<LanguageProvider>(context, listen: false).currentLanguage;
+
+    // Basierend auf der Sprache die richtigen Daten laden
+    if (language == 'de') {
+      _loadGermanData();
+    } else {
+      _loadEnglishData();
+    }
+  }
+
+  void _loadGermanData() {
+    // Deutsche Beispieldaten laden
+    _posts = [
+      CommunityPost(
+        id: '1',
+        authorName: 'Laura M.',
+        authorAvatar: 'assets/images/avatar1.png',
+        content: 'Hat jemand Tipps gegen Sodbrennen in der 32. Woche? Ich habe schon alles versucht!',
+        postedAt: DateTime.now().subtract(const Duration(hours: 3)),
+        likesCount: 8,
+        commentsCount: 5,
+        tags: [context.tr('heartburn'), context.tr('thirdTrimester')],
+      ),
+      CommunityPost(
+        id: '2',
+        authorName: 'Julia K.',
+        authorAvatar: 'assets/images/avatar2.png',
+        content: 'Heute den ersten Tritt gespürt! So ein wunderschönes Gefühl. ❤️',
+        postedAt: DateTime.now().subtract(const Duration(hours: 5)),
+        likesCount: 24,
+        commentsCount: 7,
+        tags: [context.tr('babyMovements'), context.tr('secondTrimester')],
+      ),
+      CommunityPost(
+        id: '3',
+        authorName: 'Sarah P.',
+        authorAvatar: 'assets/images/avatar3.png',
+        content: 'Welche Kliniktasche habt ihr für die Geburt gepackt? Ich bin im 8. Monat und möchte langsam anfangen, alles vorzubereiten.',
+        postedAt: DateTime.now().subtract(const Duration(hours: 8)),
+        likesCount: 15,
+        commentsCount: 12,
+        tags: [context.tr('hospitalBag'), context.tr('birthPreparation')],
+      ),
+      CommunityPost(
+        id: '4',
+        authorName: 'Melanie H.',
+        authorAvatar: 'assets/images/avatar4.png',
+        content: 'Hat jemand Erfahrung mit Pränataldiagnostik? Ich stehe vor der Entscheidung, ob ich Tests machen lassen soll.',
+        postedAt: DateTime.now().subtract(const Duration(hours: 10)),
+        likesCount: 6,
+        commentsCount: 8,
+        tags: [context.tr('prenatalDiagnosis'), context.tr('screening')],
+      ),
+      CommunityPost(
+        id: '5',
+        authorName: 'Martina B.',
+        authorAvatar: 'assets/images/avatar5.png',
+        content: 'Ist es normal, dass ich im ersten Trimester so erschöpft bin? Ich schlafe fast 10 Stunden täglich und bin trotzdem müde.',
+        postedAt: DateTime.now().subtract(const Duration(hours: 24)),
+        likesCount: 18,
+        commentsCount: 9,
+        tags: [context.tr('fatigue'), context.tr('firstTrimester')],
+      ),
+    ];
+
+    _expertPosts = [
+      CommunityPost(
+        id: 'e1',
+        authorName: 'Dr. Martina Schmidt',
+        authorAvatar: 'assets/images/doctor1.png',
+        content: 'Liebe werdende Mütter, denkt daran, ausreichend Folsäure zu euch zu nehmen. Dies ist besonders wichtig für die Entwicklung des Neuralrohrs beim Baby in den ersten Wochen der Schwangerschaft.',
+        postedAt: DateTime.now().subtract(const Duration(days: 1)),
+        likesCount: 45,
+        commentsCount: 12,
+        tags: [context.tr('expertAdvice'), context.tr('nutrition')],
+        isExpert: true,
+      ),
+      CommunityPost(
+        id: 'e2',
+        authorName: 'Hebamme Sabine Weber',
+        authorAvatar: 'assets/images/midwife1.png',
+        content: 'Entspannungstechniken für die Geburt: Praktiziert regelmäßig tiefe Atemübungen. Sie können helfen, während der Wehen ruhig zu bleiben und euren Körper mit Sauerstoff zu versorgen. Übt verschiedene Positionen, die euch während der Wehen helfen können, bequemer zu sein.',
+        postedAt: DateTime.now().subtract(const Duration(days: 2)),
+        likesCount: 38,
+        commentsCount: 8,
+        tags: [context.tr('birthPreparation'), context.tr('relaxation')],
+        isExpert: true,
+      ),
+    ];
+
+    _comments = [
+      Comment(
+        id: 'c1',
+        authorName: 'Maria S.',
+        authorAvatar: 'assets/images/avatar6.png',
+        content: 'Ich habe ähnliche Erfahrungen gemacht. Versuche mal, kleinere Mahlzeiten zu dir zu nehmen und vor dem Schlafengehen nichts mehr zu essen.',
+        postedAt: DateTime.now().subtract(const Duration(hours: 1)),
+        likesCount: 3,
+      ),
+      Comment(
+        id: 'c2',
+        authorName: 'Claudia W.',
+        authorAvatar: 'assets/images/avatar7.png',
+        content: 'Mandelmilch hat bei mir gegen Sodbrennen geholfen. Vielleicht ist das einen Versuch wert?',
+        postedAt: DateTime.now().subtract(const Duration(hours: 2)),
+        likesCount: 5,
+      ),
+    ];
+  }
+
+  void _loadEnglishData() {
+    // Englische Beispieldaten laden
+    _posts = [
+      CommunityPost(
+        id: '1',
+        authorName: 'Laura M.',
+        authorAvatar: 'assets/images/avatar1.png',
+        content: 'Does anyone have tips for heartburn in week 32? I\'ve already tried everything!',
+        postedAt: DateTime.now().subtract(const Duration(hours: 3)),
+        likesCount: 8,
+        commentsCount: 5,
+        tags: [context.tr('heartburn'), context.tr('thirdTrimester')],
+      ),
+      CommunityPost(
+        id: '2',
+        authorName: 'Julia K.',
+        authorAvatar: 'assets/images/avatar2.png',
+        content: 'Felt the first kick today! Such a wonderful feeling. ❤️',
+        postedAt: DateTime.now().subtract(const Duration(hours: 5)),
+        likesCount: 24,
+        commentsCount: 7,
+        tags: [context.tr('babyMovements'), context.tr('secondTrimester')],
+      ),
+      CommunityPost(
+        id: '3',
+        authorName: 'Sarah P.',
+        authorAvatar: 'assets/images/avatar3.png',
+        content: 'What did you pack in your hospital bag? I\'m in my 8th month and want to start preparing everything.',
+        postedAt: DateTime.now().subtract(const Duration(hours: 8)),
+        likesCount: 15,
+        commentsCount: 12,
+        tags: [context.tr('hospitalBag'), context.tr('birthPreparation')],
+      ),
+      CommunityPost(
+        id: '4',
+        authorName: 'Melanie H.',
+        authorAvatar: 'assets/images/avatar4.png',
+        content: 'Does anyone have experience with prenatal diagnosis? I\'m facing the decision whether to have tests done.',
+        postedAt: DateTime.now().subtract(const Duration(hours: 10)),
+        likesCount: 6,
+        commentsCount: 8,
+        tags: [context.tr('prenatalDiagnosis'), context.tr('screening')],
+      ),
+      CommunityPost(
+        id: '5',
+        authorName: 'Martina B.',
+        authorAvatar: 'assets/images/avatar5.png',
+        content: 'Is it normal to be so exhausted in the first trimester? I sleep almost 10 hours daily and am still tired.',
+        postedAt: DateTime.now().subtract(const Duration(hours: 24)),
+        likesCount: 18,
+        commentsCount: 9,
+        tags: [context.tr('fatigue'), context.tr('firstTrimester')],
+      ),
+    ];
+
+    _expertPosts = [
+      CommunityPost(
+        id: 'e1',
+        authorName: 'Dr. Martina Schmidt',
+        authorAvatar: 'assets/images/doctor1.png',
+        content: 'Dear expectant mothers, remember to take sufficient folic acid. This is especially important for the development of the neural tube in your baby during the first weeks of pregnancy.',
+        postedAt: DateTime.now().subtract(const Duration(days: 1)),
+        likesCount: 45,
+        commentsCount: 12,
+        tags: [context.tr('expertAdvice'), context.tr('nutrition')],
+        isExpert: true,
+      ),
+      CommunityPost(
+        id: 'e2',
+        authorName: 'Midwife Sabine Weber',
+        authorAvatar: 'assets/images/midwife1.png',
+        content: 'Relaxation techniques for birth: Practice deep breathing exercises regularly. They can help you stay calm during contractions and supply your body with oxygen. Practice different positions that can help you be more comfortable during contractions.',
+        postedAt: DateTime.now().subtract(const Duration(days: 2)),
+        likesCount: 38,
+        commentsCount: 8,
+        tags: [context.tr('birthPreparation'), context.tr('relaxation')],
+        isExpert: true,
+      ),
+    ];
+
+    _comments = [
+      Comment(
+        id: 'c1',
+        authorName: 'Maria S.',
+        authorAvatar: 'assets/images/avatar6.png',
+        content: 'I\'ve had similar experiences. Try eating smaller meals and don\'t eat anything before going to bed.',
+        postedAt: DateTime.now().subtract(const Duration(hours: 1)),
+        likesCount: 3,
+      ),
+      Comment(
+        id: 'c2',
+        authorName: 'Claudia W.',
+        authorAvatar: 'assets/images/avatar7.png',
+        content: 'Almond milk helped me with heartburn. Maybe it\'s worth a try?',
+        postedAt: DateTime.now().subtract(const Duration(hours: 2)),
+        likesCount: 5,
+      ),
+    ];
+  }
+
+  // Liste von Kategorien für Filter
+  List<String> get _localizedCategories => [
+    context.tr('allPosts'),
+    context.tr('firstTrimester'),
+    context.tr('secondTrimester'),
+    context.tr('thirdTrimester'),
+    context.tr('nutrition'),
+    context.tr('exercise'),
+    context.tr('birthPreparation'),
+    context.tr('medicalQuestions')
+  ];
 
   @override
   void dispose() {
@@ -147,19 +353,22 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
+    // Überwache Sprachänderungen
+    final languageProvider = Provider.of<LanguageProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Community',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          context.tr('community'),
+          style: const TextStyle(color: Colors.white),
         ),
         backgroundColor: AppTheme.primaryColor,
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,
-          tabs: const [
-            Tab(text: 'Diskussionen'),
-            Tab(text: 'Expertenrat'),
+          tabs: [
+            Tab(text: context.tr('discussions')),
+            Tab(text: context.tr('expertAdvice')),
           ],
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
@@ -176,12 +385,12 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _categories.length,
+              itemCount: _localizedCategories.length,
               itemBuilder: (context, index) {
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: FilterChip(
-                    label: Text(_categories[index]),
+                    label: Text(_localizedCategories[index]),
                     selected: index == 0, // Standardmäßig "Alle Beiträge" ausgewählt
                     onSelected: (selected) {
                       // Hier später Filterlogik implementieren
@@ -229,7 +438,7 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
       child: TextField(
         controller: _searchController,
         decoration: InputDecoration(
-          hintText: 'In der Community suchen...',
+          hintText: context.tr('searchInCommunity'),
           prefixIcon: const Icon(Icons.search, color: AppTheme.primaryColor),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
@@ -262,8 +471,8 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
 
   Widget _buildPostsList(List<CommunityPost> posts) {
     if (posts.isEmpty) {
-      return const Center(
-        child: Text('Keine Beiträge gefunden'),
+      return Center(
+        child: Text(context.tr('noPostsFound')),
       );
     }
 
@@ -328,9 +537,9 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                                 color: AppTheme.accentColor,
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: const Text(
-                                'Experte',
-                                style: TextStyle(
+                              child: Text(
+                                context.tr('expert'),
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
@@ -341,7 +550,7 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                         ],
                       ),
                       Text(
-                        _formatPostTime(post.postedAt),
+                        post.getFormattedPostTime(context),
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey[600],
@@ -445,7 +654,7 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Neuer Beitrag',
+                        context.tr('newPost'),
                         style: Theme.of(context).textTheme.displaySmall,
                       ),
                       IconButton(
@@ -461,7 +670,7 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                     controller: _postController,
                     maxLines: 5,
                     decoration: InputDecoration(
-                      hintText: 'Teilen Sie Ihre Erfahrungen oder stellen Sie eine Frage...',
+                      hintText: context.tr('shareExperienceOrQuestion'),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -497,9 +706,10 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                             ? () {
                           // Beitrag-Veröffentlichen-Logik hier implementieren
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Ihr Beitrag wurde veröffentlicht'),
+                            SnackBar(
+                              content: Text(context.tr('postPublished')),
                               backgroundColor: AppTheme.primaryColor,
+                              duration: const Duration(seconds: 2),
                             ),
                           );
                           Navigator.pop(context);
@@ -511,7 +721,7 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                           foregroundColor: Colors.white,
                           disabledBackgroundColor: Colors.grey[300],
                         ),
-                        child: const Text('Veröffentlichen'),
+                        child: Text(context.tr('publish')),
                       ),
                     ],
                   ),
@@ -568,22 +778,17 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                         Padding(
                           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                           child: Text(
-                            'Kommentare (${post.commentsCount})',
+                            context.tr('commentsWithCount', {'count': post.commentsCount.toString()}),
                             style: Theme.of(context).textTheme.displaySmall,
                           ),
                         ),
 
-                        // Kommentare (Beispielkommentare)
-                        _buildCommentCard(
-                          'Maria S.',
-                          'Ich habe ähnliche Erfahrungen gemacht. Versuche mal, kleinere Mahlzeiten zu dir zu nehmen und vor dem Schlafengehen nichts mehr zu essen.',
-                          DateTime.now().subtract(const Duration(hours: 1)),
-                        ),
-                        _buildCommentCard(
-                          'Claudia W.',
-                          'Mandelmilch hat bei mir gegen Sodbrennen geholfen. Vielleicht ist das einen Versuch wert?',
-                          DateTime.now().subtract(const Duration(hours: 2)),
-                        ),
+                        // Kommentare aus der Liste
+                        ..._comments.map((comment) => _buildCommentCard(
+                          comment.authorName,
+                          comment.content,
+                          comment.postedAt,
+                        )),
                       ],
                     ),
                   ),
@@ -599,7 +804,7 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                           child: TextField(
                             controller: commentController,
                             decoration: InputDecoration(
-                              hintText: 'Kommentar schreiben...',
+                              hintText: context.tr('writeComment'),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(24),
                               ),
@@ -616,9 +821,10 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                               if (commentController.text.isNotEmpty) {
                                 // Kommentar-Senden-Logik hier implementieren
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Ihr Kommentar wurde veröffentlicht'),
+                                  SnackBar(
+                                    content: Text(context.tr('commentPublished')),
                                     backgroundColor: AppTheme.primaryColor,
+                                    duration: const Duration(seconds: 2),
                                   ),
                                 );
                                 commentController.clear();
@@ -674,6 +880,8 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                 ),
                 const SizedBox(width: 8),
                 Text(
+                  // Hier könnten wir ein Comment-Objekt verwenden, um getFormattedPostTime zu nutzen
+                  // Da wir aber nur ein DateTime haben, nutzen wir die alte Methode
                   _formatPostTime(postedAt),
                   style: TextStyle(
                     fontSize: 12,
@@ -692,7 +900,7 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
               children: [
                 TextButton.icon(
                   icon: const Icon(Icons.thumb_up_outlined, size: 16),
-                  label: const Text('Gefällt mir'),
+                  label: Text(context.tr('like')),
                   style: TextButton.styleFrom(
                     foregroundColor: AppTheme.primaryColor,
                     visualDensity: VisualDensity.compact,
@@ -709,18 +917,20 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
     );
   }
 
+  // Diese Methode bleibt für direkte Formatierung von DateTime-Objekten,
+  // idealerweise würden wir überall CommunityPost oder Comment Objekte verwenden
   String _formatPostTime(DateTime dateTime) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
     if (difference.inMinutes < 1) {
-      return 'Gerade eben';
+      return context.tr('justNow');
     } else if (difference.inHours < 1) {
-      return 'Vor ${difference.inMinutes} ${difference.inMinutes == 1 ? 'Minute' : 'Minuten'}';
+      return context.tr('minutesAgo', {'count': difference.inMinutes.toString()});
     } else if (difference.inDays < 1) {
-      return 'Vor ${difference.inHours} ${difference.inHours == 1 ? 'Stunde' : 'Stunden'}';
+      return context.tr('hoursAgo', {'count': difference.inHours.toString()});
     } else if (difference.inDays < 7) {
-      return 'Vor ${difference.inDays} ${difference.inDays == 1 ? 'Tag' : 'Tagen'}';
+      return context.tr('daysAgo', {'count': difference.inDays.toString()});
     } else {
       return '${dateTime.day}.${dateTime.month}.${dateTime.year}';
     }
