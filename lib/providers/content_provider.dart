@@ -30,23 +30,21 @@ class ContentProvider extends ChangeNotifier {
   }
 
   ContentProvider() {
-    _loadContent();
     _loadFavorites();
+    // Note: We don't call _loadContent() here anymore.
+    // It will be called when updateLanguage is called from LanguageProvider
   }
 
   Future<void> updateLanguage(String language) async {
-    if (_language != language) {
+    if (_language != language || _contentData == null) {
       if (kDebugMode) {
         print("ContentProvider: Updating language to $language");
       }
 
       _language = language;
 
-      // Verwende Future.microtask, um den Aufruf zu verzögern,
-      // bis der aktuelle Build-Prozess abgeschlossen ist
-      Future.microtask(() async {
-        await _loadContent();
-      });
+      // Don't use Future.microtask here to avoid race conditions
+      await _loadContent();
     }
   }
 

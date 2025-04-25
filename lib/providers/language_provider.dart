@@ -13,29 +13,38 @@ class LanguageProvider with ChangeNotifier {
 
   String get currentLanguage => _currentLanguage;
 
-// In language_provider.dart
-
   void _loadLanguage() {
     final settingsBox = Hive.box('appSettings');
     _currentLanguage = settingsBox.get('preferredLanguage', defaultValue: 'en');
 
-    // Nach dem Build-Prozess ausführen
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _contentProvider.updateLanguage(_currentLanguage);
+    // Ensure content is loaded with the correct language immediately
+    // This is crucial for first-time app initialization
+    if (kDebugMode) {
+      print("LanguageProvider: Initial language load: $_currentLanguage");
+    }
+
+    // Use addPostFrameCallback to ensure this happens after the current build
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // We now await the content update to ensure it's completed before app continues
+      await _contentProvider.updateLanguage(_currentLanguage);
     });
   }
 
-// In language_provider.dart
   Future<void> changeLanguage(String languageCode) async {
     if (_currentLanguage != languageCode) {
       _currentLanguage = languageCode;
 
-      // Speichern in persistenten Speicher
+      // Save to persistent storage
       final settingsBox = Hive.box('appSettings');
       await settingsBox.put('preferredLanguage', languageCode);
 
-      // Warte auf den nächsten Frame, bevor der ContentProvider aktualisiert wird
+      // Wait for the ContentProvider to update before notifying listeners
       WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (kDebugMode) {
+          print("LanguageProvider: Changing language to: $languageCode");
+        }
+
+        // Await the content update to ensure it's completed
         await _contentProvider.updateLanguage(languageCode);
         notifyListeners();
       });
