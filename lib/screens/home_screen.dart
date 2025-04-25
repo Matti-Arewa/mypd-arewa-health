@@ -4,12 +4,11 @@ import '../providers/content_provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/language_provider.dart';
 import '../screens/category_screen.dart';
-import '../screens/welcome_screen.dart'; // Import welcome screen
+import '../screens/welcome_screen.dart';
 import '../screens/search_screen.dart';
 import '../screens/tools_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/community_screen.dart';
-import '../widgets/pregnancy_progress.dart';
 import '../widgets/category_card.dart';
 import '../widgets/section_card.dart';
 import '../utils/app_theme.dart';
@@ -29,10 +28,43 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   int _selectedIndex = 4;
   bool _communityDevMode = false;
   bool _medicalRecordsDevMode = false;
+  bool _forceRefresh = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkContentLoaded();
+    });
+  }
+
+  // Check if content is loaded, and force a reload if needed
+  Future<void> _checkContentLoaded() async {
+    final contentProvider = Provider.of<ContentProvider>(context, listen: false);
+    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+
+    if (contentProvider.sections.isEmpty && !contentProvider.isLoading) {
+      if (kDebugMode) {
+        print("HomeScreen: Content is empty, forcing reload");
+      }
+
+      // Try to reload content if sections are empty
+      try {
+        await languageProvider.reloadContent();
+        setState(() {
+          _forceRefresh = true;
+        });
+      } catch (e) {
+        if (kDebugMode) {
+          print("HomeScreen: Error reloading content: $e");
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Baue NavigationDestinations hier, damit sie die aktuelle Sprache verwenden
+    // Build destinations here so they use the current language
     final destinations = [
       NavigationDestination(
         icon: const Icon(Icons.menu_book_outlined),
@@ -55,14 +87,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         label: context.tr('community'),
       ),
       NavigationDestination(
-        // Hier wird das ursprüngliche Favorites-Icon für den Welcome Screen verwendet
+        // Original Favorites icon used for Welcome Screen
         icon: const Icon(Icons.info_outline),
         selectedIcon: const Icon(Icons.info),
         label: context.tr('welcomeTab'),
       ),
     ];
 
-    // WICHTIG: Erstelle die Screens bei JEDEM Build neu, damit sie den aktuellen State verwenden
+    // IMPORTANT: Recreate screens on EACH build to use current state
     final screens = [
       const _InfoContent(),            // Guide (0)
       const ToolsScreen(),             // Tools (1)
@@ -90,17 +122,27 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           });
         },
       ),
-      const WelcomeScreen(),           // Welcome Screen (ehemals Favorites) (4)
+      const WelcomeScreen(),           // Welcome Screen (formerly Favorites) (4)
     ];
 
-    // Überprüfe, ob der Content-Provider fertig geladen hat
+    // Check if ContentProvider has finished loading
     final contentProvider = Provider.of<ContentProvider>(context);
+
     if (contentProvider.isLoading) {
       return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
         ),
       );
+    }
+
+    // Reset force refresh if we've already refreshed
+    if (_forceRefresh && contentProvider.sections.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          _forceRefresh = false;
+        });
+      });
     }
 
     return Scaffold(
@@ -110,9 +152,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
-        //labelTextStyle: ,
         labelTextStyle: MaterialStateProperty.all(
-          TextStyle(fontSize: 11.0), // Kleinere Schriftgröße
+          const TextStyle(fontSize: 11.0), // Smaller font size
         ),
         onDestinationSelected: (index) {
           if (kDebugMode) {
@@ -136,8 +177,51 @@ class _InfoContent extends StatefulWidget {
 }
 
 class _InfoContentState extends State<_InfoContent> {
-  // Verfolge, welche Abschnitte erweitert sind
+  // Track which sections are expanded
   Map<String, bool> expandedSections = {};
+  bool _hasLoadedInitialContent = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Try to force reload content if needed
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkContentLoaded();
+    });
+  }
+
+  Future<void> _checkContentLoaded() async {
+    final contentProvider = Provider.of<ContentProvider>(context, listen: false);
+    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+
+    if (contentProvider.sections.isEmpty && !contentProvider.isLoading) {
+      if (kDebugMode) {
+        print("InfoContent: Content is empty, trying to reload");
+      }
+
+      try {
+        await languageProvider.reloadContent();
+        setState(() {});
+      } catch (e) {
+        if (kDebugMode) {
+          print("InfoContent: Error reloading content: $e");
+        }
+      }
+    } else if (contentProvider.sections.isNotEmpty && !_hasLoadedInitialContent) {
+      if (kDebugMode) {
+        print("InfoContent: Content loaded, initializing expanded sections");
+      }
+
+      // Initialize expanded sections only once, when content is first loaded
+      setState(() {
+        _hasLoadedInitialContent = true;
+        // Set first section to be initially expanded
+        if (contentProvider.sections.isNotEmpty) {
+          expandedSections[contentProvider.sections.first.id] = true;
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -147,15 +231,46 @@ class _InfoContentState extends State<_InfoContent> {
     final screenWidth = mediaQuery.size.width;
     final screenHeight = mediaQuery.size.height;
 
-    // Bestimme, ob wir eine kompakte Anzeige verwenden sollen
-    // basierend auf der Bildschirmgröße
+    // Determine if we should use compact view based on screen size
     final bool useCompactView = screenHeight < 700 || screenWidth < 360;
 
     if (contentProvider.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Alle Abschnitte anzeigen
+    // Check for empty content even if not loading
+    if (contentProvider.sections.isEmpty) {
+      if (kDebugMode) {
+        print("InfoContent: Sections is empty!");
+      }
+
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              context.tr('noContentAvailable'),
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () async {
+                if (kDebugMode) {
+                  print("InfoContent: Manual reload button pressed");
+                }
+
+                final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+                await languageProvider.reloadContent();
+                setState(() {});
+              },
+              child: Text(context.tr('reload')),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Display all sections
     final sections = contentProvider.sections;
 
     return Scaffold(
@@ -196,10 +311,7 @@ class _InfoContentState extends State<_InfoContent> {
       ),
       body: Column(
         children: [
-          // Header und Schwangerschaftsfortschritt
-          //_buildHeader(context, userProvider, useCompactView),
-
-          // Abschnitts-Überschrift
+          // Section heading
           Padding(
             padding: EdgeInsets.fromLTRB(16, useCompactView ? 12 : 16, 16, useCompactView ? 6 : 8),
             child: Row(
@@ -220,7 +332,7 @@ class _InfoContentState extends State<_InfoContent> {
             ),
           ),
 
-          // Abschnitts-Liste
+          // Section list
           Expanded(
             child: ListView.builder(
               key: const PageStorageKey('section-list'),
@@ -232,15 +344,15 @@ class _InfoContentState extends State<_InfoContent> {
               itemBuilder: (context, index) {
                 final section = sections[index];
 
-                // Initialisiere den expandierten Status, falls noch nicht gesetzt
-                expandedSections.putIfAbsent(section.id, () => index == 0); // Der erste Abschnitt ist standardmäßig geöffnet
+                // Initialize expanded state if not set
+                expandedSections.putIfAbsent(section.id, () => index == 0); // First section is open by default
 
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Abschnitts-Header mit Toggle
+                      // Section header with toggle
                       SectionCard(
                         title: section.title,
                         imageUrl: section.imageUrl,
@@ -252,7 +364,7 @@ class _InfoContentState extends State<_InfoContent> {
                         },
                       ),
 
-                      // Kategorien für diesen Abschnitt (nur anzeigen, wenn erweitert)
+                      // Categories for this section (only show if expanded)
                       if (expandedSections[section.id] ?? false)
                         AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
@@ -284,129 +396,6 @@ class _InfoContentState extends State<_InfoContent> {
               },
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context, UserProvider userProvider, bool compact) {
-    // Berechne die optimale Padding-Größe basierend auf der Bildschirmhöhe
-    final screenHeight = MediaQuery.of(context).size.height;
-    final verticalPadding = compact ? 12.0 : 16.0;
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: verticalPadding),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppTheme.primaryColor,
-            AppTheme.primaryColor.withOpacity(0.8),
-          ],
-        ),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  context.tr('yourPregnancy'),
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: compact
-                        ? AppTheme.fontSizeBodyLarge
-                        : AppTheme.fontSizeDisplaySmall,
-                    height: 1.1,
-                  ),
-                ),
-              ),
-              // Information Icon für medizinischen Touch - kompaktere Größe
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(compact ? 20 : 24),
-                ),
-                padding: EdgeInsets.all(compact ? 4 : 6),
-                child: Icon(
-                  Icons.medical_information,
-                  color: Colors.white,
-                  size: compact ? 20 : 24,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          if (userProvider.dueDate != null) ...[
-            PregnancyProgress(
-              weeksPregnant: userProvider.weeksPregnant,
-              daysLeft: userProvider.daysLeft,
-              dueDate: userProvider.dueDate!,
-              compact: compact, // Übergebe die compact-Flag an die PregnancyProgress-Komponente
-            ),
-          ] else ...[
-            Card(
-              elevation: 2,
-              margin: EdgeInsets.zero,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: EdgeInsets.all(compact ? 10 : 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.tr('setDueDate'),
-                      style: TextStyle(
-                        fontSize: compact
-                            ? AppTheme.fontSizeBodyMedium
-                            : AppTheme.fontSizeBodyLarge,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: compact ? 2 : 4),
-                    Text(
-                      context.tr('trackYourPregnancy'),
-                      style: TextStyle(
-                        fontSize: compact
-                            ? AppTheme.fontSizeSmall
-                            : AppTheme.fontSizeBodyMedium,
-                      ),
-                    ),
-                    SizedBox(height: compact ? 6 : 8),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const SettingsScreen(),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primaryColor,
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: compact ? 6 : 8),
-                          minimumSize: Size(double.infinity, compact ? 32 : 36),
-                        ),
-                        child: Text(context.tr('setDate')),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );

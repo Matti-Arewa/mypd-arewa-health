@@ -6,48 +6,95 @@ import 'package:flutter/foundation.dart';
 class LanguageProvider with ChangeNotifier {
   final ContentProvider _contentProvider;
   late String _currentLanguage;
+  bool _isInitialized = false;
 
   LanguageProvider(this._contentProvider) {
     _loadLanguage();
   }
 
   String get currentLanguage => _currentLanguage;
+  bool get isInitialized => _isInitialized;
 
-  void _loadLanguage() {
-    final settingsBox = Hive.box('appSettings');
-    _currentLanguage = settingsBox.get('preferredLanguage', defaultValue: 'en');
-
-    // Ensure content is loaded with the correct language immediately
-    // This is crucial for first-time app initialization
+  Future<void> _loadLanguage() async {
     if (kDebugMode) {
-      print("LanguageProvider: Initial language load: $_currentLanguage");
+      print("LanguageProvider: Loading language preference");
     }
 
-    // Use addPostFrameCallback to ensure this happens after the current build
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // We now await the content update to ensure it's completed before app continues
-      await _contentProvider.updateLanguage(_currentLanguage);
-    });
+    try {
+      final settingsBox = Hive.box('appSettings');
+      _currentLanguage = settingsBox.get('preferredLanguage', defaultValue: 'en');
+
+      if (kDebugMode) {
+        print("LanguageProvider: Language loaded from Hive: $_currentLanguage");
+      }
+
+      // Initialize content provider with correct language immediately
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        try {
+          if (kDebugMode) {
+            print("LanguageProvider: Initializing ContentProvider with $_currentLanguage");
+          }
+          // Use the new initialization method
+          await _contentProvider.initializeContent(_currentLanguage);
+          _isInitialized = true;
+          notifyListeners();
+        } catch (e) {
+          if (kDebugMode) {
+            print("LanguageProvider: Error initializing content: $e");
+          }
+        }
+      });
+    } catch (e) {
+      if (kDebugMode) {
+        print("LanguageProvider: Error loading language: $e");
+      }
+      // Fall back to English
+      _currentLanguage = 'en';
+      _contentProvider.updateLanguage('en');
+    }
   }
 
   Future<void> changeLanguage(String languageCode) async {
     if (_currentLanguage != languageCode) {
+      if (kDebugMode) {
+        print("LanguageProvider: Changing language from $_currentLanguage to $languageCode");
+      }
+
       _currentLanguage = languageCode;
 
       // Save to persistent storage
-      final settingsBox = Hive.box('appSettings');
-      await settingsBox.put('preferredLanguage', languageCode);
-
-      // Wait for the ContentProvider to update before notifying listeners
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        final settingsBox = Hive.box('appSettings');
+        await settingsBox.put('preferredLanguage', languageCode);
+      } catch (e) {
         if (kDebugMode) {
-          print("LanguageProvider: Changing language to: $languageCode");
+          print("LanguageProvider: Error saving language preference: $e");
         }
+        // Continue even if saving fails
+      }
 
-        // Await the content update to ensure it's completed
+      // Update ContentProvider with new language and wait for completion
+      try {
         await _contentProvider.updateLanguage(languageCode);
-        notifyListeners();
-      });
+      } catch (e) {
+        if (kDebugMode) {
+          print("LanguageProvider: Error updating content language: $e");
+        }
+      }
+
+      notifyListeners();
+    }
+  }
+
+  // Force a content reload with current language
+  Future<void> reloadContent() async {
+    try {
+      await _contentProvider.updateLanguage(_currentLanguage);
+      notifyListeners();
+    } catch (e) {
+      if (kDebugMode) {
+        print("LanguageProvider: Error reloading content: $e");
+      }
     }
   }
 

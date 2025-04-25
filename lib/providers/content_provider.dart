@@ -13,12 +13,14 @@ class ContentProvider extends ChangeNotifier {
   List<String> _favorites = [];
   final _searchResults = <ContentQuestion>[];
   String _language = 'en';  // Default language is English
+  bool _isInitialized = false;  // Add initialization flag
 
   ContentData? get contentData => _contentData;
   bool get isLoading => _isLoading;
   List<String> get favorites => _favorites;
   List<ContentQuestion> get searchResults => _searchResults;
   List<ContentSection> get sections => _contentData?.sections ?? [];
+  bool get isInitialized => _isInitialized;
 
   // Getter for backward compatibility
   List<ContentCategory> get categories {
@@ -31,8 +33,20 @@ class ContentProvider extends ChangeNotifier {
 
   ContentProvider() {
     _loadFavorites();
-    // Note: We don't call _loadContent() here anymore.
-    // It will be called when updateLanguage is called from LanguageProvider
+    // We'll explicitly call initializeContent later
+  }
+
+  // New method to force initialization on app start
+  Future<void> initializeContent(String initialLanguage) async {
+    if (kDebugMode) {
+      print("ContentProvider: Initializing with language: $initialLanguage");
+    }
+
+    if (!_isInitialized) {
+      _language = initialLanguage;
+      await _loadContent();
+      _isInitialized = true;
+    }
   }
 
   Future<void> updateLanguage(String language) async {
@@ -43,8 +57,15 @@ class ContentProvider extends ChangeNotifier {
 
       _language = language;
 
-      // Don't use Future.microtask here to avoid race conditions
-      await _loadContent();
+      // Force content reload and wait for it to complete
+      try {
+        await _loadContent();
+      } catch (e) {
+        if (kDebugMode) {
+          print("ContentProvider: Error loading content: $e");
+        }
+        rethrow; // Rethrow to allow handling by caller
+      }
     }
   }
 
@@ -64,54 +85,72 @@ class ContentProvider extends ChangeNotifier {
 
       if (savedContent != null) {
         if (kDebugMode) {
-          print("ContentProvider: Found saved content in Hive");
+          print("ContentProvider: Found saved content in Hive for $_language");
         }
 
-        final Map<String, dynamic> jsonData = json.decode(savedContent);
-        _contentData = ContentData.fromJson(jsonData);
+        try {
+          final Map<String, dynamic> jsonData = json.decode(savedContent);
+          _contentData = ContentData.fromJson(jsonData);
+        } catch (e) {
+          if (kDebugMode) {
+            print("ContentProvider: Error parsing saved content: $e");
+          }
+          // Fall back to sample data if parsing fails
+          _loadSampleData();
+        }
       } else {
-        // Use sample data directly instead of trying to load from assets
         if (kDebugMode) {
-          print("ContentProvider: Using sample data");
+          print("ContentProvider: No saved content found, using sample data for $_language");
         }
-
-        // Load appropriate sample data based on language
-        if (_language == 'en') {
-          _contentData = SampleDataEN.getSampleContent();
-        } else if (_language == 'de') {
-          _contentData = SampleData.getSampleContent();
-        } else {
-          // Default to English data if no match is found
-          _contentData = SampleDataEN.getSampleContent();
-        }
+        _loadSampleData();
 
         // Save to Hive for offline access
-        await contentBox.put(saveKey, json.encode(_contentData?.toJson()));
+        try {
+          await contentBox.put(saveKey, json.encode(_contentData?.toJson()));
+        } catch (e) {
+          if (kDebugMode) {
+            print("ContentProvider: Error saving to Hive: $e");
+          }
+          // Continue without saving - at least we loaded the sample data
+        }
       }
     } catch (e) {
-      debugPrint('Error loading content: $e');
-      // Fallback to sample data based on language
-      if (_language == 'en') {
-        _contentData = SampleDataEN.getSampleContent();
-      } else if (_language == 'de') {
-        _contentData = SampleData.getSampleContent();
-      } else {
-        // Default to English data if no match is found
-        _contentData = SampleDataEN.getSampleContent();
+      if (kDebugMode) {
+        print('ContentProvider: Error in _loadContent: $e');
       }
+      _loadSampleData();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
+  }
 
-    _isLoading = false;
-    notifyListeners();
+  // Extract sample data loading to a separate method
+  void _loadSampleData() {
+    if (_language == 'en') {
+      _contentData = SampleDataEN.getSampleContent();
+    } else if (_language == 'de') {
+      _contentData = SampleData.getSampleContent();
+    } else {
+      // Default to English data if no match is found
+      _contentData = SampleDataEN.getSampleContent();
+    }
   }
 
   Future<void> _loadFavorites() async {
-    final favoritesBox = Hive.box('favorites');
-    final savedFavorites = favoritesBox.get('userFavorites');
+    try {
+      final favoritesBox = Hive.box('favorites');
+      final savedFavorites = favoritesBox.get('userFavorites');
 
-    if (savedFavorites != null) {
-      _favorites = List<String>.from(savedFavorites);
-      notifyListeners();
+      if (savedFavorites != null) {
+        _favorites = List<String>.from(savedFavorites);
+        notifyListeners();
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("ContentProvider: Error loading favorites: $e");
+      }
+      // Continue with empty favorites list
     }
   }
 
@@ -122,8 +161,15 @@ class ContentProvider extends ChangeNotifier {
       _favorites.add(questionId);
     }
 
-    final favoritesBox = Hive.box('favorites');
-    await favoritesBox.put('userFavorites', _favorites);
+    try {
+      final favoritesBox = Hive.box('favorites');
+      await favoritesBox.put('userFavorites', _favorites);
+    } catch (e) {
+      if (kDebugMode) {
+        print("ContentProvider: Error saving favorites: $e");
+      }
+      // Continue without saving - at least we updated the in-memory list
+    }
 
     notifyListeners();
   }

@@ -8,19 +8,59 @@ import 'services/localization_service.dart';
 import 'providers/user_provider.dart';
 import 'providers/content_provider.dart';
 import 'providers/language_provider.dart';
+import 'providers/settings_provider.dart'; // Add this if not already imported
 import 'screens/home_screen.dart';
 import 'screens/settings_screen.dart';
-// Import other screens as needed
+import 'package:flutter/foundation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Hive
   await Hive.initFlutter();
-  await Hive.openBox('appSettings');
-  await Hive.openBox('content');
-  await Hive.openBox('favorites');
 
+  // Open Hive boxes in try-catch blocks to handle potential errors
+  try {
+    await Hive.openBox('appSettings');
+    if (kDebugMode) {
+      print("Main: Successfully opened appSettings box");
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print("Main: Error opening appSettings box: $e");
+    }
+    // Delete the box if it's corrupted and try again
+    await Hive.deleteBoxFromDisk('appSettings');
+    await Hive.openBox('appSettings');
+  }
+
+  try {
+    await Hive.openBox('content');
+    if (kDebugMode) {
+      print("Main: Successfully opened content box");
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print("Main: Error opening content box: $e");
+    }
+    // Delete the box if it's corrupted and try again
+    await Hive.deleteBoxFromDisk('content');
+    await Hive.openBox('content');
+  }
+
+  try {
+    await Hive.openBox('favorites');
+    if (kDebugMode) {
+      print("Main: Successfully opened favorites box");
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print("Main: Error opening favorites box: $e");
+    }
+    // Delete the box if it's corrupted and try again
+    await Hive.deleteBoxFromDisk('favorites');
+    await Hive.openBox('favorites');
+  }
 
   runApp(const MyApp());
 }
@@ -32,13 +72,19 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        // Create ContentProvider first
         ChangeNotifierProvider(create: (_) => ContentProvider()),
+
+        // Create LanguageProvider which depends on ContentProvider
         ChangeNotifierProxyProvider<ContentProvider, LanguageProvider>(
           create: (context) => LanguageProvider(Provider.of<ContentProvider>(context, listen: false)),
-          update: (context, contentProvider, previous) =>
-          previous ?? LanguageProvider(contentProvider),
+          update: (context, contentProvider, previousLanguageProvider) =>
+          previousLanguageProvider ?? LanguageProvider(contentProvider),
         ),
+
+        // Create other providers
         ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => SettingsProvider()..loadSettings()),
       ],
       child: const AppWithLanguage(),
     );
@@ -50,19 +96,26 @@ class AppWithLanguage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Die Key-Eigenschaft ist entscheidend hier - sie zwingt Flutter, die ganze App
-    // neu aufzubauen, wenn sich der Sprachcode ändert
+    // The Key property is critical here - it forces Flutter to rebuild
+    // the entire app when the language code changes
     final languageProvider = Provider.of<LanguageProvider>(context);
+    final contentProvider = Provider.of<ContentProvider>(context);
 
-    // Gemeinsame Eigenschaften für beide Plattformen
+    // Track if content has been loaded for debugging
+    if (kDebugMode) {
+      print("AppWithLanguage: Language is ${languageProvider.currentLanguage}");
+      print("AppWithLanguage: Content sections count: ${contentProvider.sections.length}");
+    }
+
+    // Shared properties for both platforms
     final Locale locale = Locale(languageProvider.currentLanguage);
     const String title = 'Pregnancy Guide';
     final Color primaryColor = Colors.pink[300]!;
 
-    // iOS spezifische App-Implementierung
+    // iOS specific app implementation
     if (Platform.isIOS) {
       return CupertinoApp(
-        key: ValueKey('ios_${languageProvider.currentLanguage}'),
+        key: ValueKey('ios_${languageProvider.currentLanguage}_${contentProvider.isInitialized}'),
         title: title,
         theme: CupertinoThemeData(
           primaryColor: primaryColor,
@@ -86,7 +139,7 @@ class AppWithLanguage extends StatelessWidget {
             ),
           ),
         ),
-        home: const HomeScreen(), // Weiterhin HomeScreen als Startpunkt verwenden
+        home: const HomeScreen(), // Keep HomeScreen as starting point
         routes: {
           SettingsScreen.routeName: (ctx) => const SettingsScreen(),
           // Add other routes here
@@ -101,18 +154,18 @@ class AppWithLanguage extends StatelessWidget {
         localeResolutionCallback: AppLocalizations.localeResolutionCallback,
       );
     }
-    // Android/andere Plattformen verwenden MaterialApp
+    // Android/other platforms use MaterialApp
     else {
       return MaterialApp(
         debugShowCheckedModeBanner: false,
-        key: ValueKey('android_${languageProvider.currentLanguage}'),
+        key: ValueKey('android_${languageProvider.currentLanguage}_${contentProvider.isInitialized}'),
         title: title,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
           useMaterial3: true,
           fontFamily: 'Poppins',
         ),
-        home: const HomeScreen(), // Weiterhin HomeScreen als Startpunkt verwenden
+        home: const HomeScreen(), // Keep HomeScreen as starting point
         routes: {
           SettingsScreen.routeName: (ctx) => const SettingsScreen(),
           // Add other routes here

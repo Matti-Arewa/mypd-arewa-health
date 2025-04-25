@@ -324,8 +324,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             _buildRegionOption('int', _getRegionName('int')),
             _buildRegionOption('de', _getRegionName('de')),
-            _buildRegionOption('at', _getRegionName('at')),
-            _buildRegionOption('ch', _getRegionName('ch')),
+            //_buildRegionOption('at', _getRegionName('at')),
+            //_buildRegionOption('ch', _getRegionName('ch')),
           ],
         ),
         actions: [

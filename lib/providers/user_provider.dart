@@ -60,7 +60,7 @@ class UserProvider extends ChangeNotifier {
   DateTime? _dueDate;
   DateTime? _lastPeriodDate;
   bool _isFirstLaunch = true;
-  String _preferredLanguage = 'de';
+  String _preferredLanguage = 'en';
   bool _notificationsEnabled = true;
   final List<KickSession> _kickSessions = [];
 
