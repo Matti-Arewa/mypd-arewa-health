@@ -107,19 +107,28 @@ class RelatedQuestions extends StatelessWidget {
     // Define relevant keywords to match
     List<String> keywords = [];
 
-    // Check for common pregnancy terms
+    // Check for common pregnancy terms in different languages
     final pregnancyTerms = [
+      // English terms
+      'trimester', 'birth', 'pregnancy', 'embryo', 'fetus',
+      'ultrasound', 'prenatal', 'nutrition', 'exercise',
+      'risk', 'symptom', 'checkup', 'test', 'doctor', 'midwife',
+      'early', 'late', 'contractions', 'breastfeeding', 'hygiene', 'nutrient',
+      'vitamin', 'iron', 'folic acid', 'ctg', 'diagnosis', 'pain',
+
+      // German terms
       'trimester', 'geburt', 'schwangerschaft', 'embryo', 'föt',
       'ultraschall', 'vorsorge', 'ernährung', 'sport', 'übung',
       'risiko', 'symptom', 'untersuchung', 'test', 'arzt', 'hebamme',
       'früh', 'spät', 'wehen', 'stillzeit', 'hygiene', 'nährstoff',
       'vitamin', 'eisen', 'folsäure', 'ctg', 'diagnos', 'schmerz',
-      // Add English terms as well
-      'birth', 'pregnancy', 'embryo', 'fetus',
-      'ultrasound', 'prenatal', 'nutrition', 'exercise',
-      'risk', 'symptom', 'checkup', 'test', 'doctor', 'midwife',
-      'early', 'late', 'contractions', 'breastfeeding', 'hygiene', 'nutrient',
-      'vitamin', 'iron', 'folic acid', 'ctg', 'diagnosis', 'pain'
+
+      // French terms
+      'trimestre', 'naissance', 'grossesse', 'embryon', 'fœtus',
+      'échographie', 'prénatal', 'nutrition', 'exercice',
+      'risque', 'symptôme', 'examen', 'test', 'médecin', 'sage-femme',
+      'précoce', 'tardif', 'contractions', 'allaitement', 'hygiène', 'nutriment',
+      'vitamine', 'fer', 'acide folique', 'ctg', 'diagnostic', 'douleur'
     ];
 
     for (final term in pregnancyTerms) {

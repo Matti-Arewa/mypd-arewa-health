@@ -22,6 +22,7 @@ class AppLocalizations {
   static List<Locale> supportedLocales = [
     const Locale('en', ''), // English
     const Locale('de', ''), // German
+    const Locale('fr', ''), // French
   ];
 
   static List<LocalizationsDelegate<dynamic>> localizationsDelegates = [
@@ -82,7 +83,7 @@ class _AppLocalizationsDelegate
   @override
   bool isSupported(Locale locale) {
     // Include all of your supported language codes here
-    return ['en', 'de'].contains(locale.languageCode);
+    return ['en', 'de', 'fr'].contains(locale.languageCode);
   }
 
   @override

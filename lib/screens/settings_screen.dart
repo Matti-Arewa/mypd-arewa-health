@@ -282,6 +282,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             _buildLanguageOption('en', 'English'),
             _buildLanguageOption('de', 'Deutsch'),
+            _buildLanguageOption('fr', 'Français'),
           ],
         ),
         actions: [
@@ -324,6 +325,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             _buildRegionOption('int', _getRegionName('int')),
             _buildRegionOption('de', _getRegionName('de')),
+            _buildRegionOption('fr', _getRegionName('fr')),
             //_buildRegionOption('at', _getRegionName('at')),
             //_buildRegionOption('ch', _getRegionName('ch')),
           ],

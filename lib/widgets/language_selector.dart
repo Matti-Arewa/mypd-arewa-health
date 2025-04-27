@@ -9,6 +9,7 @@ class LanguageSelector extends StatelessWidget {
   final List<Map<String, String>> languages = [
     {'code': 'en', 'name': 'English'},
     {'code': 'de', 'name': 'Deutsch'},
+    {'code': 'fr', 'name': 'Français'},
   ];
 
   LanguageSelector({super.key});

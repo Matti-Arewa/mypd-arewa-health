@@ -13,6 +13,7 @@ class LanguageProvider with ChangeNotifier {
   }
 
   String get currentLanguage => _currentLanguage;
+
   bool get isInitialized => _isInitialized;
 
   Future<void> _loadLanguage() async {
@@ -22,7 +23,8 @@ class LanguageProvider with ChangeNotifier {
 
     try {
       final settingsBox = Hive.box('appSettings');
-      _currentLanguage = settingsBox.get('preferredLanguage', defaultValue: 'en');
+      _currentLanguage =
+          settingsBox.get('preferredLanguage', defaultValue: 'en');
 
       if (kDebugMode) {
         print("LanguageProvider: Language loaded from Hive: $_currentLanguage");
@@ -32,7 +34,8 @@ class LanguageProvider with ChangeNotifier {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         try {
           if (kDebugMode) {
-            print("LanguageProvider: Initializing ContentProvider with $_currentLanguage");
+            print(
+                "LanguageProvider: Initializing ContentProvider with $_currentLanguage");
           }
           // Use the new initialization method
           await _contentProvider.initializeContent(_currentLanguage);
@@ -57,7 +60,8 @@ class LanguageProvider with ChangeNotifier {
   Future<void> changeLanguage(String languageCode) async {
     if (_currentLanguage != languageCode) {
       if (kDebugMode) {
-        print("LanguageProvider: Changing language from $_currentLanguage to $languageCode");
+        print(
+            "LanguageProvider: Changing language from $_currentLanguage to $languageCode");
       }
 
       _currentLanguage = languageCode;
@@ -105,6 +109,8 @@ class LanguageProvider with ChangeNotifier {
         return 'English';
       case 'de':
         return 'Deutsch';
+      case 'fr':
+        return 'Français';
       default:
         return 'English';
     }

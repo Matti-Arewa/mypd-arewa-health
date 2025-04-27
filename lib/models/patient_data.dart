@@ -64,20 +64,24 @@ class PatientData {
   // Wir verwenden eine Methode, um lokalisierte Beispieldaten zu bekommen
   static PatientData getSampleData({BuildContext? context}) {
     bool isGerman = context == null ? false : context.loc.locale.languageCode == 'de';
+    bool isFrench = context == null ? false : context.loc.locale.languageCode == 'fr';
 
-    // Standard-Medikamente in beiden Sprachen
+    // Standard-Medikamente in allen Sprachen
     final List<String> medicationsDE = ['Folsäure 400µg täglich', 'Eisen 30mg zweimal täglich'];
     final List<String> medicationsEN = ['Folic acid 400µg daily', 'Iron 30mg twice daily'];
+    final List<String> medicationsFR = ['Acide folique 400µg par jour', 'Fer 30mg deux fois par jour'];
 
-    // Standard-Risikofaktoren in beiden Sprachen
+    // Standard-Risikofaktoren in allen Sprachen
     final List<String> riskFactorsDE = ['Leicht erhöhter Blutdruck'];
     final List<String> riskFactorsEN = ['Slightly elevated blood pressure'];
+    final List<String> riskFactorsFR = ['Tension artérielle légèrement élevée'];
 
-    // Arztnotizen in beiden Sprachen
+    // Arztnotizen in allen Sprachen
     const String doctorNotesDE = 'Leicht erniedrigter Hämoglobinwert. Eisenpräparate wurden verschrieben. Bitte verfolgen Sie die Werte weiter.';
     const String doctorNotesEN = 'Slightly decreased hemoglobin value. Iron supplements have been prescribed. Please continue to monitor the values.';
+    const String doctorNotesFR = 'Valeur d\'hémoglobine légèrement diminuée. Des suppléments de fer ont été prescrits. Veuillez continuer à surveiller les valeurs.';
 
-    // Ultraschall-Notizen in beiden Sprachen
+    // Ultraschall-Notizen in allen Sprachen
     final Map<int, String> ultrasoundNotesDE = {
       0: 'Alle Wachstumsmessungen im normalen Bereich. Fetale Aktivität und Bewegungen normal.',
       1: 'Normales Wachstum, keine Auffälligkeiten feststellbar.',
@@ -90,7 +94,13 @@ class PatientData {
       2: 'All measurements correspond to gestational age. No structural anomalies visible.'
     };
 
-    // Plazentaposition in beiden Sprachen
+    final Map<int, String> ultrasoundNotesFR = {
+      0: 'Toutes les mesures de croissance dans la plage normale. Activité fœtale et mouvements normaux.',
+      1: 'Croissance normale, aucune anomalie détectée.',
+      2: 'Toutes les mesures correspondent à l\'âge gestationnel. Aucune anomalie structurelle visible.'
+    };
+
+    // Plazentaposition in allen Sprachen
     final Map<int, String> placentaPositionDE = {
       0: 'Vorderwand, oben',
       1: 'Vorderwand, oben',
@@ -103,7 +113,13 @@ class PatientData {
       2: 'Anterior wall'
     };
 
-    // Fetale Position in beiden Sprachen
+    final Map<int, String> placentaPositionFR = {
+      0: 'Paroi antérieure, supérieure',
+      1: 'Paroi antérieure, supérieure',
+      2: 'Paroi antérieure'
+    };
+
+    // Fetale Position in allen Sprachen
     final Map<int, String> fetalPositionDE = {
       0: 'Kopflage',
       1: 'Kopflage',
@@ -116,17 +132,26 @@ class PatientData {
       2: 'Variable'
     };
 
-    // Fruchtwasser in beiden Sprachen
+    final Map<int, String> fetalPositionFR = {
+      0: 'Tête en bas',
+      1: 'Tête en bas',
+      2: 'Variable'
+    };
+
+    // Fruchtwasser in allen Sprachen
     const String amnioticFluidDE = 'Normal';
     const String amnioticFluidEN = 'Normal';
+    const String amnioticFluidFR = 'Normal';
 
-    // Vitalwerte-Namen in beiden Sprachen
+    // Vitalwerte-Namen in allen Sprachen
     final List<String> vitalNamesDE = ['Blutdruck', 'Blutzucker', 'Gewichtszunahme', 'Hämoglobin'];
     final List<String> vitalNamesEN = ['Blood pressure', 'Blood sugar', 'Weight gain', 'Hemoglobin'];
+    final List<String> vitalNamesFR = ['Tension artérielle', 'Glycémie', 'Prise de poids', 'Hémoglobine'];
 
-    // Labortest-Namen in beiden Sprachen
+    // Labortest-Namen in allen Sprachen
     final List<String> labTestNamesDE = ['Hämoglobin', 'Hämatokrit', 'Leukozyten', 'Thrombozyten', 'Glukose', 'Eisen'];
     final List<String> labTestNamesEN = ['Hemoglobin', 'Hematocrit', 'Leukocytes', 'Platelets', 'Glucose', 'Iron'];
+    final List<String> labTestNamesFR = ['Hémoglobine', 'Hématocrite', 'Leucocytes', 'Plaquettes', 'Glucose', 'Fer'];
 
     return PatientData(
       firstName: 'Maria',
@@ -139,10 +164,10 @@ class PatientData {
       phone: '+49 123 4567890',
       email: 'maria.schmidt@example.com',
       address: 'Musterstraße 123, 10115 Berlin',
-      insuranceName: isGerman ? 'AOK Gesundheit' : 'AOK Health Insurance',
+      insuranceName: isGerman ? 'AOK Gesundheit' : (isFrench ? 'AOK Assurance Santé' : 'AOK Health Insurance'),
       insuranceNumber: 'AOK123456789',
       allergies: ['Penicillin'],
-      medications: isGerman ? medicationsDE : medicationsEN,
+      medications: isGerman ? medicationsDE : (isFrench ? medicationsFR : medicationsEN),
 
       pregnancyData: PregnancyData(
         gestationalWeeks: 28,
@@ -150,12 +175,12 @@ class PatientData {
         gravidaAndPara: 'G2P1',
         lastVisitDate: DateTime.now().subtract(const Duration(days: 14)),
         nextVisitDate: DateTime.now().add(const Duration(days: 14)),
-        riskFactors: isGerman ? riskFactorsDE : riskFactorsEN,
+        riskFactors: isGerman ? riskFactorsDE : (isFrench ? riskFactorsFR : riskFactorsEN),
       ),
 
       vitalData: [
         VitalData(
-          name: isGerman ? vitalNamesDE[0] : vitalNamesEN[0],
+          name: isGerman ? vitalNamesDE[0] : (isFrench ? vitalNamesFR[0] : vitalNamesEN[0]),
           value: '125/82',
           unit: 'mmHg',
           date: DateTime.now().subtract(const Duration(days: 14)),
@@ -163,7 +188,7 @@ class PatientData {
           isNormal: true,
         ),
         VitalData(
-          name: isGerman ? vitalNamesDE[1] : vitalNamesEN[1],
+          name: isGerman ? vitalNamesDE[1] : (isFrench ? vitalNamesFR[1] : vitalNamesEN[1]),
           value: '110',
           unit: 'mg/dL',
           date: DateTime.now().subtract(const Duration(days: 14)),
@@ -171,7 +196,7 @@ class PatientData {
           isNormal: true,
         ),
         VitalData(
-          name: isGerman ? vitalNamesDE[2] : vitalNamesEN[2],
+          name: isGerman ? vitalNamesDE[2] : (isFrench ? vitalNamesFR[2] : vitalNamesEN[2]),
           value: '9.5',
           unit: 'kg',
           date: DateTime.now().subtract(const Duration(days: 14)),
@@ -179,7 +204,7 @@ class PatientData {
           isNormal: true,
         ),
         VitalData(
-          name: isGerman ? vitalNamesDE[3] : vitalNamesEN[3],
+          name: isGerman ? vitalNamesDE[3] : (isFrench ? vitalNamesFR[3] : vitalNamesEN[3]),
           value: '10.8',
           unit: 'g/dL',
           date: DateTime.now().subtract(const Duration(days: 14)),
@@ -192,45 +217,45 @@ class PatientData {
         dateCollected: DateTime.now().subtract(const Duration(days: 14)),
         testCount: 12,
         hasAbnormalities: true,
-        doctorNotes: isGerman ? doctorNotesDE : doctorNotesEN,
+        doctorNotes: isGerman ? doctorNotesDE : (isFrench ? doctorNotesFR : doctorNotesEN),
         tests: [
           LabTest(
-            name: isGerman ? labTestNamesDE[0] : labTestNamesEN[0],
+            name: isGerman ? labTestNamesDE[0] : (isFrench ? labTestNamesFR[0] : labTestNamesEN[0]),
             result: '10.8',
             unit: 'g/dL',
             referenceRange: '11.0-15.0',
             isAbnormal: true,
           ),
           LabTest(
-            name: isGerman ? labTestNamesDE[1] : labTestNamesEN[1],
+            name: isGerman ? labTestNamesDE[1] : (isFrench ? labTestNamesFR[1] : labTestNamesEN[1]),
             result: '33',
             unit: '%',
             referenceRange: '33-45',
             isAbnormal: false,
           ),
           LabTest(
-            name: isGerman ? labTestNamesDE[2] : labTestNamesEN[2],
+            name: isGerman ? labTestNamesDE[2] : (isFrench ? labTestNamesFR[2] : labTestNamesEN[2]),
             result: '9.5',
             unit: '10^3/µL',
             referenceRange: '4.0-11.0',
             isAbnormal: false,
           ),
           LabTest(
-            name: isGerman ? labTestNamesDE[3] : labTestNamesEN[3],
+            name: isGerman ? labTestNamesDE[3] : (isFrench ? labTestNamesFR[3] : labTestNamesEN[3]),
             result: '230',
             unit: '10^3/µL',
             referenceRange: '150-450',
             isAbnormal: false,
           ),
           LabTest(
-            name: isGerman ? labTestNamesDE[4] : labTestNamesEN[4],
+            name: isGerman ? labTestNamesDE[4] : (isFrench ? labTestNamesFR[4] : labTestNamesEN[4]),
             result: '110',
             unit: 'mg/dL',
             referenceRange: '70-120',
             isAbnormal: false,
           ),
           LabTest(
-            name: isGerman ? labTestNamesDE[5] : labTestNamesEN[5],
+            name: isGerman ? labTestNamesDE[5] : (isFrench ? labTestNamesFR[5] : labTestNamesEN[5]),
             result: '45',
             unit: 'µg/dL',
             referenceRange: '50-170',
@@ -248,10 +273,10 @@ class PatientData {
           fetalLength: 38,
           headCircumference: 27,
           abdominalCircumference: 23,
-          fetalPosition: isGerman ? fetalPositionDE[0] ?? 'Kopflage' : fetalPositionEN[0] ?? 'Head down',
-          placentaPosition: isGerman ? placentaPositionDE[0] ?? 'Vorderwand, oben' : placentaPositionEN[0] ?? 'Anterior wall, upper',
-          amnioticFluid: isGerman ? amnioticFluidDE : amnioticFluidEN,
-          notes: isGerman ? (ultrasoundNotesDE[0] ?? '') : (ultrasoundNotesEN[0] ?? ''),
+          fetalPosition: isGerman ? fetalPositionDE[0] ?? 'Kopflage' : (isFrench ? fetalPositionFR[0] ?? 'Tête en bas' : fetalPositionEN[0] ?? 'Head down'),
+          placentaPosition: isGerman ? placentaPositionDE[0] ?? 'Vorderwand, oben' : (isFrench ? placentaPositionFR[0] ?? 'Paroi antérieure, supérieure' : placentaPositionEN[0] ?? 'Anterior wall, upper'),
+          amnioticFluid: isGerman ? amnioticFluidDE : (isFrench ? amnioticFluidFR : amnioticFluidEN),
+          notes: isGerman ? (ultrasoundNotesDE[0] ?? '') : (isFrench ? (ultrasoundNotesFR[0] ?? '') : (ultrasoundNotesEN[0] ?? '')),
         ),
         UltrasoundData(
           date: DateTime.now().subtract(const Duration(days: 42)), // -6 Wochen
@@ -261,10 +286,10 @@ class PatientData {
           fetalLength: 32,
           headCircumference: 22,
           abdominalCircumference: 19,
-          fetalPosition: isGerman ? fetalPositionDE[1] ?? 'Kopflage' : fetalPositionEN[1] ?? 'Head down',
-          placentaPosition: isGerman ? placentaPositionDE[1] ?? 'Vorderwand, oben' : placentaPositionEN[1] ?? 'Anterior wall, upper',
-          amnioticFluid: isGerman ? amnioticFluidDE : amnioticFluidEN,
-          notes: isGerman ? (ultrasoundNotesDE[1] ?? '') : (ultrasoundNotesEN[1] ?? ''),
+          fetalPosition: isGerman ? fetalPositionDE[1] ?? 'Kopflage' : (isFrench ? fetalPositionFR[1] ?? 'Tête en bas' : fetalPositionEN[1] ?? 'Head down'),
+          placentaPosition: isGerman ? placentaPositionDE[1] ?? 'Vorderwand, oben' : (isFrench ? placentaPositionFR[1] ?? 'Paroi antérieure, supérieure' : placentaPositionEN[1] ?? 'Anterior wall, upper'),
+          amnioticFluid: isGerman ? amnioticFluidDE : (isFrench ? amnioticFluidFR : amnioticFluidEN),
+          notes: isGerman ? (ultrasoundNotesDE[1] ?? '') : (isFrench ? (ultrasoundNotesFR[1] ?? '') : (ultrasoundNotesEN[1] ?? '')),
         ),
         UltrasoundData(
           date: DateTime.now().subtract(const Duration(days: 84)), // -12 Wochen
@@ -274,10 +299,10 @@ class PatientData {
           fetalLength: 23,
           headCircumference: 15,
           abdominalCircumference: 13,
-          fetalPosition: isGerman ? fetalPositionDE[2] ?? 'Variabel' : fetalPositionEN[2] ?? 'Variable',
-          placentaPosition: isGerman ? placentaPositionDE[2] ?? 'Vorderwand' : placentaPositionEN[2] ?? 'Anterior wall',
-          amnioticFluid: isGerman ? amnioticFluidDE : amnioticFluidEN,
-          notes: isGerman ? (ultrasoundNotesDE[2] ?? '') : (ultrasoundNotesEN[2] ?? ''),
+          fetalPosition: isGerman ? fetalPositionDE[2] ?? 'Variabel' : (isFrench ? fetalPositionFR[2] ?? 'Variable' : fetalPositionEN[2] ?? 'Variable'),
+          placentaPosition: isGerman ? placentaPositionDE[2] ?? 'Vorderwand' : (isFrench ? placentaPositionFR[2] ?? 'Paroi antérieure' : placentaPositionEN[2] ?? 'Anterior wall'),
+          amnioticFluid: isGerman ? amnioticFluidDE : (isFrench ? amnioticFluidFR : amnioticFluidEN),
+          notes: isGerman ? (ultrasoundNotesDE[2] ?? '') : (isFrench ? (ultrasoundNotesFR[2] ?? '') : (ultrasoundNotesEN[2] ?? '')),
         ),
       ],
     );

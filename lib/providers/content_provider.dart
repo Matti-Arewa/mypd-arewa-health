@@ -5,6 +5,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import '../models/content_model.dart';
 import '../utils/sample_data_en.dart';
 import '../utils/sample_data_de.dart';
+import '../utils/sample_data_fr.dart';  // Ajout du fichier de données en français
 import 'package:flutter/foundation.dart';
 
 class ContentProvider extends ChangeNotifier {
@@ -131,6 +132,8 @@ class ContentProvider extends ChangeNotifier {
       _contentData = SampleDataEN.getSampleContent();
     } else if (_language == 'de') {
       _contentData = SampleData.getSampleContent();
+    } else if (_language == 'fr') {
+      _contentData = SampleDataFR.getSampleContent();  // Utilisation des données en français
     } else {
       // Default to English data if no match is found
       _contentData = SampleDataEN.getSampleContent();
