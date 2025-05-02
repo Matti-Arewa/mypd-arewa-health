@@ -289,5 +289,8 @@
   "nutrition": "Nutrition",
   "exercise": "Exercice",
   "birthPreparation": "Préparation à l'accouchement",
-  "medicalQuestions": "Questions médicales"
+  "medicalQuestions": "Questions médicales",
+  "feedbackError": "Une erreur s'est produite. Veuillez réessayer plus tard",
+  "feedbackServiceError": "Le service de commentaires n'a pas pu être initialisé",
+  "feedbackThankYou": "Merci pour vos commentaires ! Nous apprécions votre aide pour améliorer notre application."
 }

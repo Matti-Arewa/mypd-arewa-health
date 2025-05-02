@@ -7,6 +7,9 @@ import '../providers/language_provider.dart';
 import '../utils/app_theme.dart';
 import '../services/localization_service.dart';
 import '../widgets/video_player_widget.dart';
+import '../services/feedback_service.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:flutter/foundation.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({Key? key}) : super(key: key);
@@ -20,6 +23,54 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   bool _isSubmittingFeedback = false;
   String? _feedbackMessage;
   bool _feedbackSuccess = false;
+  bool _feedbackSubmitted = false;
+  bool _isLoadingFeedbackStatus = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeServices();
+  }
+
+  Future<void> _initializeServices() async {
+    try {
+      print('WelcomeScreen: Initialisiere Services...');
+
+      // Initialize feedback service
+      await FeedbackService.instance.initialize();
+
+      print('WelcomeScreen: FeedbackService initialisiert, prüfe Feedback-Status...');
+
+      // Check if user has already sent feedback
+      final hasSentFeedback = await FeedbackService.instance.hasUserSentFeedback();
+
+      if (mounted) {
+        setState(() {
+          _feedbackSubmitted = hasSentFeedback;
+          _isLoadingFeedbackStatus = false;
+        });
+
+        print('WelcomeScreen: Feedback-Status geladen. Hat Feedback gesendet: $hasSentFeedback');
+      }
+    } catch (e, stackTrace) {
+      print('WelcomeScreen: Fehler beim Initialisieren der Services - $e');
+      print('WelcomeScreen: Stack Trace - $stackTrace');
+
+      if (mounted) {
+        setState(() {
+          _isLoadingFeedbackStatus = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.tr('feedbackServiceError')),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -34,11 +85,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         context.tr('inviteFriendsMessage'),
         subject: context.tr('inviteFriendsSubject'),
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('WelcomeScreen: Fehler beim Teilen - $e');
+      print('WelcomeScreen: Stack Trace - $stackTrace');
+
       // Show error if sharing fails
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.tr('sharingErrorMessage'))),
+          SnackBar(
+            content: Text(context.tr('sharingErrorMessage')),
+            duration: const Duration(seconds: 5),
+          ),
         );
       }
     }
@@ -61,27 +118,102 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       _feedbackMessage = null;
     });
 
-    // Simulate network request
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      print('WelcomeScreen: Bereite Feedback-Übermittlung vor...');
 
-    // For now, we'll just simulate a successful submission
-    // In a real app, you would send this to your backend
-    if (mounted) {
-      setState(() {
-        _isSubmittingFeedback = false;
-        _feedbackMessage = context.tr('feedbackSuccess');
-        _feedbackSuccess = true;
-        _feedbackController.clear();
-      });
+      // Get current language and app version
+      final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+      final currentLanguage = languageProvider.currentLanguage;
 
-      // Clear success message after a few seconds
-      Future.delayed(const Duration(seconds: 3), () {
-        if (mounted) {
-          setState(() {
-            _feedbackMessage = null;
-          });
-        }
-      });
+      print('WelcomeScreen: Aktuelle Sprache: $currentLanguage');
+
+      // Get app version using package_info_plus
+      final packageInfo = await PackageInfo.fromPlatform();
+      final appVersion = '${packageInfo.version}+${packageInfo.buildNumber}';
+
+      print('WelcomeScreen: App-Version: $appVersion');
+      print('WelcomeScreen: Sende Feedback...');
+
+      // Send feedback using our service
+      final result = await FeedbackService.instance.sendFeedback(
+        message: _feedbackController.text.trim(),
+        language: currentLanguage,
+        appVersion: appVersion,
+      );
+
+      print('WelcomeScreen: Feedback-Übermittlung abgeschlossen. Ergebnis: $result');
+
+      if (mounted) {
+        setState(() {
+          _isSubmittingFeedback = false;
+
+          if (result) {
+            _feedbackSuccess = true;
+            _feedbackMessage = context.tr('feedbackSuccess');
+            _feedbackSubmitted = true; // Mark as submitted to hide input
+            _feedbackController.clear();
+          } else {
+            _feedbackSuccess = false;
+            _feedbackMessage = context.tr('feedbackError');
+          }
+        });
+      }
+    } catch (e, stackTrace) {
+      print('WelcomeScreen: Fehler beim Übermitteln des Feedbacks - $e');
+      print('WelcomeScreen: Stack Trace - $stackTrace');
+
+      if (mounted) {
+        setState(() {
+          _isSubmittingFeedback = false;
+          _feedbackSuccess = false;
+          _feedbackMessage = context.tr('feedbackError');
+        });
+      }
+    }
+  }
+
+  // For debugging: reset feedback status
+  Future<void> _resetFeedbackStatus() async {
+    try {
+      print('WelcomeScreen: Setze Feedback-Status zurück...');
+      await FeedbackService.instance.resetFeedbackStatus();
+
+      if (mounted) {
+        setState(() {
+          _feedbackSubmitted = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Feedback-Status zurückgesetzt (nur Debug)'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e, stackTrace) {
+      print('WelcomeScreen: Fehler beim Zurücksetzen des Feedback-Status - $e');
+      print('WelcomeScreen: Stack Trace - $stackTrace');
+    }
+  }
+
+  // TEST ONLY: Simulate error to view detailed error message
+  Future<void> _simulateError() async {
+    try {
+      print('WelcomeScreen: Simuliere Fehler...');
+      throw Exception('Test-Fehler');
+    } catch (e, stackTrace) {
+      print('WelcomeScreen: Simulierter Fehler - $e');
+      print('WelcomeScreen: Stack Trace - $stackTrace');
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Simulierter Fehler: $e'),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 10),
+          ),
+        );
+      }
     }
   }
 
@@ -96,7 +228,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     final isSmallScreen = screenWidth < 360 || screenHeight < 600;
 
     // Get video asset path based on language
-    final String videoAssetPath = 'assets/videos/intro_${currentLanguage}.mp4';
+    //final String videoAssetPath = 'assets/videos/intro_${currentLanguage}.mp4';
+    //Default Video
+    final String videoAssetPath = 'assets/videos/intro.mp4';
 
     return Scaffold(
       appBar: AppBar(
@@ -108,6 +242,19 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           ),
         ),
         backgroundColor: AppTheme.primaryColor,
+        // Only show debug action in debug mode
+        actions: kDebugMode ? [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Reset Feedback Status (Debug)',
+            onPressed: _resetFeedbackStatus,
+          ),
+          IconButton(
+            icon: const Icon(Icons.bug_report),
+            tooltip: 'Simulate Error (Debug)',
+            onPressed: _simulateError,
+          ),
+        ] : null,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -202,49 +349,81 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       ),
                       SizedBox(height: isSmallScreen ? 12.0 : 16.0),
 
-                      // Feedback text field
-                      TextField(
-                        controller: _feedbackController,
-                        decoration: InputDecoration(
-                          hintText: context.tr('feedbackHint'),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          filled: true,
-                          fillColor: Colors.grey[50],
-                        ),
-                        maxLines: 4,
-                        textCapitalization: TextCapitalization.sentences,
-                      ),
-                      SizedBox(height: isSmallScreen ? 12.0 : 16.0),
-
-                      // Submit button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _isSubmittingFeedback ? null : _submitFeedback,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.accentColor,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(
-                              vertical: isSmallScreen ? 12.0 : 14.0,
+                      // Loading state
+                      if (_isLoadingFeedbackStatus)
+                        const Center(
+                          child: CircularProgressIndicator(),
+                        )
+                      // Feedback form or thank you message
+                      else if (!_feedbackSubmitted) ... [
+                        // Feedback text field
+                        TextField(
+                          controller: _feedbackController,
+                          decoration: InputDecoration(
+                            hintText: context.tr('feedbackHint'),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
+                            filled: true,
+                            fillColor: Colors.grey[50],
                           ),
-                          child: _isSubmittingFeedback
-                              ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                              : Text(context.tr('submitFeedback')),
+                          maxLines: 4,
+                          textCapitalization: TextCapitalization.sentences,
                         ),
-                      ),
+                        SizedBox(height: isSmallScreen ? 12.0 : 16.0),
 
-                      // Feedback message
-                      if (_feedbackMessage != null)
+                        // Submit button
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _isSubmittingFeedback ? null : _submitFeedback,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.accentColor,
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(
+                                vertical: isSmallScreen ? 12.0 : 14.0,
+                              ),
+                            ),
+                            child: _isSubmittingFeedback
+                                ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                                : Text(context.tr('submitFeedback')),
+                          ),
+                        ),
+                      ] else ... [
+                        // Thank you message after successful submission
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.check_circle_outline,
+                                color: Colors.green,
+                                size: 48,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                context.tr('feedbackThankYou'),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: isSmallScreen ? 16.0 : 18.0,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppTheme.textPrimaryColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+
+                      // Feedback message (error or success, if not submitted yet)
+                      if (_feedbackMessage != null && !_feedbackSubmitted)
                         Padding(
                           padding: const EdgeInsets.only(top: 12.0),
                           child: Text(

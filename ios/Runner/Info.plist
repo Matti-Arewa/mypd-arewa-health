@@ -44,6 +44,13 @@
     <key>UIApplicationSupportsIndirectInputEvents</key>
     <true/>
 
+	<!-- Internet-Berechtigung für HTTP-Anfragen (wird in iOS implizit gewährt, aber explizite Deklaration ist empfohlen) -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+
     <!-- Mehrsprachigkeit -->
     <key>CFBundleLocalizations</key>
     <array>

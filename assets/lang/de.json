@@ -288,5 +288,8 @@
   "nutrition": "Ernährung",
   "exercise": "Bewegung",
   "birthPreparation": "Geburtsvorbereitung",
-  "medicalQuestions": "Medizinische Fragen"
+  "medicalQuestions": "Medizinische Fragen",
+  "feedbackError": "Es ist ein Fehler aufgetreten. Bitte versuche es später erneut",
+  "feedbackServiceError": "Der Feedback-Service konnte nicht initialisiert werden",
+  "feedbackThankYou": "Vielen Dank für dein Feedback! Wir schätzen deine Unterstützung bei der Verbesserung unserer App."
 }

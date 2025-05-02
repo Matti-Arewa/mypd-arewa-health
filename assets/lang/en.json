@@ -288,5 +288,8 @@
   "nutrition": "Nutrition",
   "exercise": "Exercise",
   "birthPreparation": "birth preparation",
-  "medicalQuestions": "medical Questions"
+  "medicalQuestions": "medical Questions",
+  "feedbackError": "An error occurred. Please try again later",
+  "feedbackServiceError": "The feedback service could not be initialized",
+  "feedbackThankYou": "Thank you for your feedback! We appreciate your help improving our app."
 }
