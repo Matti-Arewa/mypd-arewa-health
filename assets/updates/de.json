@@ -1,0 +1,66 @@
+[
+  {
+    "id": "v2.1.0_feature",
+    "title": "Neue Funktion zur Ernährungsverfolgung",
+    "description": "Wir haben ein umfassendes Ernährungsverfolgungssystem hinzugefügt, um dir zu helfen, deine Nährstoffaufnahme während der Schwangerschaft zu überwachen. Verfolge wichtige Nährstoffe, setze Ernährungsziele und erhalte personalisierte Empfehlungen.",
+    "date": "2025-05-01T00:00:00.000Z",
+    "imageUrl": "assets/images/updates/nutrition_tracking.jpg",
+    "type": "feature",
+    "version": "2.1.0",
+    "additionalInfo": {
+      "releaseNotes": "Diese Funktion wurde in Zusammenarbeit mit zertifizierten Ernährungsberatern entwickelt, die sich auf Gesundheit während der Schwangerschaft spezialisiert haben.",
+      "requiredActions": "Aktualisiere deine App, um auf diese Funktion zuzugreifen"
+    }
+  },
+  {
+    "id": "desktop_announcement",
+    "title": "Desktop-Begleit-App jetzt verfügbar",
+    "description": "Unsere Desktop-Begleitsoftware ist jetzt für Windows und Mac verfügbar! Synchronisiere deine Daten über alle Geräte hinweg, erstelle detaillierte Geburtspläne auf einem größeren Bildschirm und drucke personalisierte Berichte für deinen Gesundheitsdienstleister.",
+    "date": "2025-04-20T00:00:00.000Z",
+    "imageUrl": "assets/images/updates/desktop_app.jpg",
+    "type": "announcement",
+    "detailLink": "https://pregnancyguide.com/de/desktop-app",
+    "additionalInfo": {
+      "downloadLinks": {
+        "windows": "https://pregnancyguide.com/de/download/windows",
+        "mac": "https://pregnancyguide.com/de/download/mac"
+      }
+    }
+  },
+  {
+    "id": "community_milestone",
+    "title": "Eine Million Nutzer Meilenstein!",
+    "description": "Wir freuen uns, bekannt geben zu können, dass unsere Schwangerschaftsführer-App weltweit eine Million Nutzerinnen erreicht hat! Vielen Dank, dass du Teil unserer unterstützenden Community bist. Zur Feier haben wir neue Premium-Inhalte hinzugefügt, die für alle Nutzer kostenlos sind.",
+    "date": "2025-04-10T00:00:00.000Z",
+    "imageUrl": "assets/images/updates/milestone.jpg",
+    "type": "milestone",
+    "additionalInfo": {
+      "unlockedContent": [
+        "Premium-Meditations-Audiospuren",
+        "Experteninterviews mit Geburtshelfern",
+        "Erweiterte Geburtsplan-Vorlagen"
+      ]
+    }
+  },
+  {
+    "id": "ai_coach_preview",
+    "title": "Demnächst: KI-Schwangerschaftscoach",
+    "description": "Wir freuen uns, unsere kommende KI-Schwangerschaftscoach-Funktion anzukündigen. Dieser intelligente Assistent bietet personalisierte Anleitungen, beantwortet deine Fragen rund um die Uhr und hilft dir, deine Schwangerschaftsreise mit Zuversicht zu meistern.",
+    "date": "2025-03-25T00:00:00.000Z",
+    "imageUrl": "assets/images/updates/ai_coach.jpg",
+    "type": "announcement",
+    "additionalInfo": {
+      "estimatedRelease": "Juni 2025",
+      "betaSignup": "https://pregnancyguide.com/de/ai-coach-beta"
+    }
+  },
+  {
+    "id": "v2.0.5_bugfix",
+    "title": "Leistungsverbesserungen & Fehlerbehebungen",
+    "description": "Wir haben erhebliche Leistungsverbesserungen vorgenommen und mehrere Fehler behoben, um ein reibungsloseres Erlebnis zu gewährleisten. Die App lädt jetzt 40% schneller und verbraucht weniger Akku. Wir haben auch Probleme mit der Kalendersynchronisierung und Erinnerungen behoben.",
+    "date": "2025-03-15T00:00:00.000Z",
+    "imageUrl": "assets/images/updates/performance.jpg",
+    "type": "bugfix",
+    "version": "2.0.5"
+  }
+]

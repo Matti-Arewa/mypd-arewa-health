@@ -5,6 +5,7 @@ import '../providers/language_provider.dart';
 import '../utils/app_theme.dart';
 import '../widgets/custom_app_bar.dart';
 import '../services/localization_service.dart';
+import 'help_screen.dart'; // Import the new help screen
 
 class SettingsScreen extends StatefulWidget {
   static const routeName = '/settings';
@@ -40,7 +41,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
-    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+    final languageProvider = Provider.of<LanguageProvider>(
+        context, listen: false);
 
     return WillPopScope(
       // Verwende WillPopScope, um sicherzustellen, dass die Navigation korrekt funktioniert
@@ -86,7 +88,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 setState(() {
                   _notificationsEnabled = value;
                 });
-                Provider.of<UserProvider>(context, listen: false).notificationsEnabled = value;
+                Provider
+                    .of<UserProvider>(context, listen: false)
+                    .notificationsEnabled = value;
               },
             ),
             const Divider(),
@@ -101,7 +105,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 setState(() {
                   _useCelsius = value;
                 });
-                Provider.of<UserProvider>(context, listen: false).useCelsius = value;
+                Provider
+                    .of<UserProvider>(context, listen: false)
+                    .useCelsius = value;
               },
             ),
             const Divider(),
@@ -140,9 +146,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               subtitle: context.tr('helpSubtitle'),
               onTap: () {
                 // Navigate to help screen
-                // This will be implemented in future versions
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(context.tr('comingSoon'))),
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const HelpScreen(),
+                  ),
                 );
               },
             ),
@@ -275,40 +282,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _showLanguageDialog() {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(context.tr('selectLanguage')),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildLanguageOption('en', 'English'),
-            _buildLanguageOption('de', 'Deutsch'),
-            _buildLanguageOption('fr', 'Français'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.tr('close')),
+      builder: (ctx) =>
+          AlertDialog(
+            title: Text(context.tr('selectLanguage')),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildLanguageOption('en', 'English'),
+                _buildLanguageOption('de', 'Deutsch'),
+                _buildLanguageOption('fr', 'Français'),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(context.tr('close')),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   Widget _buildLanguageOption(String code, String name) {
     return ListTile(
       title: Text(name),
-      trailing: _language == code ? const Icon(Icons.check, color: AppTheme.primaryColor) : null,
+      trailing: _language == code ? const Icon(
+          Icons.check, color: AppTheme.primaryColor) : null,
       onTap: () async {
         setState(() {
           _language = code;
         });
 
         // Update UserProvider
-        Provider.of<UserProvider>(context, listen: false).language = code;
+        Provider
+            .of<UserProvider>(context, listen: false)
+            .language = code;
 
         // Update LanguageProvider to change app-wide language
-        await Provider.of<LanguageProvider>(context, listen: false).changeLanguage(code);
+        await Provider.of<LanguageProvider>(context, listen: false)
+            .changeLanguage(code);
 
         Navigator.of(context).pop();
       },
@@ -318,37 +330,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _showRegionDialog() {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(context.tr('selectRegion')),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildRegionOption('int', _getRegionName('int')),
-            _buildRegionOption('de', _getRegionName('de')),
-            _buildRegionOption('fr', _getRegionName('fr')),
-            //_buildRegionOption('at', _getRegionName('at')),
-            //_buildRegionOption('ch', _getRegionName('ch')),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.tr('close')),
+      builder: (ctx) =>
+          AlertDialog(
+            title: Text(context.tr('selectRegion')),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildRegionOption('int', _getRegionName('int')),
+                _buildRegionOption('de', _getRegionName('de')),
+                _buildRegionOption('fr', _getRegionName('fr')),
+                //_buildRegionOption('at', _getRegionName('at')),
+                //_buildRegionOption('ch', _getRegionName('ch')),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(context.tr('close')),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   Widget _buildRegionOption(String code, String name) {
     return ListTile(
       title: Text(name),
-      trailing: _region == code ? const Icon(Icons.check, color: AppTheme.primaryColor) : null,
+      trailing: _region == code ? const Icon(
+          Icons.check, color: AppTheme.primaryColor) : null,
       onTap: () {
         setState(() {
           _region = code;
         });
-        Provider.of<UserProvider>(context, listen: false).region = code;
+        Provider
+            .of<UserProvider>(context, listen: false)
+            .region = code;
         Navigator.of(context).pop();
       },
     );
@@ -357,53 +373,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _showAboutDialog() {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(context.tr('aboutTitle')),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppTheme.primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+      builder: (ctx) =>
+          AlertDialog(
+            title: Text(context.tr('aboutTitle')),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.pregnant_woman,
+                    size: 50,
+                    color: AppTheme.primaryColor,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Pregnancy Guide App',
+                  style: TextStyle(
+                    fontSize: AppTheme.fontSizeDisplaySmall,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text('Version 1.0.0'),
+                const SizedBox(height: 16),
+                Text(
+                  context.tr('appDescription'),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: AppTheme.fontSizeBodyMedium),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  context.tr('copyright'),
+                  style: const TextStyle(fontSize: AppTheme.fontSizeSmall),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(context.tr('close')),
               ),
-              child: const Icon(
-                Icons.pregnant_woman,
-                size: 50,
-                color: AppTheme.primaryColor,
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Pregnancy Guide App',
-              style: TextStyle(
-                fontSize: AppTheme.fontSizeDisplaySmall,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text('Version 1.0.0'),
-            const SizedBox(height: 16),
-            Text(
-              context.tr('appDescription'),
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: AppTheme.fontSizeBodyMedium),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              context.tr('copyright'),
-              style: const TextStyle(fontSize: AppTheme.fontSizeSmall),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.tr('close')),
+            ],
           ),
-        ],
-      ),
     );
   }
 }

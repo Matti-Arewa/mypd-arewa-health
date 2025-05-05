@@ -66,6 +66,8 @@ class NutritionScreen extends StatelessWidget {
                 color: AppTheme.primaryColor,
                 fontSize: titleFontSize,
               ),
+              overflow: TextOverflow.ellipsis,  // Overflow handling
+              maxLines: 2,
             ),
             SizedBox(height: padding),
             Text(
@@ -497,6 +499,8 @@ class NutritionScreen extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         fontSize: titleFontSize,
                       ),
+                      overflow: TextOverflow.ellipsis,  // Overflow handling
+                      maxLines: 2,
                     ),
                     Text(
                       recommendation,
@@ -505,6 +509,8 @@ class NutritionScreen extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                         fontSize: descriptionFontSize,
                       ),
+                      overflow: TextOverflow.ellipsis,  // Overflow handling
+                      maxLines: 2,
                     ),
                     SizedBox(height: isSmallScreen ? 2 : 4),
                     Text(

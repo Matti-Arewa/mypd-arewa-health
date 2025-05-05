@@ -1,0 +1,66 @@
+[
+  {
+    "id": "v2.1.0_feature",
+    "title": "New Nutrition Tracking Feature",
+    "description": "We've added a comprehensive nutrition tracking system to help you monitor your nutritional intake during pregnancy. Track essential nutrients, set dietary goals, and receive personalized recommendations.",
+    "date": "2025-05-01T00:00:00.000Z",
+    "imageUrl": "assets/images/updates/nutrition_tracking.jpg",
+    "type": "feature",
+    "version": "2.1.0",
+    "additionalInfo": {
+      "releaseNotes": "This feature was developed in collaboration with certified nutritionists specializing in maternal health.",
+      "requiredActions": "Update your app to access this feature"
+    }
+  },
+  {
+    "id": "desktop_announcement",
+    "title": "Desktop Companion App Now Available",
+    "description": "Our desktop companion software is now available for Windows and Mac! Sync your data across all devices, create detailed birth plans on a larger screen, and print personalized reports for your healthcare provider.",
+    "date": "2025-04-20T00:00:00.000Z",
+    "imageUrl": "assets/images/updates/desktop_app.jpg",
+    "type": "announcement",
+    "detailLink": "https://pregnancyguide.com/desktop-app",
+    "additionalInfo": {
+      "downloadLinks": {
+        "windows": "https://pregnancyguide.com/download/windows",
+        "mac": "https://pregnancyguide.com/download/mac"
+      }
+    }
+  },
+  {
+    "id": "community_milestone",
+    "title": "One Million Users Milestone!",
+    "description": "We're thrilled to announce that our pregnancy guide app has reached one million users worldwide! Thank you for being part of our supportive community. To celebrate, we've added new premium content that's free for all users.",
+    "date": "2025-04-10T00:00:00.000Z",
+    "imageUrl": "assets/images/updates/milestone.jpg",
+    "type": "milestone",
+    "additionalInfo": {
+      "unlockedContent": [
+        "Premium meditation audio tracks",
+        "Expert interviews with obstetricians",
+        "Extended birth plan templates"
+      ]
+    }
+  },
+  {
+    "id": "ai_coach_preview",
+    "title": "Coming Soon: AI Pregnancy Coach",
+    "description": "We're excited to announce our upcoming AI Pregnancy Coach feature. This intelligent assistant will provide personalized guidance, answer your questions 24/7, and help you navigate your pregnancy journey with confidence.",
+    "date": "2025-03-25T00:00:00.000Z",
+    "imageUrl": "assets/images/updates/ai_coach.jpg",
+    "type": "announcement",
+    "additionalInfo": {
+      "estimatedRelease": "June 2025",
+      "betaSignup": "https://pregnancyguide.com/ai-coach-beta"
+    }
+  },
+  {
+    "id": "v2.0.5_bugfix",
+    "title": "Performance Improvements & Bug Fixes",
+    "description": "We've made significant performance improvements and fixed several bugs to ensure a smoother experience. The app now loads 40% faster and uses less battery. We've also fixed issues with calendar sync and reminders.",
+    "date": "2025-03-15T00:00:00.000Z",
+    "imageUrl": "assets/images/updates/performance.jpg",
+    "type": "bugfix",
+    "version": "2.0.5"
+  }
+]

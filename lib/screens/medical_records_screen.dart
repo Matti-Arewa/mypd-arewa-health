@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mypd_2/screens/settings_screen.dart';
 import '../utils/app_theme.dart';
 import '../services/localization_service.dart';
 import '../models/patient_data.dart'; // Diese Datei werden wir als nächstes erstellen
@@ -27,6 +28,18 @@ class MedicalRecordsScreen extends StatelessWidget {
           context.tr('medicalRecords'),
           style: const TextStyle(color: AppTheme.textPrimaryColor),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings, color: Colors.white),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            },
+            tooltip: context.tr('settings'),
+          ),
+        ],
         backgroundColor: AppTheme.primaryColor,
         elevation: 2,
       ),

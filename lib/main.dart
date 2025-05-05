@@ -11,6 +11,7 @@ import 'providers/language_provider.dart';
 import 'providers/settings_provider.dart'; // Add this if not already imported
 import 'screens/home_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/help_screen.dart'; // Import the new help screen
 import 'package:flutter/foundation.dart';
 
 void main() async {
@@ -142,6 +143,7 @@ class AppWithLanguage extends StatelessWidget {
         home: const HomeScreen(), // Keep HomeScreen as starting point
         routes: {
           SettingsScreen.routeName: (ctx) => const SettingsScreen(),
+          HelpScreen.routeName: (ctx) => const HelpScreen(), // Add the help screen route
           // Add other routes here
         },
         // Localization setup
@@ -168,6 +170,7 @@ class AppWithLanguage extends StatelessWidget {
         home: const HomeScreen(), // Keep HomeScreen as starting point
         routes: {
           SettingsScreen.routeName: (ctx) => const SettingsScreen(),
+          HelpScreen.routeName: (ctx) => const HelpScreen(), // Add the help screen route
           // Add other routes here
         },
         // Localization setup

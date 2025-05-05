@@ -20,18 +20,10 @@ class _KickCounterScreenState extends State<KickCounterScreen> {
   Timer? _timer;
   Duration _elapsedTime = Duration.zero;
   bool _isActive = false;
-  List<KickSession> _pastSessions = [];
 
   @override
   void initState() {
     super.initState();
-    // Load past sessions from provider
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      setState(() {
-        _pastSessions = userProvider.kickSessions.cast<KickSession>();
-      });
-    });
   }
 
   @override
@@ -68,7 +60,6 @@ class _KickCounterScreenState extends State<KickCounterScreen> {
     );
 
     setState(() {
-      _pastSessions.insert(0, newSession);
       _isActive = false;
     });
 
@@ -84,9 +75,6 @@ class _KickCounterScreenState extends State<KickCounterScreen> {
       _kickCount++;
     });
 
-    // Vibrate for feedback
-    // HapticFeedback.mediumImpact(); // Uncomment and import 'package:flutter/services.dart' if needed
-
     // Auto-end session at 10 kicks
     if (_kickCount >= 10) {
       _endSession();
@@ -95,9 +83,6 @@ class _KickCounterScreenState extends State<KickCounterScreen> {
   }
 
   void _showCompletionDialog() {
-    // Responsive Einstellungen
-    final isSmallScreen = MediaQuery.of(context).size.width < 360;
-
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -288,81 +273,86 @@ class _KickCounterScreenState extends State<KickCounterScreen> {
               ),
             ),
             SizedBox(height: isSmallScreen ? 6 : 8),
-            _pastSessions.isEmpty
-                ? Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              elevation: 2,
-              child: Padding(
-                padding: EdgeInsets.all(padding),
-                child: Center(
-                  child: Text(
-                    context.tr('noSessionsRecorded'),
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: bodyFontSize,
-                    ),
-                  ),
-                ),
-              ),
-            )
-                : ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _pastSessions.length,
-              itemBuilder: (context, index) {
-                final session = _pastSessions[index];
-                final dateFormat = DateFormat.yMd(context.loc.locale.languageCode)
-                    .add_jm(); // Uses localized date format
+            Consumer<UserProvider>(
+              builder: (context, userProvider, child) {
+                final sessions = userProvider.kickSessions;
 
-                return Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 2,
-                  margin: EdgeInsets.only(bottom: isSmallScreen ? 6 : 8),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
-                      child: Text(
-                        session.count.toString(),
-                        style: const TextStyle(
-                          color: AppTheme.primaryColor,
-                          fontWeight: FontWeight.bold,
+                if (sessions.isEmpty) {
+                  return Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 2,
+                    child: Padding(
+                      padding: EdgeInsets.all(padding),
+                      child: Center(
+                        child: Text(
+                          context.tr('noSessionsRecorded'),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: bodyFontSize,
+                          ),
                         ),
                       ),
                     ),
-                    title: Text(
-                      context.tr('kicksInDuration', {
-                        'count': '${session.count}',
-                        'duration': _formatDuration(session.duration)
-                      }),
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: isSmallScreen ? 13 : 14,
+                  );
+                }
+
+                // Sessions are already in reverse chronological order (newest first)
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: sessions.length,
+                  itemBuilder: (context, index) {
+                    final session = sessions[index];
+                    final dateFormat = DateFormat.yMd(context.loc.locale.languageCode)
+                        .add_jm();
+
+                    return Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
-                    subtitle: Text(
-                      dateFormat.format(session.date),
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: isSmallScreen ? 11 : 12,
+                      elevation: 2,
+                      margin: EdgeInsets.only(bottom: isSmallScreen ? 6 : 8),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
+                          child: Text(
+                            session.count.toString(),
+                            style: const TextStyle(
+                              color: AppTheme.primaryColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        title: Text(
+                          context.tr('kicksInDuration', {
+                            'count': '${session.count}',
+                            'duration': _formatDuration(session.duration)
+                          }),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: isSmallScreen ? 13 : 14,
+                          ),
+                        ),
+                        subtitle: Text(
+                          dateFormat.format(session.date),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: isSmallScreen ? 11 : 12,
+                          ),
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete_outline),
+                          onPressed: () {
+                            // Direct index for deletion
+                            userProvider.removeKickSession(index);
+                          },
+                          tooltip: context.tr('delete'),
+                        ),
                       ),
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete_outline),
-                      onPressed: () {
-                        setState(() {
-                          _pastSessions.removeAt(index);
-                        });
-                        // Update provider
-                        final userProvider = Provider.of<UserProvider>(context, listen: false);
-                        userProvider.removeKickSession(index);
-                      },
-                      tooltip: context.tr('delete'),
-                    ),
-                  ),
+                    );
+                  },
                 );
               },
             ),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mypd_2/screens/settings_screen.dart';
 import '../utils/app_theme.dart';
 import '../widgets/tool_card.dart';
 import 'due_date_calculator_screen.dart';
 import 'kick_counter_screen.dart';
 import 'weight_tracker_screen.dart';
+import 'nutrition_screen.dart';
 import '../services/localization_service.dart';
 
 class ToolsScreen extends StatelessWidget {
@@ -33,6 +35,18 @@ class ToolsScreen extends StatelessWidget {
             fontSize: isSmallScreen ? 18.0 : 20.0,
           ),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings, color: Colors.white),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            },
+            tooltip: context.tr('settings'),
+          ),
+        ],
         backgroundColor: AppTheme.primaryColor,
       ),
       body: SingleChildScrollView(
@@ -94,6 +108,20 @@ class ToolsScreen extends StatelessWidget {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (ctx) => const WeightTrackerScreen(),
+                  ),
+                );
+              },
+            ),
+            SizedBox(height: spacing),
+            ToolCard(
+              title: context.tr('nutritionGuide'),
+              description: context.tr('nutritionGuideDesc'),
+              icon: Icons.restaurant,
+              color: Colors.orange,
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (ctx) => const NutritionScreen(),
                   ),
                 );
               },

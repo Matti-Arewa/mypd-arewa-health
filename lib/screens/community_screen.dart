@@ -362,6 +362,7 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
           context.tr('community'),
           style: const TextStyle(color: Colors.white),
         ),
+        centerTitle: true,
         backgroundColor: AppTheme.primaryColor,
         bottom: TabBar(
           controller: _tabController,

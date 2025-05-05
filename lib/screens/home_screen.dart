@@ -25,7 +25,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
-  int _selectedIndex = 4;
+  int _selectedIndex = 2;
   bool _communityDevMode = false;
   bool _medicalRecordsDevMode = false;
   bool _forceRefresh = false;
@@ -319,7 +319,7 @@ class _InfoContentState extends State<_InfoContent> {
                 const Icon(Icons.menu_book, color: AppTheme.primaryColor),
                 const SizedBox(width: 8),
                 Text(
-                  context.tr('pregnancyGuide'),
+                  context.tr('categories'),
                   style: TextStyle(
                     fontSize: useCompactView
                         ? AppTheme.fontSizeBodyLarge

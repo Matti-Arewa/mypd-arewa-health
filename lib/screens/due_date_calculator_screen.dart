@@ -71,13 +71,22 @@ class _DueDateCalculatorScreenState extends State<DueDateCalculatorScreen> {
     // Save to user provider
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     userProvider.setDueDate(dueDate);
+
+    // Auto-scroll to results
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (_resultsKey.currentContext != null) {
+        Scrollable.ensureVisible(
+          _resultsKey.currentContext!,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    // Responsive design adjustments
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenWidth < 360;
+  final GlobalKey _resultsKey = GlobalKey();
 
+  Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate ?? DateTime.now().subtract(const Duration(days: 30)),
@@ -100,8 +109,9 @@ class _DueDateCalculatorScreenState extends State<DueDateCalculatorScreen> {
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
-        _calculateDueDate();
       });
+      // Automatically calculate when date is selected
+      _calculateDueDate();
     }
   }
 
@@ -144,6 +154,7 @@ class _DueDateCalculatorScreenState extends State<DueDateCalculatorScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+
               Card(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -165,61 +176,62 @@ class _DueDateCalculatorScreenState extends State<DueDateCalculatorScreen> {
                       SizedBox(height: spacing),
                       InkWell(
                         onTap: () => _selectDate(context),
-                        child: InputDecorator(
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(color: AppTheme.primaryColor),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: _selectedDate == null
+                                  ? Colors.grey.shade400
+                                  : AppTheme.primaryColor,
+                              width: _selectedDate == null ? 1 : 2,
                             ),
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: padding,
-                              vertical: isSmallScreen ? 10 : 12,
-                            ),
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                _selectedDate == null
-                                    ? context.tr('selectDate')
-                                    : dateFormatter.format(_selectedDate!),
-                                style: TextStyle(
+                          child: InputDecorator(
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: padding,
+                                vertical: isSmallScreen ? 10 : 12,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  _selectedDate == null
+                                      ? context.tr('selectDate')
+                                      : dateFormatter.format(_selectedDate!),
+                                  style: TextStyle(
+                                    color: _selectedDate == null
+                                        ? Colors.grey
+                                        : AppTheme.textPrimaryColor,
+                                    fontSize: isSmallScreen ? 14.0 : 15.0,
+                                    fontWeight: _selectedDate == null
+                                        ? FontWeight.normal
+                                        : FontWeight.w600,
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.calendar_today,
                                   color: _selectedDate == null
                                       ? Colors.grey
-                                      : AppTheme.textPrimaryColor,
-                                  fontSize: isSmallScreen ? 14.0 : 15.0,
+                                      : AppTheme.primaryColor,
                                 ),
-                              ),
-                              const Icon(
-                                Icons.calendar_today,
-                                color: AppTheme.primaryColor,
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                      SizedBox(height: spacing),
-                      if (_selectedDate != null)
-                        ElevatedButton(
-                          onPressed: _calculateDueDate,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.primaryColor,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 10 : 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            minimumSize: const Size(double.infinity, 48),
-                          ),
-                          child: Text(context.tr('calculateDueDate')),
-                        ),
                     ],
                   ),
                 ),
               ),
               SizedBox(height: cardSpacing),
+
               if (_dueDate != null) ...[
+                // Results section
                 Card(
+                  key: _resultsKey,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -229,6 +241,12 @@ class _DueDateCalculatorScreenState extends State<DueDateCalculatorScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        Icon(
+                          Icons.event_available,
+                          color: AppTheme.primaryColor,
+                          size: isSmallScreen ? 36 : 48,
+                        ),
+                        SizedBox(height: spacing),
                         Text(
                           context.tr('yourDueDate'),
                           style: TextStyle(
@@ -246,6 +264,8 @@ class _DueDateCalculatorScreenState extends State<DueDateCalculatorScreen> {
                           ),
                         ),
                         SizedBox(height: cardSpacing),
+                        Divider(color: AppTheme.dividerColor),
+                        SizedBox(height: spacing),
                         _buildInfoRow(
                           context.tr('weeksPregnant'),
                           context.tr('weeksAndDays', {
@@ -274,6 +294,7 @@ class _DueDateCalculatorScreenState extends State<DueDateCalculatorScreen> {
                           value: (_weeksPregnant! * 7 + _daysPregnant!) / 280,
                           backgroundColor: Colors.grey[200],
                           valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+                          minHeight: 8,
                         ),
                       ],
                     ),
@@ -290,13 +311,23 @@ class _DueDateCalculatorScreenState extends State<DueDateCalculatorScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          context.tr('importantDates'),
-                          style: TextStyle(
-                            fontSize: headerFontSize,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.primaryColor,
-                          ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_month,
+                              color: AppTheme.primaryColor,
+                              size: isSmallScreen ? 20 : 24,
+                            ),
+                            SizedBox(width: spacing / 2),
+                            Text(
+                              context.tr('importantDates'),
+                              style: TextStyle(
+                                fontSize: headerFontSize,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primaryColor,
+                              ),
+                            ),
+                          ],
                         ),
                         SizedBox(height: spacing),
                         _buildDateRow(
@@ -329,6 +360,37 @@ class _DueDateCalculatorScreenState extends State<DueDateCalculatorScreen> {
                     ),
                   ),
                 ),
+              ] else if (_selectedDate == null) ...[
+                // Empty state
+                Center(
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 2,
+                    child: Padding(
+                      padding: EdgeInsets.all(padding * 2),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.date_range,
+                            size: isSmallScreen ? 48 : 64,
+                            color: Colors.grey[400],
+                          ),
+                          SizedBox(height: spacing),
+                          Text(
+                            context.tr('pleaseSelectDate'),
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 14.0 : 16.0,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ],
           ),
@@ -338,46 +400,67 @@ class _DueDateCalculatorScreenState extends State<DueDateCalculatorScreen> {
   }
 
   Widget _buildInfoRow(String label, String value, double labelSize, double valueSize) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.grey[600],
-            fontSize: labelSize,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            flex: 2,  // Gibt dem Label mehr Platz
+            child: Text(
+              label,
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: labelSize,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
           ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: valueSize,
+          SizedBox(width: 8), // Kleiner Abstand
+          Expanded(
+            flex: 3,  // Gibt dem Wert mehr Platz
+            child: Text(
+              value,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: valueSize,
+                color: AppTheme.textPrimaryColor,
+              ),
+              textAlign: TextAlign.right,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildDateRow(String label, String startDate, String separator, String endDate, double labelSize, double valueSize) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.grey[600],
-            fontSize: labelSize,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: labelSize,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-        ),
-        Text(
-          startDate + separator + endDate,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: valueSize,
+          Text(
+            startDate + separator + endDate,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: valueSize,
+              color: AppTheme.textPrimaryColor,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

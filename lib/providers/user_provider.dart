@@ -213,7 +213,7 @@ class UserProvider extends ChangeNotifier {
   }
 
   void addKickSession(KickSession session) {
-    _kickSessions.add(session);
+    _kickSessions.insert(0, session);  // Insert at the beginning for reverse chronological order
     notifyListeners();
   }
 
