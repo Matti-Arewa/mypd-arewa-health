@@ -109,14 +109,21 @@ class FavoritesScreen extends StatelessWidget {
               child: InkWell(
                 borderRadius: BorderRadius.circular(12),
                 onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (ctx) => QuestionDetailScreen(
-                        question: question,
-                        categoryId: question.categoryId,
+                  final ContentProvider contentProvider = Provider.of<ContentProvider>(context, listen: false);
+                  final category = contentProvider.getCategoryById(question.categoryId);
+                  final section = category != null ? contentProvider.getSectionById(category.sectionId) : null;
+
+                  if (category != null && section != null) {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (ctx) => QuestionDetailScreen(
+                          question: question,
+                          category: category,
+                          parentSection: section,
+                        ),
                       ),
-                    ),
-                  );
+                    );
+                  }
                 },
                 child: Padding(
                   padding: EdgeInsets.all(isSmallScreen ? 12.0 : 16.0),

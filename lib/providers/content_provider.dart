@@ -131,7 +131,7 @@ class ContentProvider extends ChangeNotifier {
     if (_language == 'en') {
       _contentData = SampleDataEN.getSampleContent();
     } else if (_language == 'de') {
-      _contentData = SampleData.getSampleContent();
+      _contentData = SampleDataDE.getSampleContent();
     } else if (_language == 'fr') {
       _contentData = SampleDataFR.getSampleContent();  // Utilisation des données en français
     } else {

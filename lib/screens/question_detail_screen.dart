@@ -1,361 +1,386 @@
-//screens/question_detail.screen
+// screens/question_detail_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../models/content_model.dart';
 import '../providers/content_provider.dart';
 import '../utils/app_theme.dart';
-import '../widgets/related_questions.dart';
 import '../services/localization_service.dart';
+import '../widgets/related_questions.dart';
 
 class QuestionDetailScreen extends StatelessWidget {
   final ContentQuestion question;
-  final String categoryId;
+  final ContentCategory category;
+  final ContentSection parentSection;
 
   const QuestionDetailScreen({
     super.key,
     required this.question,
-    required this.categoryId,
+    required this.category,
+    required this.parentSection,
   });
 
   @override
   Widget build(BuildContext context) {
     final contentProvider = Provider.of<ContentProvider>(context);
-    final category = contentProvider.getCategoryById(categoryId);
-
-    // Responsive Design-Anpassungen
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final isSmallScreen = screenWidth < 360 || screenHeight < 600;
-
-    // Responsive Textstile basierend auf Bildschirmgröße
-    final titleStyle = Theme.of(context).textTheme.headlineMedium?.copyWith(
-      color: AppTheme.primaryColor,
-      fontWeight: FontWeight.bold,
-      fontSize: isSmallScreen ? 18.0 : 22.0,
-    );
-
-    final bodyStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
-      fontSize: isSmallScreen ? 14.0 : 16.0,
-      height: 1.4, // Verbesserte Zeilenhöhe für bessere Lesbarkeit
-    );
-
-    final sectionTitleStyle = Theme.of(context).textTheme.titleLarge?.copyWith(
-      color: AppTheme.primaryColor,
-      fontSize: isSmallScreen ? 16.0 : 18.0,
-      fontWeight: FontWeight.w600,
-    );
-
-    // Responsive Abstände
-    final padding = isSmallScreen ? 12.0 : 16.0;
-    final spacing = isSmallScreen ? 16.0 : 20.0;
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final isSmallScreen = screenHeight < 700;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          category?.title ?? context.tr('question'),
-          style: TextStyle(
-            color: AppTheme.textPrimaryColor,
-            fontSize: isSmallScreen ? 18.0 : 20.0,
-          ),
-        ),
-        backgroundColor: AppTheme.primaryColor,
-        actions: [
-          IconButton(
-            icon: Icon(
-              contentProvider.isFavorite(question.id)
-                  ? Icons.favorite
-                  : Icons.favorite_border,
-              color: AppTheme.accentColor,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 0, // No expanded height for question detail
+            pinned: true,
+            backgroundColor: AppTheme.primaryColor,
+            title: Text(
+              category.title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
-            onPressed: () {
-              contentProvider.toggleFavorite(question.id);
-            },
-            tooltip: context.tr('toggleFavorite'),
+            actions: [
+              IconButton(
+                icon: Icon(
+                  contentProvider.isFavorite(question.id)
+                      ? Icons.favorite
+                      : Icons.favorite_border,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  contentProvider.toggleFavorite(question.id);
+                },
+                tooltip: context.tr('toggleFavorite'),
+              ),
+              IconButton(
+                icon: const Icon(Icons.share, color: Colors.white),
+                onPressed: () {
+                  _shareQuestion(context, question);
+                },
+                tooltip: context.tr('share'),
+              ),
+            ],
           ),
-          IconButton(
-            icon: const Icon(Icons.share, color: AppTheme.accentColor),
-            onPressed: () {
-              // Share functionality could be implemented here
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(context.tr('sharingComingSoon'))),
-              );
-            },
-            tooltip: context.tr('share'),
+          SliverToBoxAdapter(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Breadcrumb navigation
+                _buildBreadcrumbNavigation(context, isSmallScreen),
+
+                // Question card
+                _buildQuestionCard(context, isSmallScreen),
+
+                // Answer content
+                _buildAnswerContent(context, isSmallScreen),
+
+                // Related questions
+                _buildRelatedQuestionsSection(context, contentProvider, isSmallScreen),
+              ],
+            ),
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header Bereich mit Bild und Titel
-            //_buildHeaderSection(context, question, category, titleStyle, isSmallScreen),
+    );
+  }
 
-            // Hauptinhalt
-            Padding(
-              padding: EdgeInsets.all(padding),
-              child: Column(
+  Widget _buildBreadcrumbNavigation(BuildContext context, bool isSmallScreen) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: isSmallScreen ? 8 : 12,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        border: Border(
+          bottom: BorderSide(
+            color: Colors.grey[200]!,
+            width: 1,
+          ),
+        ),
+      ),
+      child: Wrap(
+        spacing: 4,
+        children: [
+          GestureDetector(
+            onTap: () {
+              // Navigate back to home
+              Navigator.popUntil(context, (route) => route.isFirst);
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.home,
+                  size: isSmallScreen ? 14 : 16,
+                  color: AppTheme.primaryColor,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  context.tr('home'),
+                  style: TextStyle(
+                    fontSize: isSmallScreen ? 12 : 13,
+                    color: AppTheme.primaryColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            Icons.chevron_right,
+            size: isSmallScreen ? 14 : 16,
+            color: Colors.grey[400],
+          ),
+          GestureDetector(
+            onTap: () {
+              // Pop twice to return to chapter
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
+            child: Text(
+              parentSection.title,
+              style: TextStyle(
+                fontSize: isSmallScreen ? 12 : 13,
+                color: AppTheme.primaryColor,
+              ),
+            ),
+          ),
+          Icon(
+            Icons.chevron_right,
+            size: isSmallScreen ? 14 : 16,
+            color: Colors.grey[400],
+          ),
+          GestureDetector(
+            onTap: () {
+              // Pop once to return to category
+              Navigator.pop(context);
+            },
+            child: Text(
+              category.title,
+              style: TextStyle(
+                fontSize: isSmallScreen ? 12 : 13,
+                color: AppTheme.primaryColor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuestionCard(BuildContext context, bool isSmallScreen) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Kategorienavi (neu)
-                  _buildBreadcrumbNavigation(context, contentProvider, category, isSmallScreen),
-                  SizedBox(height: spacing),
-
-                  // Antwortinhalt
-                  _buildAnswerContent(question.answer, bodyStyle),
-                  SizedBox(height: spacing),
-
-                  // Medienbereich (falls vorhanden)
-                  if (question.mediaUrls.isNotEmpty)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          context.tr('visualGuide'),
-                          style: sectionTitleStyle,
-                        ),
-                        SizedBox(height: isSmallScreen ? 8 : 12),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: _buildMediaWidget(question.mediaUrls, isSmallScreen),
-                        ),
-                      ],
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  SizedBox(height: isSmallScreen ? 24 : 32),
-
-                  // Verwandte Fragen
-                  Text(
-                    context.tr('relatedQuestions'),
-                    style: sectionTitleStyle,
+                    child: Icon(
+                      Icons.question_mark,
+                      color: AppTheme.primaryColor,
+                      size: isSmallScreen ? 24 : 28,
+                    ),
                   ),
-                  SizedBox(height: isSmallScreen ? 12 : 16),
-                  RelatedQuestions(
-                    currentQuestionId: question.id,
-                    categoryId: categoryId,
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      question.question,
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? 18 : 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primaryColor,
+                        height: 1.3,
+                      ),
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // Neuer Header-Bereich mit optionalem Hintergrundbild
-  Widget _buildHeaderSection(BuildContext context, ContentQuestion question, ContentCategory? category, TextStyle? titleStyle, bool isSmallScreen) {
-    // Überprüfen, ob ein Bild verfügbar ist
-    final hasHeaderImage = question.mediaUrls.isNotEmpty && !question.mediaUrls.first.endsWith('.mp4');
-
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppTheme.primaryColor.withOpacity(0.1),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(20),
-          bottomRight: Radius.circular(20),
-        ),
-        // Hintergrundbild, falls vorhanden
-        image: hasHeaderImage ? DecorationImage(
-          image: AssetImage(question.mediaUrls.first),
-          fit: BoxFit.cover,
-          colorFilter: ColorFilter.mode(
-            Colors.black.withOpacity(0.3),
-            BlendMode.darken,
-          ),
-        ) : null,
-      ),
-      padding: EdgeInsets.all(isSmallScreen ? 16.0 : 24.0),
+  Widget _buildAnswerContent(BuildContext context, bool isSmallScreen) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Kategorie-Chip
-          if (category != null)
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: hasHeaderImage ? Colors.white.withOpacity(0.8) : AppTheme.primaryColor.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                category.title,
-                style: TextStyle(
-                  fontSize: isSmallScreen ? 12.0 : 14.0,
-                  fontWeight: FontWeight.w500,
-                  color: AppTheme.primaryColor,
+          Padding(
+            padding: const EdgeInsets.only(left: 8, bottom: 8),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.lightbulb_outline,
+                  color: AppTheme.accentColor,
+                  size: 20,
                 ),
-              ),
-            ),
-
-          SizedBox(height: 12),
-
-          // Frage-Titel
-          Text(
-            question.question,
-            style: titleStyle?.copyWith(
-              color: hasHeaderImage ? Colors.white : AppTheme.primaryColor,
-              shadows: hasHeaderImage ? [
-                Shadow(
-                  offset: const Offset(0, 1),
-                  blurRadius: 3.0,
-                  color: Colors.black.withOpacity(0.5),
+                const SizedBox(width: 8),
+                Text(
+                  context.tr('answer'),
+                  style: TextStyle(
+                    fontSize: isSmallScreen ? 16 : 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.accentColor,
+                  ),
                 ),
-              ] : null,
+              ],
             ),
           ),
-
-          SizedBox(height: isSmallScreen ? 8 : 12),
+          Card(
+            elevation: 0,
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: Colors.grey[200]!,
+                width: 1,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                question.answer,
+                style: TextStyle(
+                  fontSize: isSmallScreen ? 15 : 16,
+                  height: 1.5,
+                  color: AppTheme.textPrimaryColor,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  // Breadcrumb-Navigation zur besseren Orientierung
-  Widget _buildBreadcrumbNavigation(BuildContext context, ContentProvider contentProvider, ContentCategory? category, bool isSmallScreen) {
-    if (category == null) return const SizedBox.shrink();
+  Widget _buildRelatedQuestionsSection(BuildContext context, ContentProvider contentProvider, bool isSmallScreen) {
+    // Find related questions from the same category
+    final relatedQuestions = category.questions
+        .where((q) => q.id != question.id)
+        .take(3)
+        .toList();
 
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        Icon(
-          Icons.menu_book,
-          size: isSmallScreen ? 14 : 16,
-          color: Colors.grey[600],
-        ),
-        const SizedBox(width: 4),
-        Text(
-          context.tr('guide'),
-          style: TextStyle(
-            fontSize: isSmallScreen ? 12 : 13,
-            color: Colors.grey[600],
-          ),
-        ),
-        Icon(
-          Icons.chevron_right,
-          size: isSmallScreen ? 14 : 16,
-          color: Colors.grey[600],
-        ),
-        Text(
-          category.title,
-          style: TextStyle(
-            fontSize: isSmallScreen ? 12 : 13,
-            fontWeight: FontWeight.w500,
-            color: AppTheme.primaryColor,
-          ),
-        ),
-      ],
-    );
-  }
+    if (relatedQuestions.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
-  // Formatierter Antworttext mit Hervorhebungen
-  Widget _buildAnswerContent(String answer, TextStyle? bodyStyle) {
-    // Liste-Erkennung: Zeilen, die mit • oder - beginnen
-    final List<String> paragraphs = answer.split('\n\n');
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: paragraphs.map((paragraph) {
-        // Prüfen, ob es sich um eine Liste handelt
-        if (paragraph.contains('\n• ') || paragraph.contains('\n- ')) {
-          final listItems = paragraph.split('\n');
-          final listHeader = listItems[0]; // Die erste Zeile ist der Header
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Liste-Header
-              if (listHeader.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Text(
-                    listHeader,
-                    style: bodyStyle?.copyWith(fontWeight: FontWeight.w600),
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 8, bottom: 16),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.launch,
+                  color: AppTheme.primaryColor,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  context.tr('relatedQuestions'),
+                  style: TextStyle(
+                    fontSize: isSmallScreen ? 16 : 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primaryColor,
                   ),
                 ),
-
-              // Liste-Items
-              ...listItems.skip(1).where((item) => item.trim().isNotEmpty).map((item) {
-                final isListItem = item.trim().startsWith('• ') || item.trim().startsWith('- ');
-                if (isListItem) {
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 8.0, bottom: 6.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '•',
-                          style: bodyStyle?.copyWith(
-                            fontSize: (bodyStyle.fontSize ?? 16) + 2,
-                            color: AppTheme.primaryColor,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            item.replaceFirst(RegExp(r'^\s*[•\-]\s*'), ''),
-                            style: bodyStyle,
-                          ),
-                        ),
-                      ],
+              ],
+            ),
+          ),
+          ...relatedQuestions.map((relatedQuestion) {
+            return Card(
+              elevation: 0,
+              margin: const EdgeInsets.only(bottom: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: Colors.grey[200]!,
+                  width: 1,
+                ),
+              ),
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => QuestionDetailScreen(
+                        question: relatedQuestion,
+                        category: category,
+                        parentSection: parentSection,
+                      ),
                     ),
                   );
-                } else {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 6.0),
-                    child: Text(item, style: bodyStyle),
-                  );
-                }
-              }).toList(),
-            ],
-          );
-        } else {
-          // Normale Absätze
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12.0),
-            child: Text(paragraph, style: bodyStyle),
-          );
-        }
-      }).toList(),
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.question_answer,
+                        color: AppTheme.accentColor,
+                        size: isSmallScreen ? 18 : 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          relatedQuestion.question,
+                          style: TextStyle(
+                            fontSize: isSmallScreen ? 14 : 15,
+                            color: AppTheme.textPrimaryColor,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        size: 14,
+                        color: Colors.grey[400],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
     );
   }
 
-  Widget _buildMediaWidget(List<String> mediaUrls, bool isSmallScreen) {
-    final mediaUrl = mediaUrls.first;
-    if (mediaUrl.endsWith('.mp4')) {
-      return Container(
-        height: isSmallScreen ? 160 : 200,
-        color: Colors.grey[300],
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.play_circle_outline, size: isSmallScreen ? 40 : 48, color: AppTheme.primaryColor),
-              const SizedBox(height: 8),
-              Text(
-                'Video content', //Error
-                //context.tr('videoContent'),
-                style: TextStyle(fontSize: isSmallScreen ? 13.0 : 14.0),
-              ),
-            ],
-          ),
-        ),
-      );
-    } else {
-      return Container(
-        constraints: BoxConstraints(
-          maxHeight: isSmallScreen ? 200 : 250,
-        ),
-        child: Image.asset(
-          mediaUrl,
-          fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) {
-            return Image.asset(
-              'assets/images/placeholder.png',
-              fit: BoxFit.cover,
-            );
-          },
-        ),
-      );
-    }
+  // Improved sharing functionality
+  void _shareQuestion(BuildContext context, ContentQuestion question) {
+    final String shareText = '${question.question}\n\n${question.answer}';
+
+    Share.share(
+      shareText,
+      subject: question.question,
+    );
   }
 }

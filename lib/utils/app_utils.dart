@@ -177,7 +177,6 @@ class AppUtils {
     final lowercaseQuery = query.toLowerCase();
     return categories.where((category) {
       final matchesTitle = category.title.toLowerCase().contains(lowercaseQuery);
-      final matchesDescription = category.description.toLowerCase().contains(lowercaseQuery);
 
       bool matchesQuestions = false;
       for (final question in category.questions) {
@@ -188,7 +187,7 @@ class AppUtils {
         }
       }
 
-      return matchesTitle || matchesDescription || matchesQuestions;
+      return matchesTitle || matchesQuestions;
     }).toList();
   }
 

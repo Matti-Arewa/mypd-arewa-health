@@ -68,9 +68,10 @@ class _DueDateCalculatorScreenState extends State<DueDateCalculatorScreen> {
       _trimester = trimester;
     });
 
-    // Save to user provider
+    // Save both values to user provider
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     userProvider.setDueDate(dueDate);
+    userProvider.setLastPeriodDate(_selectedDate!);  // Save last period date too
 
     // Auto-scroll to results
     Future.delayed(const Duration(milliseconds: 300), () {

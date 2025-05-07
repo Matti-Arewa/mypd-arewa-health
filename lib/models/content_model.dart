@@ -2,14 +2,12 @@
 class ContentSection {
   final String id;
   final String title;
-  final String description;
   final String imageUrl;
   final List<ContentCategory> categories;
 
   ContentSection({
     required this.id,
     required this.title,
-    required this.description,
     required this.imageUrl,
     required this.categories,
   });
@@ -25,7 +23,6 @@ class ContentSection {
     return ContentSection(
       id: json['id'] ?? '',
       title: json['title'] ?? '',
-      description: json['description'] ?? '',
       imageUrl: json['imageUrl'] ?? 'assets/images/placeholder.png',
       categories: categoriesList,
     );
@@ -35,7 +32,6 @@ class ContentSection {
     return {
       'id': id,
       'title': title,
-      'description': description,
       'imageUrl': imageUrl,
       'categories': categories.map((c) => c.toJson()).toList(),
     };
@@ -45,7 +41,6 @@ class ContentSection {
 class ContentCategory {
   final String id;
   final String title;
-  final String description;
   final String imageUrl;
   final String sectionId;
   final List<ContentQuestion> questions;
@@ -53,7 +48,6 @@ class ContentCategory {
   ContentCategory({
     required this.id,
     required this.title,
-    required this.description,
     required this.imageUrl,
     required this.sectionId,
     required this.questions,
@@ -70,7 +64,6 @@ class ContentCategory {
     return ContentCategory(
       id: json['id'] ?? '',
       title: json['title'] ?? '',
-      description: json['description'] ?? '',
       imageUrl: json['imageUrl'] ?? 'assets/images/placeholder.png',
       sectionId: json['sectionId'] ?? '',
       questions: questionsList,
@@ -81,7 +74,6 @@ class ContentCategory {
     return {
       'id': id,
       'title': title,
-      'description': description,
       'imageUrl': imageUrl,
       'sectionId': sectionId,
       'questions': questions.map((q) => q.toJson()).toList(),
@@ -93,28 +85,20 @@ class ContentQuestion {
   final String id;
   final String question;
   final String answer;
-  final List<String> mediaUrls;
   final String categoryId;
 
   ContentQuestion({
     required this.id,
     required this.question,
     required this.answer,
-    this.mediaUrls = const [],
     required this.categoryId,
   });
 
   factory ContentQuestion.fromJson(Map<String, dynamic> json) {
-    List<String> media = [];
-    if (json['mediaUrls'] != null) {
-      media = List<String>.from(json['mediaUrls']);
-    }
-
     return ContentQuestion(
       id: json['id'] ?? '',
       question: json['question'] ?? '',
       answer: json['answer'] ?? '',
-      mediaUrls: media,
       categoryId: json['categoryId'] ?? '',
     );
   }
@@ -124,7 +108,6 @@ class ContentQuestion {
       'id': id,
       'question': question,
       'answer': answer,
-      'mediaUrls': mediaUrls,
       'categoryId': categoryId,
     };
   }

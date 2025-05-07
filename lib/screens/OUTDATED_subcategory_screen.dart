@@ -1,27 +1,26 @@
-//screens/category_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/content_model.dart';
 import '../providers/content_provider.dart';
-import '../widgets/question_card.dart';
 import '../screens/question_detail_screen.dart';
+import '../widgets/question_card.dart';
 import '../utils/app_theme.dart';
 import '../services/localization_service.dart';
+import 'package:flutter/foundation.dart';
 
-class CategoryScreen extends StatefulWidget {
+class SubcategoryScreen extends StatefulWidget {
   final String categoryId;
 
-  const CategoryScreen({
+  const SubcategoryScreen({
     Key? key,
     required this.categoryId,
   }) : super(key: key);
 
   @override
-  State<CategoryScreen> createState() => _CategoryScreenState();
+  State<SubcategoryScreen> createState() => _SubcategoryScreenState();
 }
 
-class _CategoryScreenState extends State<CategoryScreen> {
-  // Für die Filterung der Fragen
+class _SubcategoryScreenState extends State<SubcategoryScreen> {
   String _filter = 'all';
   final TextEditingController _searchController = TextEditingController();
 
@@ -36,28 +35,30 @@ class _CategoryScreenState extends State<CategoryScreen> {
     final contentProvider = Provider.of<ContentProvider>(context);
     final category = contentProvider.getCategoryById(widget.categoryId);
 
+    // Get the parent section for breadcrumb navigation
+    ContentSection? parentSection;
+    if (category != null) {
+      parentSection = contentProvider.getSectionById(category.sectionId);
+    }
+
     // Responsive Design-Anpassungen
-    final screenWidth = MediaQuery
-        .of(context)
-        .size
-        .width;
+    final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 360;
 
     if (category == null) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(context.tr('category')),
+          title: Text(context.tr('subcategory')),
           backgroundColor: AppTheme.primaryColor,
         ),
         body: Center(
-          child: Text(context.tr('categoryNotFound')),
+          child: Text(context.tr('subcategoryNotFound')),
         ),
       );
     }
 
     // Fragen nach Filter anwenden
-    final List<ContentQuestion> filteredQuestions = _filterQuestions(
-        category.questions);
+    final List<ContentQuestion> filteredQuestions = _filterQuestions(category.questions);
 
     return Scaffold(
       appBar: AppBar(
@@ -72,13 +73,51 @@ class _CategoryScreenState extends State<CategoryScreen> {
       ),
       body: Column(
         children: [
-          // Header mit Bild - vereinfachte Version
-          //_buildSimplifiedCategoryHeader(context, category, isSmallScreen),
+          // Breadcrumb navigation header
+          _buildBreadcrumbHeader(context, category, parentSection, isSmallScreen),
 
-          // Suchfeld und Filteroptionen
-          _buildSearchAndFilter(context, isSmallScreen),
+          // Search and filter options
+          //_buildSearchAndFilter(context, isSmallScreen),
 
-          // Liste der Fragen
+          // Questions header
+          Padding(
+            padding: EdgeInsets.fromLTRB(16, isSmallScreen ? 4 : 8, 16, isSmallScreen ? 2 : 4),
+            child: Row(
+              children: [
+                const Icon(Icons.question_answer, color: AppTheme.primaryColor, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  context.tr('questions'),
+                  style: TextStyle(
+                    fontSize: isSmallScreen
+                        ? AppTheme.fontSizeBodyMedium
+                        : AppTheme.fontSizeBodyLarge,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimaryColor,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Show question count badge
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryColor.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    filteredQuestions.length.toString(),
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? 12 : 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.primaryColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // List of questions
           Expanded(
             child: filteredQuestions.isEmpty
                 ? Center(
@@ -103,16 +142,22 @@ class _CategoryScreenState extends State<CategoryScreen> {
                   question: question.question,
                   isFavorite: contentProvider.isFavorite(question.id),
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            QuestionDetailScreen(
-                              question: question,
-                              categoryId: widget.categoryId,
-                            ),
-                      ),
-                    );
+                    final ContentProvider contentProvider = Provider.of<ContentProvider>(context, listen: false);
+                    final category = contentProvider.getCategoryById(widget.categoryId);
+                    final section = category != null ? contentProvider.getSectionById(category.sectionId) : null;
+
+                    if (category != null && section != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => QuestionDetailScreen(
+                            question: question,
+                            category: category,
+                            parentSection: section,
+                          ),
+                        ),
+                      );
+                    }
                   },
                   onFavoriteToggle: () {
                     contentProvider.toggleFavorite(question.id);
@@ -126,37 +171,73 @@ class _CategoryScreenState extends State<CategoryScreen> {
     );
   }
 
-  // Vereinfachter Header ohne Beschreibung und Anzeige der Fragenanzahl
-  Widget _buildSimplifiedCategoryHeader(BuildContext context,
-      ContentCategory category, bool isSmallScreen) {
+  Widget _buildBreadcrumbHeader(
+      BuildContext context,
+      ContentCategory category,
+      ContentSection? parentSection,
+      bool isSmallScreen,
+      ) {
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
-        color: AppTheme.primaryColor.withOpacity(0.1),
+      padding: EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: isSmallScreen ? 8 : 12,
       ),
-      padding: EdgeInsets.all(isSmallScreen ? 12.0 : 16.0),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        border: Border(
+          bottom: BorderSide(
+            color: Colors.grey[300]!,
+            width: 1,
+          ),
+        ),
+      ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Kategorielogo/-bild
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
-              category.imageUrl,
-              width: isSmallScreen ? 50 : 60,
-              height: isSmallScreen ? 50 : 60,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  width: isSmallScreen ? 50 : 60,
-                  height: isSmallScreen ? 50 : 60,
-                  color: AppTheme.primaryColor.withOpacity(0.1),
-                  child: Icon(
-                    Icons.image,
-                    color: AppTheme.primaryColor,
-                  ),
-                );
+          // Home icon
+          Icon(
+            Icons.home,
+            size: isSmallScreen ? 16 : 18,
+            color: Colors.grey[600],
+          ),
+
+          // Parent section (chapter)
+          if (parentSection != null) ...[
+            Icon(
+              Icons.chevron_right,
+              size: isSmallScreen ? 16 : 18,
+              color: Colors.grey[600],
+            ),
+            GestureDetector(
+              onTap: () {
+                // Navigate back to chapter screen
+                Navigator.pop(context);
               },
+              child: Text(
+                parentSection.title,
+                style: TextStyle(
+                  fontSize: isSmallScreen ? 12 : 14,
+                  color: AppTheme.primaryColor,
+                ),
+              ),
+            ),
+          ],
+
+          // Current category
+          Icon(
+            Icons.chevron_right,
+            size: isSmallScreen ? 16 : 18,
+            color: Colors.grey[600],
+          ),
+          Flexible(
+            child: Text(
+              category.title,
+              style: TextStyle(
+                fontSize: isSmallScreen ? 12 : 14,
+                fontWeight: FontWeight.w500,
+                color: AppTheme.textPrimaryColor,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -177,8 +258,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
             controller: _searchController,
             decoration: InputDecoration(
               hintText: context.tr('searchQuestions'),
-              prefixIcon: const Icon(
-                  Icons.search, color: AppTheme.primaryColor),
+              prefixIcon: const Icon(Icons.search, color: AppTheme.primaryColor),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
                 icon: const Icon(Icons.clear, color: Colors.grey),
@@ -217,27 +297,12 @@ class _CategoryScreenState extends State<CategoryScreen> {
             ),
           ),
 
-          // Filter-Optionen
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Row(
-              children: [
-                _buildFilterChip(
-                    context, 'all', context.tr('allQuestions'), isSmallScreen),
-                _buildFilterChip(
-                    context, 'favorites', context.tr('favoriteQuestions'),
-                    isSmallScreen),
-              ],
-            ),
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildFilterChip(BuildContext context, String value, String label,
-      bool isSmallScreen) {
+  Widget _buildFilterChip(BuildContext context, String value, String label, bool isSmallScreen) {
     final isSelected = _filter == value;
 
     return Padding(
@@ -268,8 +333,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
   }
 
   List<ContentQuestion> _filterQuestions(List<ContentQuestion> questions) {
-    final ContentProvider contentProvider = Provider.of<ContentProvider>(
-        context, listen: false);
+    final ContentProvider contentProvider = Provider.of<ContentProvider>(context, listen: false);
 
     // Zuerst den Textfilter anwenden
     List<ContentQuestion> filteredList = [];
@@ -285,8 +349,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
     // Dann den Kategoriefilter anwenden
     if (_filter == 'favorites') {
-      filteredList =
-          filteredList.where((q) => contentProvider.isFavorite(q.id)).toList();
+      filteredList = filteredList.where((q) => contentProvider.isFavorite(q.id)).toList();
     }
 
     return filteredList;

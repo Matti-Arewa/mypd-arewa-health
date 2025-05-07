@@ -1,7 +1,6 @@
-//providers/user_provider.dart
+// providers/user_provider.dart
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-
 
 class KickSession {
   final int count;
@@ -30,7 +29,6 @@ class KickSession {
     );
   }
 }
-
 
 class WeightEntry {
   final DateTime date;
@@ -73,8 +71,6 @@ class UserProvider extends ChangeNotifier {
   final List<WeightEntry> _weightEntries = [];
   List<WeightEntry> get weightEntries => _weightEntries;
 
-  // Dark Mode wurde entfernt
-
   bool _useCelsius = true;
   bool get useCelsius => _useCelsius;
   set useCelsius(bool value) {
@@ -112,43 +108,65 @@ class UserProvider extends ChangeNotifier {
   Future<void> _loadUserData() async {
     final settingsBox = Hive.box('appSettings');
 
-    final savedDueDate = settingsBox.get('dueDate');
-    final savedLastPeriodDate = settingsBox.get('lastPeriodDate');
-    final savedFirstLaunch = settingsBox.get('isFirstLaunch');
-    final savedLanguage = settingsBox.get('preferredLanguage');
-    final savedNotifications = settingsBox.get('notificationsEnabled');
-    // Dark Mode Einstellung wurde entfernt
-    final savedRegion = settingsBox.get('region');
-    final savedUseCelsius = settingsBox.get('useCelsius');
+    try {
+      // Lade allgemeine Einstellungen
+      final savedDueDate = settingsBox.get('dueDate');
+      final savedLastPeriodDate = settingsBox.get('lastPeriodDate');
+      final savedFirstLaunch = settingsBox.get('isFirstLaunch');
+      final savedLanguage = settingsBox.get('preferredLanguage');
+      final savedNotifications = settingsBox.get('notificationsEnabled');
+      final savedRegion = settingsBox.get('region');
+      final savedUseCelsius = settingsBox.get('useCelsius');
 
-    if (savedDueDate != null) {
-      _dueDate = DateTime.parse(savedDueDate);
-    }
+      if (savedDueDate != null) {
+        _dueDate = DateTime.parse(savedDueDate);
+      }
 
-    if (savedLastPeriodDate != null) {
-      _lastPeriodDate = DateTime.parse(savedLastPeriodDate);
-    }
+      if (savedLastPeriodDate != null) {
+        _lastPeriodDate = DateTime.parse(savedLastPeriodDate);
+      }
 
-    if (savedFirstLaunch != null) {
-      _isFirstLaunch = savedFirstLaunch;
-    }
+      if (savedFirstLaunch != null) {
+        _isFirstLaunch = savedFirstLaunch;
+      }
 
-    if (savedLanguage != null) {
-      _preferredLanguage = savedLanguage;
-    }
+      if (savedLanguage != null) {
+        _preferredLanguage = savedLanguage;
+      }
 
-    if (savedNotifications != null) {
-      _notificationsEnabled = savedNotifications;
-    }
+      if (savedNotifications != null) {
+        _notificationsEnabled = savedNotifications;
+      }
 
-    // Dark Mode Laden wurde entfernt
+      if (savedRegion != null) {
+        _region = savedRegion;
+      }
 
-    if (savedRegion != null) {
-      _region = savedRegion;
-    }
+      if (savedUseCelsius != null) {
+        _useCelsius = savedUseCelsius;
+      }
 
-    if (savedUseCelsius != null) {
-      _useCelsius = savedUseCelsius;
+      // Lade Kick Counter Daten
+      final savedKickSessions = settingsBox.get('kickSessions');
+      if (savedKickSessions != null) {
+        final List<dynamic> sessionsList = savedKickSessions;
+        _kickSessions.clear();
+        for (var sessionData in sessionsList) {
+          _kickSessions.add(KickSession.fromJson(Map<String, dynamic>.from(sessionData)));
+        }
+      }
+
+      // Lade Weight Tracker Daten
+      final savedWeightEntries = settingsBox.get('weightEntries');
+      if (savedWeightEntries != null) {
+        final List<dynamic> entriesList = savedWeightEntries;
+        _weightEntries.clear();
+        for (var entryData in entriesList) {
+          _weightEntries.add(WeightEntry.fromJson(Map<String, dynamic>.from(entryData)));
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading user data: $e');
     }
 
     notifyListeners();
@@ -157,8 +175,21 @@ class UserProvider extends ChangeNotifier {
   Future<void> setDueDate(DateTime dueDate) async {
     _dueDate = dueDate;
 
+    // Auch das Datum der letzten Periode setzen
+    _lastPeriodDate = dueDate.subtract(const Duration(days: 280));
+
     final settingsBox = Hive.box('appSettings');
     await settingsBox.put('dueDate', dueDate.toIso8601String());
+    await settingsBox.put('lastPeriodDate', _lastPeriodDate!.toIso8601String());
+
+    notifyListeners();
+  }
+
+  Future<void> setLastPeriodDate(DateTime lastPeriodDate) async {
+    _lastPeriodDate = lastPeriodDate;
+
+    final settingsBox = Hive.box('appSettings');
+    await settingsBox.put('lastPeriodDate', lastPeriodDate.toIso8601String());
 
     notifyListeners();
   }
@@ -212,25 +243,51 @@ class UserProvider extends ChangeNotifier {
     return difference.inDays;
   }
 
+  // Methoden für KickCounter
   void addKickSession(KickSession session) {
     _kickSessions.insert(0, session);  // Insert at the beginning for reverse chronological order
+    _saveKickSessions();
     notifyListeners();
   }
 
   void removeKickSession(int index) {
     if (index >= 0 && index < _kickSessions.length) {
       _kickSessions.removeAt(index);
+      _saveKickSessions();
       notifyListeners();
     }
   }
 
+  Future<void> _saveKickSessions() async {
+    try {
+      final settingsBox = Hive.box('appSettings');
+      List<Map<String, dynamic>> sessionsList = _kickSessions.map((session) => session.toJson()).toList();
+      await settingsBox.put('kickSessions', sessionsList);
+    } catch (e) {
+      debugPrint('Error saving kick sessions: $e');
+    }
+  }
+
+  // Methoden für WeightTracker
   void addWeightEntry({required DateTime date, required double weight}) {
     _weightEntries.add(WeightEntry(date: date, weight: weight));
+    _saveWeightEntries();
     notifyListeners();
   }
 
   void removeWeightEntry(WeightEntry entry) {
     _weightEntries.remove(entry);
+    _saveWeightEntries();
     notifyListeners();
+  }
+
+  Future<void> _saveWeightEntries() async {
+    try {
+      final settingsBox = Hive.box('appSettings');
+      List<Map<String, dynamic>> entriesList = _weightEntries.map((entry) => entry.toJson()).toList();
+      await settingsBox.put('weightEntries', entriesList);
+    } catch (e) {
+      debugPrint('Error saving weight entries: $e');
+    }
   }
 }
