@@ -3,5 +3,3 @@ env:
   AWS_CLI_AUTO_PROMPT: on-partial
 before: |
   source bin/aws_cli_install.sh
-
-
