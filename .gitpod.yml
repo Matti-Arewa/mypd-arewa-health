@@ -5,7 +5,3 @@ before: |
   source bin/aws_cli_install.sh
 
 
-gp env AWS_CLI_AUTO_PROMPT=on-partial 
-gp env AWS_REGION=eu-north-1
-gp env AWS_SECRET_ACCESS_KEY=dSNrFXL276GTdaCT3xl4JSa6/DyFwonDUeY/EFHp
-gp env AWS_ACCESS_KEY_ID=AKIAZDZTB4B5K66RO6WU
