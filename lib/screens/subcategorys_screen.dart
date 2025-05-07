@@ -1,4 +1,4 @@
-// screens/chapter_detail_screen.dart
+// screens/subcategorys_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/content_model.dart';
@@ -6,7 +6,7 @@ import '../providers/content_provider.dart';
 import '../screens/questions_screen.dart';
 import '../utils/app_theme.dart';
 import '../services/localization_service.dart';
-import '../widgets/category_list_item.dart';
+import '../widgets/subcategory_list_item.dart';
 
 class ChapterDetailScreen extends StatelessWidget {
   final ContentSection section;

@@ -1,4 +1,4 @@
-// widgets/category_list_item.dart
+// widgets/subcategory_list_item.dart
 import 'package:flutter/material.dart';
 import '../models/content_model.dart';
 import '../utils/app_theme.dart';

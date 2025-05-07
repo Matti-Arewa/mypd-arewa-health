@@ -8,7 +8,7 @@ import '../providers/content_provider.dart';
 import '../providers/language_provider.dart';
 import '../screens/search_screen.dart';
 import '../screens/settings_screen.dart';
-import '../screens/chapter_detail_screen.dart';
+import '../screens/subcategorys_screen.dart';
 import '../models/content_model.dart';
 import '../utils/app_theme.dart';
 import '../services/localization_service.dart';
