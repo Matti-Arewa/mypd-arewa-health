@@ -1,4 +1,4 @@
 tasks:
   - name: aws-cli
-  before: |
-    source bin/aws_cli_install.sh
+    before: |
+      source bin/aws_cli_install.sh
