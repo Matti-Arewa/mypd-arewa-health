@@ -44,6 +44,14 @@ class QuestionDetailScreen extends StatelessWidget {
             ),
             actions: [
               IconButton(
+                icon: const Icon(Icons.home, color: Colors.white),
+                onPressed: () {
+                  // Navigate back to home screen (reset navigation stack)
+                  Navigator.popUntil(context, (route) => route.isFirst);
+                },
+                tooltip: context.tr('home'),
+              ),
+              IconButton(
                 icon: Icon(
                   contentProvider.isFavorite(question.id)
                       ? Icons.favorite

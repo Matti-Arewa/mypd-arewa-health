@@ -55,6 +55,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           title: context.tr('settings'),
           backgroundColor: AppTheme.primaryColor,
           showBackButton: true,
+          titleColor: Colors.white,
+          titleFontWeight: FontWeight.w600,
           onBackPressed: () {
             // Explizite Navigation zurück
             Navigator.of(context).pop();

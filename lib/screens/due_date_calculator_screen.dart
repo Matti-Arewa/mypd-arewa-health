@@ -142,7 +142,8 @@ class _DueDateCalculatorScreenState extends State<DueDateCalculatorScreen> {
         title: Text(
           context.tr('dueDateCalculator'),
           style: TextStyle(
-            color: AppTheme.textPrimaryColor,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
             fontSize: isSmallScreen ? 18.0 : 20.0,
           ),
         ),

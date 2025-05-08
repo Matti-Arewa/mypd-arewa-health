@@ -25,6 +25,8 @@ class HelpScreen extends StatelessWidget {
         title: context.tr('helpTitle'),
         backgroundColor: AppTheme.primaryColor,
         showBackButton: true,
+        titleColor: Colors.white,
+        titleFontWeight: FontWeight.w600,
         onBackPressed: () {
           Navigator.of(context).pop();
         },

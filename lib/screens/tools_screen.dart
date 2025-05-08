@@ -31,7 +31,8 @@ class ToolsScreen extends StatelessWidget {
         title: Text(
           context.tr('pregnancyTools'),
           style: TextStyle(
-            color: AppTheme.textPrimaryColor,
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
             fontSize: isSmallScreen ? 18.0 : 20.0,
           ),
         ),

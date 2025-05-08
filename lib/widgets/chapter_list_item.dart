@@ -18,6 +18,10 @@ class ChapterListItem extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
     final isSmallScreen = mediaQuery.size.width < 360;
 
+    // Extraktion der Kapitelnummer aus der ID (z.B. "chapter1" -> "1")
+    final chapterNumber = section.id.replaceAll(RegExp(r'[^0-9]'), '');
+    final chapterLabel = "Kapitel $chapterNumber";
+
     return Card(
       margin: const EdgeInsets.symmetric(
         vertical: 6,
@@ -60,6 +64,15 @@ class ChapterListItem extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
+                          chapterLabel,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.accentColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
                           section.title,
                           style: TextStyle(
                             fontSize: isSmallScreen ? 16 : 18,
@@ -71,39 +84,7 @@ class ChapterListItem extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.category,
-                              size: 14,
-                              color: AppTheme.accentColor,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              "${section.categories.length} categories",
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: AppTheme.accentColor,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            const Icon(
-                              Icons.question_answer,
-                              size: 14,
-                              color: AppTheme.accentColor,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              "${_countQuestions(section)} questions",
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: AppTheme.accentColor,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
+
                       ],
                     ),
                   ),

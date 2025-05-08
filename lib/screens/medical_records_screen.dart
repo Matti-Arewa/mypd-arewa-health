@@ -26,7 +26,8 @@ class MedicalRecordsScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           context.tr('medicalRecords'),
-          style: const TextStyle(color: AppTheme.textPrimaryColor),
+
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600,),
         ),
         actions: [
           IconButton(

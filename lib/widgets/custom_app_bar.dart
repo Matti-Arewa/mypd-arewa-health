@@ -9,7 +9,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;
   final double elevation;
   final Color? backgroundColor;
-  final VoidCallback? onBackPressed; // Neuer Callback für explizite Navigation
+  final Color? titleColor; // Neuer Parameter für die Titelfarbe
+  final FontWeight? titleFontWeight; // Neuer Parameter für die Schriftdicke
+  final double? titleFontSize; // Optionaler Parameter für die Schriftgröße
+  final VoidCallback? onBackPressed; // Callback für explizite Navigation
 
   const CustomAppBar({
     Key? key,
@@ -19,6 +22,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.leading,
     this.elevation = 0,
     this.backgroundColor,
+    this.titleColor, // Standard ist null, wird dann in build gesetzt
+    this.titleFontWeight, // Standard ist null, wird dann in build gesetzt
+    this.titleFontSize, // Optional, ansonsten responsive
     this.onBackPressed,
   }) : super(key: key);
 
@@ -28,11 +34,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 360;
 
+    // Passe Textgröße basierend auf Bildschirmbreite an, falls keine explizite Größe angegeben wurde
+    final responsiveFontSize = isSmallScreen ? 16.0 : 18.0;
+
     // Passe Textgröße basierend auf Bildschirmbreite an
     final titleTextStyle = TextStyle(
-      color: AppTheme.textPrimaryColor,
-      fontWeight: FontWeight.bold,
-      fontSize: isSmallScreen ? 16.0 : 18.0, // Kleinere Schriftgröße auf kleinen Bildschirmen
+      color: titleColor ?? AppTheme.textPrimaryColor, // Verwende übergebene Farbe oder Standard
+      fontWeight: titleFontWeight ?? FontWeight.bold, // Verwende übergebene Dicke oder Standard
+      fontSize: titleFontSize ?? responsiveFontSize, // Verwende übergebene Größe oder responsive Standard
     );
 
     return AppBar(

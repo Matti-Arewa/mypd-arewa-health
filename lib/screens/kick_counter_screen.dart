@@ -134,7 +134,7 @@ class _KickCounterScreenState extends State<KickCounterScreen> {
       appBar: AppBar(
         title: Text(
           context.tr('kickCounter'),
-          style: TextStyle(color: AppTheme.textPrimaryColor),
+          style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600,),
         ),
         backgroundColor: AppTheme.primaryColor,
       ),

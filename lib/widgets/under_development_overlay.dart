@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../utils/app_theme.dart';
 import '../services/localization_service.dart';
 
-class UnderDevelopmentOverlay extends StatelessWidget {
+class UnderDevelopmentOverlay extends StatefulWidget {
   final Widget child;
   final bool developmentMode;
   final VoidCallback onTestButtonPressed;
@@ -15,9 +15,53 @@ class UnderDevelopmentOverlay extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<UnderDevelopmentOverlay> createState() => _UnderDevelopmentOverlayState();
+}
+
+class _UnderDevelopmentOverlayState extends State<UnderDevelopmentOverlay> with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _glowAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Animation Controller für Pulsieren und Glühen
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    // Leichte Skalierungsanimation
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.05,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+
+    // Glüh-Animation für den Schatten
+    _glowAnimation = Tween<double>(
+      begin: 2.0,
+      end: 6.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (developmentMode) {
-      return child;
+    if (widget.developmentMode) {
+      return widget.child;
     }
 
     // Responsive Anpassungen
@@ -32,7 +76,7 @@ class UnderDevelopmentOverlay extends StatelessWidget {
         // Original-Screen im Hintergrund
         Opacity(
           opacity: 0.3,
-          child: AbsorbPointer(child: child),
+          child: AbsorbPointer(child: widget.child),
         ),
 
         // Overlay
@@ -80,20 +124,50 @@ class UnderDevelopmentOverlay extends StatelessWidget {
                           textAlign: TextAlign.center,
                         ),
                         SizedBox(height: isSmallScreen ? 24 : 32),
-                        SizedBox(
-                          width: double.infinity,
-                          height: buttonHeight,
-                          child: ElevatedButton(
-                            onPressed: onTestButtonPressed,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.primaryColor,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+
+                        // Animierter Button mit Pulse-Effekt
+                        AnimatedBuilder(
+                          animation: _animationController,
+                          builder: (context, child) {
+                            return Transform.scale(
+                              scale: _scaleAnimation.value,
+                              child: Container(
+                                width: double.infinity,
+                                height: buttonHeight,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppTheme.primaryColor.withOpacity(0.4),
+                                      blurRadius: _glowAnimation.value,
+                                      spreadRadius: _glowAnimation.value / 2,
+                                    ),
+                                  ],
+                                ),
+                                child: ElevatedButton(
+                                  onPressed: widget.onTestButtonPressed,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppTheme.primaryColor,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(context.tr('testFeatures')),
+                                      const SizedBox(width: 8),
+                                      const Icon(
+                                        Icons.touch_app,
+                                        size: 18,
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                            ),
-                            child: Text(context.tr('testFeatures')),
-                          ),
+                            );
+                          },
                         ),
                       ],
                     ),

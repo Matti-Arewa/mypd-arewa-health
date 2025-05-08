@@ -310,8 +310,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         title: Text(
           context.tr('welcomeTitle'),
           style: TextStyle(
-            color: AppTheme.textPrimaryColor,
-            fontSize: isSmallScreen ? 18.0 : 20.0,
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: isSmallScreen ? 17.0 : 20.0,
           ),
         ),
         backgroundColor: AppTheme.primaryColor,

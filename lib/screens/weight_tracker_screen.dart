@@ -26,7 +26,7 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
   @override
   void initState() {
     super.initState();
-    _dateController.text = DateFormat('yyyy-MM-dd').format(_selectedDate);
+    _dateController.text = DateFormat('dd-MM-yyyy').format(_selectedDate);
   }
 
   @override
@@ -58,7 +58,7 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
-        _dateController.text = DateFormat('yyyy-MM-dd').format(_selectedDate);
+        _dateController.text = DateFormat('dd-MM-yyyy').format(_selectedDate);
       });
     }
   }
@@ -79,7 +79,7 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
       _weightController.clear();
       setState(() {
         _selectedDate = DateTime.now();
-        _dateController.text = DateFormat('yyyy-MM-dd').format(_selectedDate);
+        _dateController.text = DateFormat('dd-MM-yyyy').format(_selectedDate);
 
         // Update selected month when adding a new entry
         final monthYearFormatter = DateFormat('MMMM yyyy', context.loc.locale.languageCode);
@@ -147,7 +147,7 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
     final dropdownHeight = isSmallScreen ? 40.0 : 48.0;
 
     return Scaffold(
-      appBar: CustomAppBar(title: context.tr('weightTracker'), backgroundColor: AppTheme.primaryColor,),
+      appBar: CustomAppBar(title: context.tr('weightTracker'), backgroundColor: AppTheme.primaryColor, titleColor: Colors.white,titleFontWeight: FontWeight.w600,),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(padding),
         child: Consumer<UserProvider>(
