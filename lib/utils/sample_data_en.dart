@@ -6,7 +6,7 @@ class SampleDataEN {
       ContentSection(
         id: 'chapter1',
         title: 'My First Visit to the Gynecologist',
-        imageUrl: '',
+        imageUrl: '/assets/icons/chapter1.png',
         categories: [
           ContentCategory(
             id: '1.1',
@@ -175,7 +175,7 @@ class SampleDataEN {
       ContentSection(
         id: 'chapter2',
         title: 'Desire for Children & Preparation for Pregnancy',
-        imageUrl: '',
+        imageUrl: '/assets/icons/chapter2.png',
         categories: [
           ContentCategory(
             id: '2.1',
@@ -316,7 +316,7 @@ class SampleDataEN {
       ContentSection(
         id: 'chapter3',
         title: 'Pregnancy',
-        imageUrl: '',
+        imageUrl: '/assets/icons/chapter3.png',
         categories: [
           ContentCategory(
             id: '3.1',
@@ -457,7 +457,7 @@ class SampleDataEN {
       ContentSection(
         id: 'chapter4',
         title: 'Care During Pregnancy',
-        imageUrl: '',
+        imageUrl: '/assets/icons/chapter4.png',
         categories: [
           ContentCategory(
             id: '4.1',
@@ -658,7 +658,7 @@ class SampleDataEN {
       ContentSection(
         id: 'chapter5',
         title: 'Preparation for Birth',
-        imageUrl: '',
+        imageUrl: '/assets/icons/chapter5.png',
         categories: [
           ContentCategory(
             id: '5.1',
@@ -867,7 +867,7 @@ class SampleDataEN {
       ContentSection(
         id: 'chapter6',
         title: 'Birth - What to Expect',
-        imageUrl: '',
+        imageUrl: '/assets/icons/chapter6.png',
         categories: [
           ContentCategory(
             id: '6.1',

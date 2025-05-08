@@ -2,10 +2,21 @@
 import 'package:flutter/material.dart';
 import '../models/content_model.dart';
 import '../utils/app_theme.dart';
+import 'package:flutter/foundation.dart';
 
 class ChapterListItem extends StatelessWidget {
   final ContentSection section;
   final VoidCallback onTap;
+
+  // Definiere eine Map für die Kapitelbilder
+  static final Map<String, String> chapterImages = {
+    'chapter1': 'assets/icons/chapter1.png',
+    'chapter2': 'assets/icons/chapter2.png',
+    'chapter3': 'assets/icons/chapter3.png',
+    'chapter4': 'assets/icons/chapter4.png',
+    'chapter5': 'assets/icons/chapter5.png',
+    'chapter6': 'assets/icons/chapter6.png',
+  };
 
   const ChapterListItem({
     super.key,
@@ -22,6 +33,13 @@ class ChapterListItem extends StatelessWidget {
     final chapterNumber = section.id.replaceAll(RegExp(r'[^0-9]'), '');
     final chapterLabel = "Kapitel $chapterNumber";
 
+    // Verwende den Eintrag aus der Map oder einen Fallback
+    final String imagePath = chapterImages[section.id] ?? 'assets/icons/default.png';
+
+    if (kDebugMode) {
+      print("Section ID: ${section.id}, Using image path: $imagePath");
+    }
+
     return Card(
       margin: const EdgeInsets.symmetric(
         vertical: 6,
@@ -36,95 +54,77 @@ class ChapterListItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Use an icon instead of an image
-                  Container(
-                    width: isSmallScreen ? 50 : 60,
-                    height: isSmallScreen ? 50 : 60,
-                    decoration: BoxDecoration(
-                      color: _getColorForSection(section.title).withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Center(
+              // Entferne den Container und verwende stattdessen ClipRRect für abgerundete Ecken
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  imagePath,
+                  width: isSmallScreen ? 60 : 70, // Größeres Bild
+                  height: isSmallScreen ? 60 : 70, // Größeres Bild
+                  fit: BoxFit.cover, // Bild füllt den verfügbaren Raum
+                  errorBuilder: (context, error, stackTrace) {
+                    if (kDebugMode) {
+                      print("Error loading image '$imagePath': $error");
+                    }
+                    // Fallback-Icon mit Container für Hintergrundfarbe
+                    return Container(
+                      width: isSmallScreen ? 60 : 70,
+                      height: isSmallScreen ? 60 : 70,
+                      decoration: BoxDecoration(
+                        color: _getColorForSection(section.title).withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       child: Icon(
-                        _getIconForSection(section.title),
-                        size: isSmallScreen ? 28 : 32,
+                        Icons.book_outlined,
+                        size: isSmallScreen ? 32 : 36,
                         color: _getColorForSection(section.title),
                       ),
+                    );
+                  },
+                ),
+              ),
+              SizedBox(width: isSmallScreen ? 12 : 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      chapterLabel,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.accentColor,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: isSmallScreen ? 12 : 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          chapterLabel,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppTheme.accentColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          section.title,
-                          style: TextStyle(
-                            fontSize: isSmallScreen ? 16 : 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.primaryColor,
-                            height: 1.2,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 6),
-
-                      ],
+                    const SizedBox(height: 4),
+                    Text(
+                      section.title,
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? 16 : 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                        height: 1.2,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    size: isSmallScreen ? 14 : 16,
-                    color: Colors.grey[400],
-                  ),
-                ],
+                    const SizedBox(height: 6),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: isSmallScreen ? 14 : 16,
+                color: Colors.grey[400],
               ),
             ],
           ),
         ),
       ),
     );
-  }
-
-
-  IconData _getIconForSection(String title) {
-    final titleLower = title.toLowerCase();
-
-    if (titleLower.contains('visit') || titleLower.contains('practice')) {
-      return Icons.local_hospital;
-    } else if (titleLower.contains('body') || titleLower.contains('anatomy')) {
-      return Icons.woman;
-    } else if (titleLower.contains('birth') || titleLower.contains('delivery')) {
-      return Icons.child_care;
-    } else if (titleLower.contains('nutrition') || titleLower.contains('diet')) {
-      return Icons.restaurant;
-    } else if (titleLower.contains('exercise') || titleLower.contains('fitness')) {
-      return Icons.fitness_center;
-    } else if (titleLower.contains('health') || titleLower.contains('wellness')) {
-      return Icons.favorite;
-    } else if (titleLower.contains('trimester') || titleLower.contains('stages')) {
-      return Icons.timeline;
-    } else if (titleLower.contains('prepare') || titleLower.contains('planning')) {
-      return Icons.event_note;
-    } else {
-      return Icons.menu_book;
-    }
   }
 
   Color _getColorForSection(String title) {

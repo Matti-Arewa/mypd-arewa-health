@@ -6,7 +6,7 @@ class SampleDataFR {
       ContentSection(
         id: 'chapter1',
         title: 'Ma première visite chez le gynécologue',
-        imageUrl: '',
+        imageUrl: '/assets/icons/chapter1.png',
         categories: [
           ContentCategory(
             id: '1.1',
@@ -175,7 +175,7 @@ class SampleDataFR {
       ContentSection(
         id: 'chapter2',
         title: 'Désir d\'enfant & préparation à la grossesse',
-        imageUrl: '',
+        imageUrl: '/assets/icons/chapter2.png',
         categories: [
           ContentCategory(
             id: '2.1',
@@ -316,7 +316,7 @@ class SampleDataFR {
       ContentSection(
         id: 'chapter3',
         title: 'Grossesse',
-        imageUrl: '',
+        imageUrl: '/assets/icons/chapter3.png',
         categories: [
           ContentCategory(
             id: '3.1',
@@ -457,7 +457,7 @@ class SampleDataFR {
       ContentSection(
         id: 'chapter4',
         title: 'Suivi pendant la grossesse',
-        imageUrl: '',
+        imageUrl: '/assets/icons/chapter4.png',
         categories: [
           ContentCategory(
             id: '4.1',
@@ -658,7 +658,7 @@ class SampleDataFR {
       ContentSection(
         id: 'chapter5',
         title: 'Préparation à l\'accouchement',
-        imageUrl: '',
+        imageUrl: '/assets/icons/chapter5.png',
         categories: [
           ContentCategory(
             id: '5.1',
@@ -867,7 +867,7 @@ class SampleDataFR {
       ContentSection(
         id: 'chapter6',
         title: 'L\'accouchement - à quoi s\'attendre',
-        imageUrl: '',
+        imageUrl: '/assets/icons/chapter6.png',
         categories: [
           ContentCategory(
             id: '6.1',

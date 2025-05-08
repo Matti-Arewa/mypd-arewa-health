@@ -6,7 +6,7 @@ class SampleDataDE {
       ContentSection(
         id: 'chapter1',
         title: 'Mein erster Besuch in der gynäkologischen Praxis',
-        imageUrl: '',
+        imageUrl: 'assets/icons/chapter1.png',
         categories: [
           ContentCategory(
             id: '1.1',
@@ -175,7 +175,7 @@ class SampleDataDE {
       ContentSection(
         id: 'chapter2',
         title: 'Kinderwunsch & Vorbereitung auf die Schwangerschaft',
-        imageUrl: '',
+        imageUrl: 'assets/icons/chapter2.png',
         categories: [
           ContentCategory(
             id: '2.1',
@@ -316,7 +316,7 @@ class SampleDataDE {
       ContentSection(
         id: 'chapter3',
         title: 'Schwangerschaft',
-        imageUrl: '',
+        imageUrl: 'assets/icons/chapter3.png',
         categories: [
           ContentCategory(
             id: '3.1',
@@ -457,7 +457,7 @@ class SampleDataDE {
       ContentSection(
         id: 'chapter4',
         title: 'Betreuung in der Schwangerschaft',
-        imageUrl: '',
+        imageUrl: 'assets/icons/chapter4.png',
         categories: [
           ContentCategory(
             id: '4.1',
@@ -658,7 +658,7 @@ class SampleDataDE {
       ContentSection(
         id: 'chapter5',
         title: 'Vorbereitung auf die Geburt',
-        imageUrl: '',
+        imageUrl: 'assets/icons/chapter5.png',
         categories: [
           ContentCategory(
             id: '5.1',
@@ -867,7 +867,7 @@ class SampleDataDE {
       ContentSection(
         id: 'chapter6',
         title: 'Die Geburt – was dich erwartet',
-        imageUrl: '',
+        imageUrl: 'assets/icons/chapter6.png',
         categories: [
           ContentCategory(
             id: '6.1',
