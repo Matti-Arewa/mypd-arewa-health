@@ -1,6 +1,5 @@
 //widgets/category_card.dart
 import 'package:flutter/material.dart';
-import '../utils/app_theme.dart';
 
 class CategoryCard extends StatelessWidget {
   final String title;
@@ -8,14 +7,14 @@ class CategoryCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const CategoryCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.imageUrl,
     required this.onTap,
     // Folgende Parameter werden nicht mehr benötigt, aber für Kompatibilität gelassen
     String? description,
     int? questionCount,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

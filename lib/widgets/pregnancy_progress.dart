@@ -11,12 +11,12 @@ class PregnancyProgress extends StatelessWidget {
   final bool compact; // Option für kompaktere Darstellung
 
   const PregnancyProgress({
-    Key? key,
+    super.key,
     required this.weeksPregnant,
     required this.daysLeft,
     required this.dueDate,
     this.compact = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

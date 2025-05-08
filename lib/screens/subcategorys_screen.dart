@@ -12,9 +12,9 @@ class ChapterDetailScreen extends StatefulWidget {
   final ContentSection section;
 
   const ChapterDetailScreen({
-    Key? key,
+    super.key,
     required this.section,
-  }) : super(key: key);
+  });
 
   @override
   State<ChapterDetailScreen> createState() => _ChapterDetailScreenState();
@@ -22,7 +22,7 @@ class ChapterDetailScreen extends StatefulWidget {
 
 class _ChapterDetailScreenState extends State<ChapterDetailScreen> {
   // Map to track which categories are expanded
-  Map<String, bool> _expandedCategories = {};
+  final Map<String, bool> _expandedCategories = {};
 
   @override
   void initState() {
@@ -91,7 +91,7 @@ class _ChapterDetailScreenState extends State<ChapterDetailScreen> {
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.category,
                     color: AppTheme.primaryColor,
                     size: 20,

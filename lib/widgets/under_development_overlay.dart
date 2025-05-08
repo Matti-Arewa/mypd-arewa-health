@@ -8,11 +8,11 @@ class UnderDevelopmentOverlay extends StatefulWidget {
   final VoidCallback onTestButtonPressed;
 
   const UnderDevelopmentOverlay({
-    Key? key,
+    super.key,
     required this.child,
     required this.developmentMode,
     required this.onTestButtonPressed,
-  }) : super(key: key);
+  });
 
   @override
   State<UnderDevelopmentOverlay> createState() => _UnderDevelopmentOverlayState();

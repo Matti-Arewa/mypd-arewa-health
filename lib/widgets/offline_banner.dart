@@ -7,10 +7,10 @@ class OfflineBanner extends StatefulWidget {
   final Duration checkInterval;
 
   const OfflineBanner({
-    Key? key,
+    super.key,
     required this.child,
     this.checkInterval = const Duration(seconds: 10),
-  }) : super(key: key);
+  });
 
   @override
   State<OfflineBanner> createState() => _OfflineBannerState();

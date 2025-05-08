@@ -266,7 +266,7 @@ class _DueDateCalculatorScreenState extends State<DueDateCalculatorScreen> {
                           ),
                         ),
                         SizedBox(height: cardSpacing),
-                        Divider(color: AppTheme.dividerColor),
+                        const Divider(color: AppTheme.dividerColor),
                         SizedBox(height: spacing),
                         _buildInfoRow(
                           context.tr('weeksPregnant'),
@@ -419,7 +419,7 @@ class _DueDateCalculatorScreenState extends State<DueDateCalculatorScreen> {
               maxLines: 1,
             ),
           ),
-          SizedBox(width: 8), // Kleiner Abstand
+          const SizedBox(width: 8), // Kleiner Abstand
           Expanded(
             flex: 3,  // Gibt dem Wert mehr Platz
             child: Text(

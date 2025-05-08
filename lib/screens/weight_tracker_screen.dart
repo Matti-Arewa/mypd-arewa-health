@@ -10,7 +10,7 @@ import '../services/localization_service.dart';
 class WeightTrackerScreen extends StatefulWidget {
   static const routeName = '/weight-tracker';
 
-  const WeightTrackerScreen({Key? key}) : super(key: key);
+  const WeightTrackerScreen({super.key});
 
   @override
   State<WeightTrackerScreen> createState() => _WeightTrackerScreenState();
@@ -45,7 +45,7 @@ class _WeightTrackerScreenState extends State<WeightTrackerScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
+            colorScheme: const ColorScheme.light(
               primary: AppTheme.primaryColor,
               onPrimary: Colors.white,
               onSurface: AppTheme.textPrimaryColor,

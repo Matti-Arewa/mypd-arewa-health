@@ -6,10 +6,10 @@ class VersionInfo extends StatefulWidget {
   final bool showBuildNumber;
 
   const VersionInfo({
-    Key? key,
+    super.key,
     this.style,
     this.showBuildNumber = false,
-  }) : super(key: key);
+  });
 
   @override
   State<VersionInfo> createState() => _VersionInfoState();
@@ -47,7 +47,7 @@ class _VersionInfoState extends State<VersionInfo> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return SizedBox(
+      return const SizedBox(
         height: 18,
         width: 18,
         child: CircularProgressIndicator(

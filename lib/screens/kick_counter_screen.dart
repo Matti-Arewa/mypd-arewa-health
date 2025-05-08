@@ -8,7 +8,7 @@ import '../utils/app_theme.dart';
 import '../services/localization_service.dart';
 
 class KickCounterScreen extends StatefulWidget {
-  const KickCounterScreen({Key? key}) : super(key: key);
+  const KickCounterScreen({super.key});
 
   @override
   _KickCounterScreenState createState() => _KickCounterScreenState();
@@ -88,10 +88,10 @@ class _KickCounterScreenState extends State<KickCounterScreen> {
       builder: (ctx) => AlertDialog(
         title: Text(context.tr('sessionComplete')),
         content: Text(
-          context.tr('kickCounterResult', {
+          "${context.tr('kickCounterResult', {
             'count': '10',
             'duration': _formatDuration(_elapsedTime),
-          }) + "\n\n" + context.tr('expertRecommendation'),
+          })}\n\n${context.tr('expertRecommendation')}",
         ),
         actions: [
           TextButton(
@@ -134,7 +134,7 @@ class _KickCounterScreenState extends State<KickCounterScreen> {
       appBar: AppBar(
         title: Text(
           context.tr('kickCounter'),
-          style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600,),
+          style: const TextStyle(color: Colors.white,fontWeight: FontWeight.w600,),
         ),
         backgroundColor: AppTheme.primaryColor,
       ),

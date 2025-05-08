@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
-import 'dart:io';
 import 'package:flutter/services.dart';
 import '../utils/app_theme.dart';
 
@@ -12,12 +11,12 @@ class VideoPlayerWidget extends StatefulWidget {
   final bool autoPlay;
 
   const VideoPlayerWidget({
-    Key? key,
+    super.key,
     required this.videoUrl,
     required this.title,
     this.description = '',
     this.autoPlay = true,
-  }) : super(key: key);
+  });
 
   @override
   State<VideoPlayerWidget> createState() => _VideoPlayerWidgetState();
@@ -126,7 +125,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isSmallScreen = MediaQuery.of(context).size.width < 360;
+    //final bool isSmallScreen = MediaQuery.of(context).size.width < 360;
 
     return Card(
       clipBehavior: Clip.antiAlias,

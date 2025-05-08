@@ -6,7 +6,6 @@ import '../models/content_model.dart';
 import '../providers/content_provider.dart';
 import '../utils/app_theme.dart';
 import '../services/localization_service.dart';
-import '../widgets/related_questions.dart';
 
 class QuestionDetailScreen extends StatelessWidget {
   final ContentQuestion question;

@@ -17,7 +17,7 @@ import '../widgets/under_development_overlay.dart';
 import '../services/localization_service.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -97,7 +97,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       const GuideScreen(),           // Guide (0) - neue zusammengefasste Komponente
       const ToolsScreen(),            // Tools (1)
       UnderDevelopmentOverlay(         // Medical Records (2)
-        child: const MedicalRecordsScreen(),
         developmentMode: _medicalRecordsDevMode,
         onTestButtonPressed: () {
           if (kDebugMode) {
@@ -106,10 +105,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           setState(() {
             _medicalRecordsDevMode = true;
           });
-        },
+        },         // Medical Records (2)
+        child: const MedicalRecordsScreen(),
       ),
       UnderDevelopmentOverlay(         // Community (3)
-        child: const CommunityScreen(),
         developmentMode: _communityDevMode,
         onTestButtonPressed: () {
           if (kDebugMode) {
@@ -118,7 +117,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           setState(() {
             _communityDevMode = true;
           });
-        },
+        },         // Community (3)
+        child: const CommunityScreen(),
       ),
       const WelcomeScreen(),           // Welcome Screen (4)
     ];

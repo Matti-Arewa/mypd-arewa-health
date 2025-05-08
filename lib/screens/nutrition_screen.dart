@@ -657,7 +657,7 @@ class _FoodCategory extends StatelessWidget {
           ),
           SizedBox(height: isSmallScreen ? 1 : 2),
           Text(
-            context.tr('examples') + ': ' + examples,
+            '${context.tr('examples')}: $examples',
             style: TextStyle(
               fontSize: descriptionFontSize,
               fontStyle: FontStyle.italic,
@@ -709,7 +709,7 @@ class _AvoidFoodItem extends StatelessWidget {
           if (examples != null) ...[
             SizedBox(height: isSmallScreen ? 1 : 2),
             Text(
-              context.tr('examples') + ': ' + examples!,
+              '${context.tr('examples')}: ${examples!}',
               style: TextStyle(
                 fontSize: descriptionFontSize,
                 fontStyle: FontStyle.italic,

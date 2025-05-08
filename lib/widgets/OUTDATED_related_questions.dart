@@ -1,7 +1,6 @@
-// widgets/related_questions.dart
+// widgets/OUTDATED_related_questions.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/content_model.dart';
 import '../providers/content_provider.dart';
 import '../screens/question_detail_screen.dart';
 import '../utils/app_theme.dart';
@@ -12,11 +11,11 @@ class RelatedQuestions extends StatelessWidget {
   final int maxQuestions;
 
   const RelatedQuestions({
-    Key? key,
+    super.key,
     required this.currentQuestionId,
     required this.categoryId,
     this.maxQuestions = 3,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +70,7 @@ class RelatedQuestions extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.question_answer,
                     color: AppTheme.accentColor,
                     size: 20,

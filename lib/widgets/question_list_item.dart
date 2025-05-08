@@ -10,12 +10,12 @@ class QuestionListItem extends StatelessWidget {
   final VoidCallback onFavoriteToggle;
 
   const QuestionListItem({
-    Key? key,
+    super.key,
     required this.question,
     required this.isFavorite,
     required this.onTap,
     required this.onFavoriteToggle,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +52,7 @@ class QuestionListItem extends StatelessWidget {
                   color: AppTheme.accentColor,
                 ),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               // Question text
               Expanded(
                 child: Text(

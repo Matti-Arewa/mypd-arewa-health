@@ -12,7 +12,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter/foundation.dart';
 
 class WelcomeScreen extends StatefulWidget {
-  const WelcomeScreen({Key? key}) : super(key: key);
+  const WelcomeScreen({super.key});
 
   @override
   State<WelcomeScreen> createState() => _WelcomeScreenState();
@@ -761,7 +761,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   // Date
                   Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.calendar_today,
                         size: 14,
                         color: AppTheme.textSecondaryColor,
@@ -853,7 +853,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           color: AppTheme.primaryColor,
           size: isSmallScreen ? 20.0 : 24.0,
         ),
-        SizedBox(width: 8.0),
+        const SizedBox(width: 8.0),
         Text(
           context.tr(key),
           style: TextStyle(

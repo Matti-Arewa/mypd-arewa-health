@@ -10,10 +10,10 @@ class FavoriteQuestionItem extends StatelessWidget {
   final VoidCallback onTap;
 
   const FavoriteQuestionItem({
-    Key? key,
+    super.key,
     required this.question,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +44,7 @@ class FavoriteQuestionItem extends StatelessWidget {
               if (category != null) ...[
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.bookmark,
                       size: 14,
                       color: AppTheme.primaryColor,
@@ -55,7 +55,7 @@ class FavoriteQuestionItem extends StatelessWidget {
                         section != null
                             ? '${section.title} > ${category.title}'
                             : category.title,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           color: AppTheme.primaryColor,
                           fontWeight: FontWeight.w500,

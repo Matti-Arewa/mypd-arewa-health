@@ -8,12 +8,12 @@ class QuestionCard extends StatelessWidget {
   final VoidCallback onFavoriteToggle;
 
   const QuestionCard({
-    Key? key,
+    super.key,
     required this.question,
     required this.isFavorite,
     required this.onTap,
     required this.onFavoriteToggle,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

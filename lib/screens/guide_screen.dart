@@ -9,14 +9,13 @@ import '../providers/language_provider.dart';
 import '../screens/search_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/subcategorys_screen.dart';
-import '../models/content_model.dart';
 import '../utils/app_theme.dart';
 import '../services/localization_service.dart';
 import '../widgets/chapter_list_item.dart';
 import '../widgets/favorite_question_item.dart';
 
 class GuideScreen extends StatefulWidget {
-  const GuideScreen({Key? key}) : super(key: key);
+  const GuideScreen({super.key});
 
   @override
   State<GuideScreen> createState() => _GuideScreenState();

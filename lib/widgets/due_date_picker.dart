@@ -7,10 +7,10 @@ class DueDatePicker extends StatefulWidget {
   final DateTime? initialDate;
 
   const DueDatePicker({
-    Key? key,
+    super.key,
     required this.onDateSelected,
     this.initialDate,
-  }) : super(key: key);
+  });
 
   @override
   State<DueDatePicker> createState() => _DueDatePickerState();

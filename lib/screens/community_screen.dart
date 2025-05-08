@@ -91,7 +91,7 @@ class Comment {
 }
 
 class CommunityScreen extends StatefulWidget {
-  const CommunityScreen({Key? key}) : super(key: key);
+  const CommunityScreen({super.key});
 
   @override
   State<CommunityScreen> createState() => _CommunityScreenState();

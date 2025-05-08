@@ -60,9 +60,7 @@ class LanguageSelector extends StatelessWidget {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          context.tr('language') + ' ' +
-                              context.tr('changed') + ': ' +
-                              language['name']!,
+                          '${context.tr('language')} ${context.tr('changed')}: ${language['name']!}',
                         ),
                         duration: const Duration(seconds: 2),
                       ),

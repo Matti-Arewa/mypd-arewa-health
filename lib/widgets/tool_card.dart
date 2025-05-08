@@ -10,14 +10,14 @@ class ToolCard extends StatelessWidget {
   final bool isDisabled;
 
   const ToolCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.description,
     required this.icon,
     required this.color,
     required this.onTap,
     this.isDisabled = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

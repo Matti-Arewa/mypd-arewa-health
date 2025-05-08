@@ -13,10 +13,10 @@ class CategoryDetailScreen extends StatefulWidget {
   final ContentSection parentSection;
 
   const CategoryDetailScreen({
-    Key? key,
+    super.key,
     required this.category,
     required this.parentSection,
-  }) : super(key: key);
+  });
 
   @override
   State<CategoryDetailScreen> createState() => _CategoryDetailScreenState();
@@ -25,7 +25,7 @@ class CategoryDetailScreen extends StatefulWidget {
 class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<ContentQuestion> _filteredQuestions = [];
-  bool _onlyFavorites = false;
+  final bool _onlyFavorites = false;
 
   @override
   void initState() {
@@ -86,7 +86,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                   //const SizedBox(height: 16),
                   Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.question_answer,
                         color: AppTheme.primaryColor,
                         size: 20,
@@ -169,76 +169,6 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
     );
   }
 
-  Widget _buildSearchAndFilter(BuildContext context, bool isSmallScreen) {
-    return Column(
-      children: [
-        TextField(
-          controller: _searchController,
-          decoration: InputDecoration(
-            hintText: context.tr('searchInCategory'),
-            prefixIcon: const Icon(Icons.search, color: AppTheme.primaryColor),
-            suffixIcon: _searchController.text.isNotEmpty
-                ? IconButton(
-              icon: const Icon(Icons.clear, color: Colors.grey),
-              onPressed: () {
-                setState(() {
-                  _searchController.clear();
-                });
-              },
-            )
-                : null,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30),
-              borderSide: BorderSide(color: Colors.grey[300]!),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30),
-              borderSide: BorderSide(color: Colors.grey[300]!),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30),
-              borderSide: const BorderSide(color: AppTheme.primaryColor),
-            ),
-            filled: true,
-            fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: FilterChip(
-            label: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.favorite,
-                  size: 18,
-                  color: _onlyFavorites ? Colors.white : AppTheme.accentColor,
-                ),
-                const SizedBox(width: 8),
-                Text(context.tr('onlyFavorites')),
-              ],
-            ),
-            selected: _onlyFavorites,
-            onSelected: (selected) {
-              setState(() {
-                _onlyFavorites = selected;
-                _filterQuestions();
-              });
-            },
-            backgroundColor: Colors.white,
-            selectedColor: AppTheme.accentColor,
-            checkmarkColor: Colors.white,
-            labelStyle: TextStyle(
-              color: _onlyFavorites ? Colors.white : Colors.black87,
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildQuestionsList(
       BuildContext context,

@@ -8,10 +8,10 @@ class CategoryListItem extends StatelessWidget {
   final VoidCallback onTap;
 
   const CategoryListItem({
-    Key? key,
+    super.key,
     required this.category,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -8,10 +8,10 @@ class ChapterListItem extends StatelessWidget {
   final VoidCallback onTap;
 
   const ChapterListItem({
-    Key? key,
+    super.key,
     required this.section,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +65,7 @@ class ChapterListItem extends StatelessWidget {
                       children: [
                         Text(
                           chapterLabel,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
                             color: AppTheme.accentColor,
                             fontWeight: FontWeight.w600,
@@ -102,13 +102,6 @@ class ChapterListItem extends StatelessWidget {
     );
   }
 
-  int _countQuestions(ContentSection section) {
-    int count = 0;
-    for (var category in section.categories) {
-      count += category.questions.length;
-    }
-    return count;
-  }
 
   IconData _getIconForSection(String title) {
     final titleLower = title.toLowerCase();
