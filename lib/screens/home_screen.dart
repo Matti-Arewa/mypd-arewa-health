@@ -10,7 +10,7 @@ import '../screens/guide_screen.dart';  // Neue zusammengefasste Komponente
 import '../screens/tools_screen.dart';
 import '../screens/medical_records_screen.dart';
 import '../screens/community_screen.dart';
-import '../screens/welcome_screen.dart';
+import '../screens/about_us_screen.dart';
 
 import '../widgets/under_development_overlay.dart';
 

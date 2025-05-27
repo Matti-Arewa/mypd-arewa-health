@@ -43,14 +43,6 @@ class QuestionDetailScreen extends StatelessWidget {
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.home, color: Colors.white),
-                onPressed: () {
-                  // Navigate back to home screen (reset navigation stack)
-                  Navigator.popUntil(context, (route) => route.isFirst);
-                },
-                tooltip: context.tr('home'),
-              ),
-              IconButton(
                 icon: Icon(
                   contentProvider.isFavorite(question.id)
                       ? Icons.favorite
@@ -78,14 +70,20 @@ class QuestionDetailScreen extends StatelessWidget {
                 // Breadcrumb navigation
                 _buildBreadcrumbNavigation(context, isSmallScreen),
 
-                // Question card
+                // Question card (weniger dominant)
                 _buildQuestionCard(context, isSmallScreen),
+
+                // Video placeholder
+                _buildVideoPlaceholder(context, isSmallScreen),
 
                 // Answer content
                 _buildAnswerContent(context, isSmallScreen),
 
                 // Related questions
                 _buildRelatedQuestionsSection(context, contentProvider, isSmallScreen),
+
+                // Home Button
+                _buildHomeButton(context, isSmallScreen),
               ],
             ),
           ),
@@ -181,45 +179,132 @@ class QuestionDetailScreen extends StatelessWidget {
 
   Widget _buildQuestionCard(BuildContext context, bool isSmallScreen) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Card(
+        elevation: 1, // Reduziert von 2 auf 1
+        color: Colors.grey[50], // Weniger auffällige Hintergrundfarbe
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12), // Reduziert von 16 auf 12
+          side: BorderSide(
+            color: Colors.grey[300]!, // Subtiler Rahmen
+            width: 1,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12), // Reduziert von 16 auf 12
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8), // Reduziert von 10 auf 8
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor.withOpacity(0.08), // Weniger opak
+                  borderRadius: BorderRadius.circular(8), // Reduziert von 12 auf 8
+                ),
+                child: Icon(
+                  Icons.help_outline, // Geändert zu outline version
+                  color: AppTheme.primaryColor.withOpacity(0.7), // Weniger intensiv
+                  size: isSmallScreen ? 20 : 22, // Reduziert
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  question.question,
+                  style: TextStyle(
+                    fontSize: isSmallScreen ? 16 : 17, // Reduziert
+                    fontWeight: FontWeight.w600, // Reduziert von bold zu w600
+                    color: AppTheme.textPrimaryColor,
+                    height: 1.3,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVideoPlaceholder(BuildContext context, bool isSmallScreen) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Card(
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        child: Container(
+          height: isSmallScreen ? 180 : 220,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppTheme.accentColor.withOpacity(0.1),
+                AppTheme.primaryColor.withOpacity(0.1),
+              ],
+            ),
+          ),
+          child: Stack(
+            alignment: Alignment.center,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primaryColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.question_mark,
-                      color: AppTheme.primaryColor,
-                      size: isSmallScreen ? 24 : 28,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      question.question,
-                      style: TextStyle(
-                        fontSize: isSmallScreen ? 18 : 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primaryColor,
-                        height: 1.3,
+              // Video Thumbnail Placeholder
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  color: Colors.grey[100],
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryColor.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.play_arrow,
+                          size: isSmallScreen ? 40 : 48,
+                          color: AppTheme.primaryColor,
+                        ),
                       ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Erklärvideo wird geladen...',
+                        style: TextStyle(
+                          fontSize: isSmallScreen ? 14 : 16,
+                          color: AppTheme.textSecondaryColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // Video duration placeholder
+              Positioned(
+                bottom: 12,
+                right: 12,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    '3:45',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: isSmallScreen ? 11 : 12,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                ],
+                ),
               ),
             ],
           ),
@@ -230,7 +315,7 @@ class QuestionDetailScreen extends StatelessWidget {
 
   Widget _buildAnswerContent(BuildContext context, bool isSmallScreen) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -377,6 +462,43 @@ class QuestionDetailScreen extends StatelessWidget {
             );
           }),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHomeButton(BuildContext context, bool isSmallScreen) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Center(
+        child: ElevatedButton.icon(
+          onPressed: () {
+            // Navigate back to home screen (reset navigation stack)
+            Navigator.popUntil(context, (route) => route.isFirst);
+          },
+          icon: const Icon(
+            Icons.home,
+            size: 20,
+          ),
+          label: Text(
+            context.tr('home'),
+            style: TextStyle(
+              fontSize: isSmallScreen ? 14 : 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.primaryColor,
+            foregroundColor: Colors.white,
+            elevation: 2,
+            padding: EdgeInsets.symmetric(
+              horizontal: isSmallScreen ? 24 : 32,
+              vertical: isSmallScreen ? 12 : 16,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+          ),
+        ),
       ),
     );
   }
