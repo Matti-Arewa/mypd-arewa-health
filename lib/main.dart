@@ -7,10 +7,15 @@ import 'services/localization_service.dart';
 import 'providers/user_provider.dart';
 import 'providers/content_provider.dart';
 import 'providers/language_provider.dart';
-import 'providers/settings_provider.dart'; // Add this if not already imported
+import 'providers/settings_provider.dart';
+import 'providers/auth_provider.dart'; // Add AuthProvider
+import 'screens/splash_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/language_selection_screen.dart';
+import 'screens/intro_video_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/settings_screen.dart';
-import 'screens/help_screen.dart'; // Import the new help screen
+import 'screens/help_screen.dart';
 import 'package:flutter/foundation.dart';
 
 void main() async {
@@ -72,7 +77,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // Create ContentProvider first
+        // Create AuthProvider first
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+
+        // Create ContentProvider
         ChangeNotifierProvider(create: (_) => ContentProvider()),
 
         // Create LanguageProvider which depends on ContentProvider
@@ -139,11 +147,14 @@ class AppWithLanguage extends StatelessWidget {
             ),
           ),
         ),
-        home: const HomeScreen(), // Keep HomeScreen as starting point
+        home: const AppEntryPoint(), // Use new entry point
         routes: {
+          '/login': (ctx) => const LoginScreen(),
+          '/language-selection': (ctx) => const LanguageSelectionScreen(),
+          '/intro-video': (ctx) => const IntroVideoScreen(),
+          '/home': (ctx) => const HomeScreen(),
           SettingsScreen.routeName: (ctx) => const SettingsScreen(),
-          HelpScreen.routeName: (ctx) => const HelpScreen(), // Add the help screen route
-          // Add other routes here
+          HelpScreen.routeName: (ctx) => const HelpScreen(),
         },
         // Localization setup
         locale: locale,
@@ -166,11 +177,14 @@ class AppWithLanguage extends StatelessWidget {
           useMaterial3: true,
           fontFamily: 'Poppins',
         ),
-        home: const HomeScreen(), // Keep HomeScreen as starting point
+        home: const AppEntryPoint(), // Use new entry point
         routes: {
+          '/login': (ctx) => const LoginScreen(),
+          '/language-selection': (ctx) => const LanguageSelectionScreen(),
+          '/intro-video': (ctx) => const IntroVideoScreen(),
+          '/home': (ctx) => const HomeScreen(),
           SettingsScreen.routeName: (ctx) => const SettingsScreen(),
-          HelpScreen.routeName: (ctx) => const HelpScreen(), // Add the help screen route
-          // Add other routes here
+          HelpScreen.routeName: (ctx) => const HelpScreen(),
         },
         // Localization setup
         locale: locale,
@@ -179,5 +193,63 @@ class AppWithLanguage extends StatelessWidget {
         localeResolutionCallback: AppLocalizations.localeResolutionCallback,
       );
     }
+  }
+}
+
+class AppEntryPoint extends StatefulWidget {
+  const AppEntryPoint({super.key});
+
+  @override
+  State<AppEntryPoint> createState() => _AppEntryPointState();
+}
+
+class _AppEntryPointState extends State<AppEntryPoint> {
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _determineInitialRoute();
+  }
+
+  Future<void> _determineInitialRoute() async {
+    // Add a small delay to show splash screen
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (!mounted) return;
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    // Check if user is authenticated (either real login or demo mode)
+    if (authProvider.isAuthenticated || authProvider.isDemoMode) {
+      // User is logged in, check if it's first launch
+      if (userProvider.isFirstLaunch) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const LanguageSelectionScreen(),
+          ),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const HomeScreen(),
+          ),
+        );
+      }
+    } else {
+      // User is not logged in, show login screen
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => const LoginScreen(),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Show splash screen while determining route
+    return const SplashScreen();
   }
 }

@@ -44,21 +44,27 @@
     <key>UIApplicationSupportsIndirectInputEvents</key>
     <true/>
 
-	<!-- Internet-Berechtigung für HTTP-Anfragen (wird in iOS implizit gewährt, aber explizite Deklaration ist empfohlen) -->
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-	</dict>
+    <!-- Internet-Berechtigung für HTTP-Anfragen -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+       <key>NSAllowsArbitraryLoads</key>
+       <true/>
+       <key>NSAllowsArbitraryLoadsInWebContent</key>
+        <true/>
+        <!-- Für Entwicklung - in Produktion sollten Sie spezifische Domains verwenden -->
+        <key>NSAllowsLocalNetworking</key>
+        <true/>
+    </dict>
 
-    <!-- Mehrsprachigkeit -->
+    <!-- Erweiterte Mehrsprachigkeit -->
     <key>CFBundleLocalizations</key>
     <array>
         <string>en</string>
         <string>de</string>
+        <string>fr</string>
     </array>
 
-    <!-- Benutzung der persönlichen Daten/Privatsphäre-Beschreibungen -->
+    <!-- Existierende Berechtigungen (bereits vorhanden) -->
     <key>NSCalendarsUsageDescription</key>
     <string>Diese App benötigt Zugriff auf Ihren Kalender, um Schwangerschaftstermine speichern zu können.</string>
 
@@ -74,17 +80,124 @@
     <key>NSHealthUpdateUsageDescription</key>
     <string>Diese App benötigt Zugriff auf Ihre Gesundheitsdaten, um Gewichtsänderungen während der Schwangerschaft zu verfolgen.</string>
 
-    <!-- Für Benachrichtigungen -->
+    <!-- NEU: Kamera-Berechtigung für Profilbilder und zukünftige Features -->
+    <key>NSCameraUsageDescription</key>
+    <string>Diese App benötigt Kamera-Zugriff für Profilbilder und zum Dokumentieren Ihrer Schwangerschaftsreise.</string>
+
+    <!-- NEU: Mikrofon-Berechtigung für Video-Aufnahmen (falls später implementiert) -->
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Diese App benötigt Mikrofon-Zugriff für Video-Aufnahmen und Sprachnotizen.</string>
+
+    <!-- NEU: Gesichts-/Touch-ID für sicheren Login -->
+    <key>NSFaceIDUsageDescription</key>
+    <string>Diese App verwendet Face ID oder Touch ID für sicheren und bequemen Zugang zu Ihren persönlichen Daten.</string>
+
+    <!-- NEU: Benachrichtigungen -->
+    <key>NSUserNotificationUsageDescription</key>
+    <string>Diese App sendet Ihnen wichtige Erinnerungen für Termine, Medikamente und Schwangerschafts-Meilensteine.</string>
+
+    <!-- NEU: Kontakte-Zugriff für Notfallkontakte -->
+    <key>NSContactsUsageDescription</key>
+    <string>Diese App kann auf Ihre Kontakte zugreifen, um Notfallkontakte und Ihren Arzt schnell hinzuzufügen.</string>
+
+    <!-- Erweiterte Background-Modi -->
     <key>UIBackgroundModes</key>
     <array>
         <string>remote-notification</string>
+        <string>background-fetch</string>
+        <string>background-processing</string>
     </array>
 
-    <!-- App Transport Security Settings -->
-    <key>NSAppTransportSecurity</key>
+    <!-- NEU: Status Bar Konfiguration -->
+    <key>UIStatusBarStyle</key>
+    <string>UIStatusBarStyleDefault</string>
+    <key>UIViewControllerBasedStatusBarAppearance</key>
+    <false/>
+
+    <!-- NEU: Launch Screen Konfiguration -->
+    <key>UILaunchScreen</key>
     <dict>
-        <key>NSAllowsArbitraryLoads</key>
+        <key>UIColorName</key>
+        <string>LaunchColor</string>
+        <key>UIImageName</key>
+        <string>LaunchImage</string>
+        <key>UIImageRespectsSafeAreaInsets</key>
         <true/>
     </dict>
+
+    <!-- NEU: Video-Playback im Hintergrund unterstützen -->
+    <key>AVAudioSessionCategoryPlayback</key>
+    <true/>
+
+    <!-- NEU: Unterstützung für Dark Mode -->
+    <key>UIUserInterfaceStyle</key>
+    <string>Automatic</string>
+
+    <!-- NEU: App-spezifische URL-Schemes (für Deep Links falls später benötigt) -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.yourcompany.pregnancyguide</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>pregnancyguide</string>
+            </array>
+        </dict>
+    </array>
+
+    <!-- NEU: Verhindern Sie Backup sensibler Daten -->
+    <key>ITSEncryptionExportComplianceCode</key>
+    <string>false</string>
+
+    <!-- NEU: App-Kategorien für App Store -->
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.medical</string>
+
+    <!-- NEU: Unterstützung für Accessibility -->
+    <key>UIAccessibilityEnabled</key>
+    <true/>
+
+    <!-- NEU: Orientierung für Video-Playback -->
+    <key>UISupportedInterfaceOrientations~iphone</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+    </array>
+
+    <!-- NEU: Scene-basierte App (für iOS 13+) -->
+    <key>UIApplicationSceneManifest</key>
+    <dict>
+        <key>UIApplicationSupportsMultipleScenes</key>
+        <false/>
+        <key>UISceneConfigurations</key>
+        <dict>
+            <key>UIWindowSceneSessionRoleApplication</key>
+            <array>
+                <dict>
+                    <key>UISceneConfigurationName</key>
+                    <string>Default Configuration</string>
+                    <key>UISceneDelegateClassName</key>
+                    <string>SceneDelegate</string>
+                </dict>
+            </array>
+        </dict>
+    </dict>
+
+    <!-- NEU: Privacy Manifest (iOS 17+) -->
+    <key>NSPrivacyCollectedDataTypes</key>
+    <array>
+        <dict>
+            <key>NSPrivacyCollectedDataType</key>
+            <string>NSPrivacyCollectedDataTypeHealthAndFitness</string>
+            <key>NSPrivacyCollectedDataTypeLinked</key>
+            <true/>
+            <key>NSPrivacyCollectedDataTypeTracking</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypePurposes</key>
+            <array>
+                <string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+            </array>
+        </dict>
+    </array>
 </dict>
 </plist>

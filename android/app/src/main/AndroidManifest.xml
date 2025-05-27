@@ -1,5 +1,27 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <!-- Internet permissions for API calls -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Video playback permissions -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Storage permissions for video caching -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <!-- Notification permissions (Android 13+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Camera permission for profile pictures (if implemented later) -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Location permissions for region-based content (if needed) -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+
     <application
         android:label="MyPD Pregnancy Guide"
         android:name="${applicationName}"
