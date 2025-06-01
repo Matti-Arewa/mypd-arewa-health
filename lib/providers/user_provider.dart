@@ -54,6 +54,62 @@ class WeightEntry {
   }
 }
 
+class PregnancyNote {
+  final String id;
+  final String title;
+  final String content;
+  final String category;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  PregnancyNote({
+    required this.id,
+    required this.title,
+    required this.content,
+    required this.category,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'content': content,
+      'category': category,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+    };
+  }
+
+  factory PregnancyNote.fromJson(Map<String, dynamic> json) {
+    return PregnancyNote(
+      id: json['id'],
+      title: json['title'],
+      content: json['content'],
+      category: json['category'],
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: DateTime.parse(json['updatedAt']),
+    );
+  }
+
+  PregnancyNote copyWith({
+    String? title,
+    String? content,
+    String? category,
+    DateTime? updatedAt,
+  }) {
+    return PregnancyNote(
+      id: id,
+      title: title ?? this.title,
+      content: content ?? this.content,
+      category: category ?? this.category,
+      createdAt: createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+}
+
 class UserProvider extends ChangeNotifier {
   DateTime? _dueDate;
   DateTime? _lastPeriodDate;
@@ -61,15 +117,18 @@ class UserProvider extends ChangeNotifier {
   String _preferredLanguage = 'en';
   bool _notificationsEnabled = true;
   final List<KickSession> _kickSessions = [];
+  final List<WeightEntry> _weightEntries = [];
+  final List<PregnancyNote> _pregnancyNotes = [];
+  List<String> _enabledToolIds = ['dueDate', 'kickCounter', 'weightTracker', 'nutrition'];
 
   DateTime? get dueDate => _dueDate;
   DateTime? get lastPeriodDate => _lastPeriodDate;
   bool get isFirstLaunch => _isFirstLaunch;
   String get preferredLanguage => _preferredLanguage;
   List<KickSession> get kickSessions => _kickSessions;
-
-  final List<WeightEntry> _weightEntries = [];
   List<WeightEntry> get weightEntries => _weightEntries;
+  List<PregnancyNote> get pregnancyNotes => List.unmodifiable(_pregnancyNotes);
+  List<String> get enabledToolIds => List.unmodifiable(_enabledToolIds);
 
   bool _useCelsius = true;
   bool get useCelsius => _useCelsius;
@@ -117,6 +176,7 @@ class UserProvider extends ChangeNotifier {
       final savedNotifications = settingsBox.get('notificationsEnabled');
       final savedRegion = settingsBox.get('region');
       final savedUseCelsius = settingsBox.get('useCelsius');
+      final savedEnabledTools = settingsBox.get('enabledToolIds');
 
       if (savedDueDate != null) {
         _dueDate = DateTime.parse(savedDueDate);
@@ -146,6 +206,10 @@ class UserProvider extends ChangeNotifier {
         _useCelsius = savedUseCelsius;
       }
 
+      if (savedEnabledTools != null) {
+        _enabledToolIds = List<String>.from(savedEnabledTools);
+      }
+
       // Lade Kick Counter Daten
       final savedKickSessions = settingsBox.get('kickSessions');
       if (savedKickSessions != null) {
@@ -163,6 +227,16 @@ class UserProvider extends ChangeNotifier {
         _weightEntries.clear();
         for (var entryData in entriesList) {
           _weightEntries.add(WeightEntry.fromJson(Map<String, dynamic>.from(entryData)));
+        }
+      }
+
+      // Lade Pregnancy Notes
+      final savedNotes = settingsBox.get('pregnancyNotes');
+      if (savedNotes != null) {
+        final List<dynamic> notesList = savedNotes;
+        _pregnancyNotes.clear();
+        for (var noteData in notesList) {
+          _pregnancyNotes.add(PregnancyNote.fromJson(Map<String, dynamic>.from(noteData)));
         }
       }
     } catch (e) {
@@ -288,6 +362,94 @@ class UserProvider extends ChangeNotifier {
       await settingsBox.put('weightEntries', entriesList);
     } catch (e) {
       debugPrint('Error saving weight entries: $e');
+    }
+  }
+
+  // Methoden für Pregnancy Notes
+  void addNote({
+    required String title,
+    required String content,
+    required String category,
+  }) {
+    final note = PregnancyNote(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      title: title,
+      content: content,
+      category: category,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    _pregnancyNotes.insert(0, note); // Insert at the beginning for latest first
+    _saveNotes();
+    notifyListeners();
+  }
+
+  void updateNote(
+      PregnancyNote note, {
+        required String title,
+        required String content,
+        required String category,
+      }) {
+    final index = _pregnancyNotes.indexWhere((n) => n.id == note.id);
+    if (index != -1) {
+      final updatedNote = note.copyWith(
+        title: title,
+        content: content,
+        category: category,
+        updatedAt: DateTime.now(),
+      );
+      _pregnancyNotes[index] = updatedNote;
+      _saveNotes();
+      notifyListeners();
+    }
+  }
+
+  void removeNote(PregnancyNote note) {
+    _pregnancyNotes.removeWhere((n) => n.id == note.id);
+    _saveNotes();
+    notifyListeners();
+  }
+
+  Future<void> _saveNotes() async {
+    try {
+      final settingsBox = Hive.box('appSettings');
+      List<Map<String, dynamic>> notesList = _pregnancyNotes.map((note) => note.toJson()).toList();
+      await settingsBox.put('pregnancyNotes', notesList);
+    } catch (e) {
+      debugPrint('Error saving pregnancy notes: $e');
+    }
+  }
+
+  // Methoden für Tool-Personalisierung
+  void updateEnabledTools(List<String> toolIds) {
+    _enabledToolIds = List.from(toolIds);
+    _saveEnabledTools();
+    notifyListeners();
+  }
+
+  void enableTool(String toolId) {
+    if (!_enabledToolIds.contains(toolId)) {
+      _enabledToolIds.add(toolId);
+      _saveEnabledTools();
+      notifyListeners();
+    }
+  }
+
+  void disableTool(String toolId) {
+    if (_enabledToolIds.contains(toolId)) {
+      _enabledToolIds.remove(toolId);
+      _saveEnabledTools();
+      notifyListeners();
+    }
+  }
+
+  Future<void> _saveEnabledTools() async {
+    try {
+      final settingsBox = Hive.box('appSettings');
+      await settingsBox.put('enabledToolIds', _enabledToolIds);
+    } catch (e) {
+      debugPrint('Error saving enabled tools: $e');
     }
   }
 }

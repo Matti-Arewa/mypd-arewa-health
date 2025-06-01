@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mypd_2/screens/settings_screen.dart';
 import '../utils/app_theme.dart';
 import '../services/localization_service.dart';
-import '../models/patient_data.dart'; // Diese Datei werden wir als nächstes erstellen
+import '../models/ipd_patient_data.dart';
 
 class MedicalRecordsScreen extends StatelessWidget {
   const MedicalRecordsScreen({super.key});

@@ -204,8 +204,6 @@ class AppEntryPoint extends StatefulWidget {
 }
 
 class _AppEntryPointState extends State<AppEntryPoint> {
-  bool _isLoading = true;
-
   @override
   void initState() {
     super.initState();
@@ -216,34 +214,51 @@ class _AppEntryPointState extends State<AppEntryPoint> {
     // Add a small delay to show splash screen
     await Future.delayed(const Duration(seconds: 2));
 
-    if (!mounted) return;
+    if (!mounted) return; // Wichtig: Prüfen ob Widget noch mounted ist
 
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
 
-    // Check if user is authenticated (either real login or demo mode)
-    if (authProvider.isAuthenticated || authProvider.isDemoMode) {
-      // User is logged in, check if it's first launch
-      if (userProvider.isFirstLaunch) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const LanguageSelectionScreen(),
-          ),
-        );
+      // Check if user is authenticated (either real login or demo mode)
+      if (authProvider.isAuthenticated || authProvider.isDemoMode) {
+        // User is logged in, check if it's first launch
+        if (userProvider.isFirstLaunch) {
+          if (mounted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const LanguageSelectionScreen(),
+              ),
+            );
+          }
+        } else {
+          if (mounted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const HomeScreen(),
+              ),
+            );
+          }
+        }
       } else {
+        // User is not logged in, show login screen
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => const LoginScreen(),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      // Fallback: Navigate to login screen on any error
+      if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => const HomeScreen(),
+            builder: (context) => const LoginScreen(),
           ),
         );
       }
-    } else {
-      // User is not logged in, show login screen
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const LoginScreen(),
-        ),
-      );
     }
   }
 

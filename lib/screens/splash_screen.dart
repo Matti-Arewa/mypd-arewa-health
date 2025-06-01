@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/user_provider.dart';
-import '../screens/onboarding_screen.dart';
-import '../screens/home_screen.dart';
 import '../services/localization_service.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -35,21 +31,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     );
 
     _controller.forward();
-
-    // Navigate to next screen after animation completes
-    Future.delayed(const Duration(seconds: 3), () {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-
-      if (userProvider.isFirstLaunch) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const OnboardingScreen()),
-        );
-      } else {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
-      }
-    });
   }
 
   @override
@@ -93,10 +74,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image.asset(
-                        'assets/images/logo.png',
-                        width: logoSize,
-                        height: logoSize,
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.pregnant_woman,
+                          size: logoSize,
+                          color: Theme.of(context).primaryColor,
+                        ),
                       ),
                       SizedBox(height: isSmallScreen ? 20 : 24),
                       Text(
